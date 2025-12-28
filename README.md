@@ -32,6 +32,8 @@ Users can explore skills, share knowledge, and hire talented individuals through
 Live Demo:  
 👉 skill-sync-jiofar7n2-deepkabariya2308-1876s-projects.vercel.app
 ---
-
+bash
+npm install
+npm run dev
 ## 🚀 Getting Started (Run Locally)
 
