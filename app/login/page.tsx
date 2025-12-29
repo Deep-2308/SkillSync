@@ -14,9 +14,12 @@ import Link from "next/link"
 import { Eye, EyeOff, Mail, Lock } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { useAuth } from "@/context/AuthContext"
+
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { login } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState("")
@@ -29,11 +32,17 @@ export default function LoginPage() {
     // Simulate login delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
+    // Mock login logic
+    login({
+      name: email.split("@")[0], // Use part of email as name
+      role: "expert", // Default role for login, usually would come from backend
+    })
+
     toast({
       title: "Welcome back!",
       description: "You've successfully logged in.",
     })
-    
+
     router.push("/hire-talent")
     setLoading(false)
   }

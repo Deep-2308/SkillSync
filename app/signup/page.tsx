@@ -15,9 +15,12 @@ import Link from "next/link"
 import { Eye, EyeOff, Mail, Lock, User, Building } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
+import { useAuth, UserRole } from "@/context/AuthContext"
+
 export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { signup } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -26,7 +29,7 @@ export default function SignupPage() {
     firstName: "",
     lastName: "",
     email: "",
-    accountType: "",
+    role: "" as UserRole | "",
     companyName: "",
     password: "",
     confirmPassword: "",
@@ -54,10 +57,24 @@ export default function SignupPage() {
       return
     }
 
+    if (!formData.role) {
+      toast({
+        title: "Select a role",
+        description: "Please select whether you are a Learner or an Expert.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setLoading(true)
 
     // Simulate signup delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    signup({
+      name: `${formData.firstName} ${formData.lastName}`,
+      role: formData.role as UserRole,
+    })
 
     toast({
       title: "Account created!",
@@ -143,19 +160,18 @@ export default function SignupPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="accountType">Account type</Label>
+                  <Label htmlFor="role">I want to...</Label>
                   <Select
-                    value={formData.accountType}
-                    onValueChange={(value) => setFormData({ ...formData, accountType: value })}
+                    value={formData.role}
+                    onValueChange={(value) => setFormData({ ...formData, role: value as UserRole })}
                     disabled={loading}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select account type" />
+                      <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="client">Client - I want to hire talent</SelectItem>
-                      <SelectItem value="freelancer">Freelancer - I want to offer services</SelectItem>
-                      <SelectItem value="both">Both - I want to hire and offer services</SelectItem>
+                      <SelectItem value="learner">Hire Talent (Learner)</SelectItem>
+                      <SelectItem value="expert">Work as Freelancer (Expert)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
