@@ -43,7 +43,6 @@ export default function ContactPage() {
         description: "We'll get back to you as soon as possible.",
       })
 
-      // Reset form
       setFormData({ firstName: "", lastName: "", email: "", message: "" })
 
     } catch (error) {
@@ -58,43 +57,51 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF5F2]">
+    <div className="min-h-screen bg-background">
       <Navigation />
 
-      <main className="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
-          {/* Left Side: Info */}
+          {/* Left Side */}
           <AnimatedSection animation="slideInLeft" delay={0}>
             <div>
-              <h1 className="text-5xl md:text-7xl font-serif text-[#2D2D2D] mb-8 leading-tight">
-                Get in <br />
-                <span className="italic text-[#FF7F50]">Touch</span>
+              <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/60 mb-6 block">
+                Contact
+              </span>
+              <h1 className="font-display text-5xl md:text-7xl font-bold text-foreground mb-8 leading-[0.92] tracking-tight">
+                Get in
+                <br />
+                <span className="text-primary italic font-serif font-normal">Touch</span>
               </h1>
 
-              <p className="text-xl text-[#4A4A4A] mb-12 max-w-md leading-relaxed">
-                If you would like to discuss a project or just say hi, I'm always down to chat.
+              <p className="font-serif text-lg text-muted-foreground mb-14 max-w-md leading-relaxed italic">
+                If you would like to discuss a project or just say hi, we&apos;re always down to chat.
               </p>
 
               <div className="space-y-10">
                 <div className="group">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#999] mb-2 block">Email</span>
+                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-2 block">
+                    Email
+                  </span>
                   <a
                     href="mailto:hello@skillsync.com"
-                    className="text-2xl font-medium text-[#2D2D2D] hover:text-[#FF7F50] transition-colors flex items-center"
+                    className="text-xl font-medium text-foreground hover:text-primary transition-colors flex items-center gap-2"
                   >
                     hello@skillsync.com
-                    <ArrowRight className="ml-2 h-5 w-5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-primary" />
                   </a>
                 </div>
 
-                <div className="group">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#999] mb-2 block">Socials</span>
-                  <div className="flex flex-wrap gap-x-8 gap-y-2">
-                    {["Linkedin", "Instagram", "Github", "Twitter"].map((social) => (
+                <div>
+                  <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground mb-3 block">
+                    Socials
+                  </span>
+                  <div className="flex flex-wrap gap-6">
+                    {["LinkedIn", "Instagram", "GitHub", "Twitter"].map((social) => (
                       <a
                         key={social}
                         href="#"
-                        className="text-lg font-medium text-[#2D2D2D] hover:text-[#FF7F50] transition-colors"
+                        className="font-mono text-sm text-muted-foreground hover:text-primary transition-colors"
                       >
                         {social}
                       </a>
@@ -105,20 +112,20 @@ export default function ContactPage() {
             </div>
           </AnimatedSection>
 
-          {/* Right Side: Form */}
+          {/* Right Side — Form */}
           <AnimatedSection animation="slideInRight" delay={100}>
-            <div className="bg-white p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-[#EEE]">
-              <h2 className="text-2xl font-bold text-[#2D2D2D] mb-8">Send a message</h2>
+            <div className="bg-card border border-border rounded-lg p-8 md:p-10">
+              <h2 className="text-xl font-bold text-foreground mb-8">Send a message</h2>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-[10px] font-bold uppercase tracking-wider text-[#999]">
+                    <Label htmlFor="firstName" className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
                       First Name
                     </Label>
                     <Input
                       id="firstName"
                       placeholder="Jane"
-                      className="border-0 border-b border-[#DDD] rounded-none px-0 h-10 focus-visible:ring-0 focus-visible:border-[#FF7F50] bg-transparent"
+                      className="bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10"
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                       required
@@ -126,13 +133,13 @@ export default function ContactPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-[10px] font-bold uppercase tracking-wider text-[#999]">
+                    <Label htmlFor="lastName" className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
                       Last Name
                     </Label>
                     <Input
                       id="lastName"
                       placeholder="Doe"
-                      className="border-0 border-b border-[#DDD] rounded-none px-0 h-10 focus-visible:ring-0 focus-visible:border-[#FF7F50] bg-transparent"
+                      className="bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10"
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                       required
@@ -142,14 +149,14 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-[10px] font-bold uppercase tracking-wider text-[#999]">
+                  <Label htmlFor="email" className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
                     Email Address
                   </Label>
                   <Input
                     id="email"
                     type="email"
                     placeholder="jane@example.com"
-                    className="border-0 border-b border-[#DDD] rounded-none px-0 h-10 focus-visible:ring-0 focus-visible:border-[#FF7F50] bg-transparent"
+                    className="bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
@@ -158,13 +165,13 @@ export default function ContactPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message" className="text-[10px] font-bold uppercase tracking-wider text-[#999]">
+                  <Label htmlFor="message" className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
                     How can we help?
                   </Label>
                   <Textarea
                     id="message"
                     placeholder="Tell us about your project..."
-                    className="border-0 border-b border-[#DDD] rounded-none px-0 min-h-[120px] focus-visible:ring-0 focus-visible:border-[#FF7F50] bg-transparent resize-none"
+                    className="bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10 min-h-[130px] resize-none"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     required
@@ -172,9 +179,9 @@ export default function ContactPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={loading} className="w-full bg-[#2D2D2D] hover:bg-[#1A1A1A] text-white font-bold py-6 h-auto text-lg uppercase tracking-wide rounded-none group">
+                <Button type="submit" disabled={loading} className="w-full btn-glow h-12 text-base tracking-wide group">
                   {loading ? "Sending..." : "Submit Message"}
-                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </form>
             </div>

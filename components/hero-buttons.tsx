@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Play } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 
@@ -9,31 +9,32 @@ export function HeroButtons() {
   const [showDemo, setShowDemo] = useState(false)
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+    <div className="flex flex-col sm:flex-row gap-4">
       <Link href="/signup">
-        <Button size="lg" className="text-lg px-8 w-full sm:w-auto">
+        <Button size="lg" className="btn-glow text-base px-8 h-12 w-full sm:w-auto tracking-wide">
           Get Started
-          <ArrowRight className="ml-2 h-5 w-5" />
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </Link>
       <Button
         variant="outline"
         size="lg"
-        className="text-lg px-8 bg-transparent w-full sm:w-auto"
+        className="text-base px-8 h-12 w-full sm:w-auto tracking-wide border-border hover:border-primary/40 hover:bg-primary/5 bg-transparent"
         onClick={() => setShowDemo(true)}
       >
-        {showDemo ? "Demo Loading..." : "Watch Demo"}
+        <Play className="mr-2 h-4 w-4 fill-current" />
+        Watch Demo
       </Button>
 
       {showDemo && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-background rounded-lg p-6 max-w-lg w-full shadow-2xl">
-            <h2 className="text-2xl font-bold mb-4">SkillSync Demo</h2>
-            <div className="aspect-video bg-muted rounded flex items-center justify-center mb-4">
-              <p className="text-muted-foreground">Video Demo Placeholder</p>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-card border border-border rounded-lg p-8 max-w-lg w-full shadow-2xl shadow-black/50">
+            <h2 className="text-xl font-bold mb-4 text-foreground">SkillSync Demo</h2>
+            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center mb-6 border border-border">
+              <p className="text-muted-foreground font-serif text-sm italic">Demo coming soon</p>
             </div>
-            <Button onClick={() => setShowDemo(false)} className="w-full">
-              Close Demo
+            <Button onClick={() => setShowDemo(false)} variant="outline" className="w-full hover:border-primary/40">
+              Close
             </Button>
           </div>
         </div>

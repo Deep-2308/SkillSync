@@ -1,291 +1,168 @@
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Code, Palette, PenTool, Megaphone, BarChart, Camera, Brain, Zap, Target, Users } from "lucide-react"
 import Link from "next/link"
 import { AnimatedSection } from "@/components/animated-section"
+
+const categories = [
+  { icon: Code, title: "Web Development", desc: "Full-stack developers, frontend specialists, backend engineers, and mobile app developers", tags: ["React", "Node.js", "Python", "Mobile"], count: "1,200+" },
+  { icon: Palette, title: "Design & Creative", desc: "UI/UX designers, graphic designers, brand specialists, and creative directors", tags: ["UI/UX", "Branding", "Illustration", "Video"], count: "800+" },
+  { icon: PenTool, title: "Writing & Content", desc: "Content writers, copywriters, technical writers, and content strategists", tags: ["Copywriting", "SEO", "Technical", "Blog"], count: "600+" },
+  { icon: Megaphone, title: "Digital Marketing", desc: "SEO specialists, social media managers, PPC experts, and growth marketers", tags: ["SEO", "Social Media", "PPC", "Analytics"], count: "500+" },
+  { icon: BarChart, title: "Data & Analytics", desc: "Data scientists, analysts, business intelligence experts, and researchers", tags: ["Python", "SQL", "Tableau", "ML"], count: "400+" },
+  { icon: Camera, title: "Video & Photography", desc: "Video editors, photographers, animators, and multimedia specialists", tags: ["Editing", "Photography", "Animation", "3D"], count: "350+" },
+]
+
+const matchingSteps = [
+  { label: "01", text: "Project requirements analyzed by AI" },
+  { label: "02", text: "Freelancer database searched for matches" },
+  { label: "03", text: "Top candidates ranked by compatibility" },
+  { label: "04", text: "Personalized recommendations delivered" },
+]
 
 export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-background to-muted">
-        <AnimatedSection animation="fadeIn" delay={0}>
-          <div className="max-w-4xl mx-auto text-center">
-            <Badge variant="secondary" className="mb-4">
-              Our Services
-            </Badge>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-              Find Expert Freelancers in Every Category
+      {/* Hero */}
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 ambient-glow overflow-hidden">
+        <AnimatedSection animation="blurIn" delay={0}>
+          <div className="max-w-4xl mx-auto text-center relative z-10">
+            <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/60 mb-4 block">Our Services</span>
+            <h1 className="font-display text-4xl md:text-6xl font-bold text-foreground mb-6 tracking-tight">
+              Expert Freelancers in
+              <br />
+              <span className="text-primary">Every Category</span>
             </h1>
-            <p className="text-xl text-muted-foreground text-pretty">
+            <p className="font-serif text-lg text-muted-foreground italic leading-relaxed max-w-2xl mx-auto">
               From web development to digital marketing, discover top-tier talent across all major freelance categories
               with our AI-powered matching system.
             </p>
           </div>
         </AnimatedSection>
+        <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       </section>
 
-      {/* Freelancer Categories */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      {/* Categories */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <AnimatedSection animation="slideUp" delay={0}>
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
+              <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/50 mb-4 block">Categories</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Freelancer Categories</h2>
-              <p className="text-lg text-muted-foreground">Browse our extensive network of verified professionals</p>
+              <p className="font-serif text-muted-foreground italic">Browse our extensive network of verified professionals</p>
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatedSection animation="fadeIn" delay={100}>
-              <Card className="hover:shadow-lg transition-shadow group">
-              <CardHeader>
-                <Code className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                <CardTitle>Web Development</CardTitle>
-                <CardDescription>
-                  Full-stack developers, frontend specialists, backend engineers, and mobile app developers
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline">React</Badge>
-                  <Badge variant="outline">Node.js</Badge>
-                  <Badge variant="outline">Python</Badge>
-                  <Badge variant="outline">Mobile</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">1,200+ developers available</p>
-              </CardContent>
-              </Card>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeIn" delay={150}>
-              <Card className="hover:shadow-lg transition-shadow group">
-                <CardHeader>
-                  <Palette className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                  <CardTitle>Design & Creative</CardTitle>
-                  <CardDescription>
-                    UI/UX designers, graphic designers, brand specialists, and creative directors
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline">UI/UX</Badge>
-                    <Badge variant="outline">Branding</Badge>
-                    <Badge variant="outline">Illustration</Badge>
-                    <Badge variant="outline">Video</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">800+ designers available</p>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeIn" delay={200}>
-              <Card className="hover:shadow-lg transition-shadow group">
-                <CardHeader>
-                  <PenTool className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                  <CardTitle>Writing & Content</CardTitle>
-                  <CardDescription>
-                    Content writers, copywriters, technical writers, and content strategists
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline">Copywriting</Badge>
-                    <Badge variant="outline">SEO</Badge>
-                    <Badge variant="outline">Technical</Badge>
-                    <Badge variant="outline">Blog</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">600+ writers available</p>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeIn" delay={250}>
-              <Card className="hover:shadow-lg transition-shadow group">
-                <CardHeader>
-                  <Megaphone className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                  <CardTitle>Digital Marketing</CardTitle>
-                  <CardDescription>
-                    SEO specialists, social media managers, PPC experts, and growth marketers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline">SEO</Badge>
-                    <Badge variant="outline">Social Media</Badge>
-                    <Badge variant="outline">PPC</Badge>
-                    <Badge variant="outline">Analytics</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">500+ marketers available</p>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeIn" delay={300}>
-              <Card className="hover:shadow-lg transition-shadow group">
-                <CardHeader>
-                  <BarChart className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                  <CardTitle>Data & Analytics</CardTitle>
-                  <CardDescription>
-                    Data scientists, analysts, business intelligence experts, and researchers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="outline">Python</Badge>
-                    <Badge variant="outline">SQL</Badge>
-                    <Badge variant="outline">Tableau</Badge>
-                    <Badge variant="outline">ML</Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">400+ analysts available</p>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
-
-            <AnimatedSection animation="fadeIn" delay={350}>
-              <Card className="hover:shadow-lg transition-shadow group">
-              <CardHeader>
-                <Camera className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" />
-                <CardTitle>Video & Photography</CardTitle>
-                <CardDescription>Video editors, photographers, animators, and multimedia specialists</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  <Badge variant="outline">Video Editing</Badge>
-                  <Badge variant="outline">Photography</Badge>
-                  <Badge variant="outline">Animation</Badge>
-                  <Badge variant="outline">3D</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">350+ creatives available</p>
-              </CardContent>
-              </Card>
-            </AnimatedSection>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {categories.map((cat, index) => (
+              <AnimatedSection key={cat.title} animation="fadeIn" delay={80 + index * 60}>
+                <Card className="card-shimmer group h-full">
+                  <CardHeader>
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
+                      <cat.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-base">{cat.title}</CardTitle>
+                    <CardDescription className="font-serif text-sm leading-relaxed">{cat.desc}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {cat.tags.map((tag) => (
+                        <span key={tag} className="font-mono text-[10px] tracking-wider uppercase text-primary/70 border border-primary/15 px-2 py-0.5 rounded bg-primary/5">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="font-mono text-[11px] text-muted-foreground tracking-wider">
+                      <span className="text-foreground font-medium">{cat.count}</span> available
+                    </p>
+                  </CardContent>
+                </Card>
+              </AnimatedSection>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* AI Matching Details */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted">
+      {/* Decorative line */}
+      <div className="max-w-5xl mx-auto px-4"><div className="line-accent-gold" /></div>
+
+      {/* AI Matching */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <AnimatedSection animation="slideUp" delay={0}>
-            <div className="text-center mb-12">
+            <div className="text-center mb-16">
+              <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/50 mb-4 block">Technology</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">AI-Powered Skill Matching</h2>
-              <p className="text-lg text-muted-foreground">
-                Our advanced algorithms ensure perfect project-freelancer matches
-              </p>
+              <p className="font-serif text-muted-foreground italic">Our advanced algorithms ensure perfect project-freelancer matches</p>
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimatedSection animation="slideInLeft" delay={100}>
-              <div>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <Brain className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">Intelligent Analysis</h3>
-                    <p className="text-muted-foreground">
-                      Our AI analyzes project requirements, complexity, timeline, and budget to understand exactly what
-                      you need.
-                    </p>
+              <div className="space-y-8">
+                {[
+                  { icon: Brain, title: "Intelligent Analysis", desc: "Our AI analyzes project requirements, complexity, timeline, and budget to understand exactly what you need." },
+                  { icon: Target, title: "Precision Matching", desc: "Match with freelancers based on skills, experience level, past project success, and availability." },
+                  { icon: Zap, title: "Instant Results", desc: "Get matched with qualified freelancers within minutes, not days. Start your project faster than ever." },
+                  { icon: Users, title: "Quality Assurance", desc: "All matches are verified for quality and compatibility, ensuring successful project outcomes." },
+                ].map((item) => (
+                  <div key={item.title} className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground mb-1">{item.title}</h3>
+                      <p className="font-serif text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <Target className="h-8 w-8 text-secondary mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">Precision Matching</h3>
-                    <p className="text-muted-foreground">
-                      Match with freelancers based on skills, experience level, past project success, and availability.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <Zap className="h-8 w-8 text-accent mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">Instant Results</h3>
-                    <p className="text-muted-foreground">
-                      Get matched with qualified freelancers within minutes, not days. Start your project faster than
-                      ever.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <Users className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">Quality Assurance</h3>
-                    <p className="text-muted-foreground">
-                      All matches are verified for quality and compatibility, ensuring successful project outcomes.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                ))}
               </div>
             </AnimatedSection>
 
             <AnimatedSection animation="slideInRight" delay={200}>
-              <Card className="p-8">
-              <CardHeader className="text-center pb-6">
-                <CardTitle className="text-2xl">How Matching Works</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                    1
-                  </div>
-                  <p className="text-muted-foreground">Project requirements analyzed by AI</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="bg-secondary text-secondary-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                    2
-                  </div>
-                  <p className="text-muted-foreground">Freelancer database searched for matches</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="bg-accent text-accent-foreground rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                    3
-                  </div>
-                  <p className="text-muted-foreground">Top candidates ranked by compatibility</p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="bg-muted-foreground text-background rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
-                    4
-                  </div>
-                  <p className="text-muted-foreground">Personalized recommendations delivered</p>
-                </div>
-              </CardContent>
+              <Card className="card-shimmer">
+                <CardHeader className="text-center pb-6">
+                  <CardTitle>How Matching Works</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {matchingSteps.map((step) => (
+                    <div key={step.label} className="flex items-center gap-4 p-3 rounded-lg border border-border/30 bg-muted/30">
+                      <span className="stat-number text-sm font-medium text-primary w-6">{step.label}</span>
+                      <p className="font-serif text-sm text-muted-foreground">{step.text}</p>
+                    </div>
+                  ))}
+                </CardContent>
               </Card>
             </AnimatedSection>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <AnimatedSection animation="slideUp" delay={0}>
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">Ready to Find Your Perfect Match?</h2>
-            <p className="text-lg text-muted-foreground mb-8">
+      {/* CTA */}
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 ambient-glow overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <AnimatedSection animation="blurIn" delay={0}>
+          <div className="max-w-3xl mx-auto text-center relative z-10">
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-foreground mb-6 tracking-tight">
+              Find Your Perfect Match
+            </h2>
+            <p className="font-serif text-lg text-muted-foreground mb-10 italic">
               Start your project today and get matched with top freelancers in minutes
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/post-project">
-              <Button size="lg" className="text-lg px-8">
-                Post a Project
-              </Button>
-            </Link>
-            <Link href="/hire-talent">
-              <Button variant="outline" size="lg" className="text-lg px-8 bg-transparent">
-                Browse Freelancers
-              </Button>
-            </Link>
-          </div>
+              <Link href="/post-project">
+                <Button size="lg" className="btn-glow text-base px-8 h-12">Post a Project</Button>
+              </Link>
+              <Link href="/hire-talent">
+                <Button variant="outline" size="lg" className="text-base px-8 h-12 bg-transparent border-border hover:border-primary/40 hover:bg-primary/5">
+                  Browse Freelancers
+                </Button>
+              </Link>
+            </div>
           </div>
         </AnimatedSection>
       </section>

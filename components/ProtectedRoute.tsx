@@ -5,25 +5,36 @@ import { useRouter } from "next/navigation"
 import { useAuth } from "@/context/AuthContext"
 
 interface ProtectedRouteProps {
-    children: React.ReactNode
+  children: React.ReactNode
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-    const { isAuthenticated } = useAuth()
-    const router = useRouter()
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
 
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/login")
-        }
-    }, [isAuthenticated, router])
-
-    // While checking or if redirected, we might show nothing or a loader
-    // But since we have local state initialized to false, specific logic might be needed
-    // to avoid flash. For simplicity in this requirements set, if not auth, we render nothing.
-    if (!isAuthenticated) {
-        return null
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.push("/login")
     }
+  }, [isAuthenticated, isLoading, router])
 
-    return <>{children}</>
+  // Show loading state while checking session
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-muted-foreground">
+            Verifying session...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  return <>{children}</>
 }

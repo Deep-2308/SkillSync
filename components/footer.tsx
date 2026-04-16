@@ -1,71 +1,61 @@
 import Link from "next/link"
-import { Facebook, Twitter, Linkedin, Instagram } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-muted border-t border-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="text-2xl font-bold text-primary mb-4 block">
+    <footer className="border-t border-border/40 bg-background">
+      {/* Decorative gold line */}
+      <div className="h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand */}
+          <div className="md:col-span-2">
+            <Link href="/" className="font-display text-xl text-primary mb-4 block tracking-tight hover:opacity-80 transition-opacity">
               SkillSync
             </Link>
-            <p className="text-muted-foreground mb-4 max-w-md">
-              Smart freelancer hiring and review platform. Connect with top talent through AI-powered matching, secure
-              payments, and verified reviews.
+            <p className="font-serif text-sm text-muted-foreground leading-relaxed max-w-sm italic">
+              Smart freelancer hiring and review platform. Connect with top talent through
+              AI-powered matching, secure payments, and verified reviews.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Linkedin size={20} />
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Instagram size={20} />
-              </a>
-            </div>
           </div>
 
+          {/* Quick Links */}
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link href="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="text-muted-foreground hover:text-primary transition-colors">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="text-muted-foreground hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </li>
+            <h3 className="font-mono text-[11px] tracking-[0.15em] uppercase text-primary/70 mb-5">
+              Navigation
+            </h3>
+            <ul className="space-y-2.5">
+              {[
+                { href: "/", label: "Home" },
+                { href: "/about", label: "About" },
+                { href: "/services", label: "Services" },
+                { href: "/contact", label: "Contact" },
+              ].map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="font-serif text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Legal */}
           <div>
-            <h3 className="text-foreground font-semibold mb-4">Legal</h3>
-            <ul className="space-y-2">
+            <h3 className="font-mono text-[11px] tracking-[0.15em] uppercase text-primary/70 mb-5">
+              Legal
+            </h3>
+            <ul className="space-y-2.5">
               <li>
-                <Link href="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/terms" className="font-serif text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link href="/privacy" className="font-serif text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Privacy Policy
                 </Link>
               </li>
@@ -73,8 +63,22 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center">
-          <p className="text-muted-foreground">© 2024 SkillSync. All rights reserved.</p>
+        {/* Bottom bar */}
+        <div className="mt-14 pt-6 border-t border-border/40 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="font-mono text-[11px] text-muted-foreground tracking-wider">
+            © 2024 SKILLSYNC. ALL RIGHTS RESERVED.
+          </p>
+          <div className="flex gap-8">
+            {["LinkedIn", "Twitter", "GitHub"].map((s) => (
+              <a
+                key={s}
+                href="#"
+                className="font-mono text-[11px] text-muted-foreground hover:text-primary transition-colors tracking-wider uppercase"
+              >
+                {s}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
     </footer>

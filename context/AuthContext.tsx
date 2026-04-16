@@ -1,21 +1,25 @@
 "use client"
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import React, { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react"
 
 // Types
 export type UserRole = "learner" | "expert"
 
 export interface User {
-    name: string
-    role: UserRole
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  username?: string
 }
 
 interface AuthContextType {
-    user: User | null
-    isAuthenticated: boolean
-    login: (userData: User) => void
-    signup: (userData: User) => void
-    logout: () => void
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<{ error?: string }>
+  signup: (data: { name: string; email: string; password: string; role: UserRole }) => Promise<{ error?: string }>
+  logout: () => Promise<void>
 }
 
 // Context
@@ -23,56 +27,96 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Provider
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-    // Initialize state from local storage
-    useEffect(() => {
-        const storedUser = localStorage.getItem("skillSyncUser")
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser))
-            } catch (error) {
-                console.error("Failed to parse user data", error)
-                localStorage.removeItem("skillSyncUser")
-            }
-        }
-    }, [])
+  // Check existing session on mount
+  useEffect(() => {
+    checkAuth()
+  }, [])
 
-    const login = (userData: User) => {
-        setUser(userData)
-        localStorage.setItem("skillSyncUser", JSON.stringify(userData))
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("/api/auth/me")
+      const data = await res.json()
+      setUser(data.user || null)
+    } catch {
+      setUser(null)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    const signup = (userData: User) => {
-        // In a real backend, this would create a user. For now, it's same as login.
-        login(userData)
+  const login = useCallback(async (email: string, password: string): Promise<{ error?: string }> => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        return { error: data.error || "Login failed" }
+      }
+
+      setUser(data.user)
+      return {}
+    } catch {
+      return { error: "Network error. Please try again." }
     }
+  }, [])
 
-    const logout = () => {
-        setUser(null)
-        localStorage.removeItem("skillSyncUser")
+  const signup = useCallback(async (data: { name: string; email: string; password: string; role: UserRole }): Promise<{ error?: string }> => {
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      const resData = await res.json()
+
+      if (!res.ok) {
+        return { error: resData.error || "Signup failed" }
+      }
+
+      setUser(resData.user)
+      return {}
+    } catch {
+      return { error: "Network error. Please try again." }
     }
+  }, [])
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isAuthenticated: !!user,
-                login,
-                signup,
-                logout,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    )
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" })
+    } catch {
+      // Logout locally even if API fails
+    }
+    setUser(null)
+  }, [])
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        signup,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
 }
 
 // Hook
 export function useAuth() {
-    const context = useContext(AuthContext)
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider")
-    }
-    return context
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
 }
