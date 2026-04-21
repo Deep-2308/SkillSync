@@ -15,9 +15,8 @@ export async function POST(req: NextRequest) {
     const payload = await verifyToken(token)
     if (!payload) return NextResponse.json({ error: "Invalid session" }, { status: 401 })
 
-    const userId = payload.userId || payload.id
-
     await dbConnect()
+    const userId = payload.userId || payload.id
 
     const body = await req.json()
     const { conversationId, content } = body
@@ -26,10 +25,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Conversation ID and message content are required" }, { status: 400 })
     }
 
-    // Verify user is part of this conversation
+    // Verify user is a participant
     const conversation = await Conversation.findById(conversationId)
     if (!conversation) return NextResponse.json({ error: "Conversation not found" }, { status: 404 })
-    
+
     const isParticipant = conversation.participants.some(
       (p: { toString: () => string }) => p.toString() === userId
     )
@@ -43,7 +42,7 @@ export async function POST(req: NextRequest) {
       content: content.trim(),
     })
 
-    // Update conversation's last message
+    // Update conversation preview
     conversation.lastMessage = content.trim().slice(0, 100)
     conversation.lastMessageAt = new Date()
     await conversation.save()
@@ -55,7 +54,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET /api/messages?conversationId=xxx — Fetch messages for a conversation
+// GET /api/messages?conversationId=xxx&after=timestamp
 export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies()
@@ -65,18 +64,18 @@ export async function GET(req: NextRequest) {
     const payload = await verifyToken(token)
     if (!payload) return NextResponse.json({ error: "Invalid session" }, { status: 401 })
 
-    const userId = payload.userId || payload.id
-
     await dbConnect()
+    const userId = payload.userId || payload.id
 
     const { searchParams } = new URL(req.url)
     const conversationId = searchParams.get("conversationId")
+    const after = searchParams.get("after")
 
     if (!conversationId) {
       return NextResponse.json({ error: "conversationId is required" }, { status: 400 })
     }
 
-    // Verify user is part of this conversation
+    // Verify participant
     const conversation = await Conversation.findById(conversationId)
     if (!conversation) return NextResponse.json({ error: "Conversation not found" }, { status: 404 })
 
@@ -87,12 +86,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "You are not part of this conversation" }, { status: 403 })
     }
 
-    const messages = await Message.find({ conversationId })
+    const query: Record<string, unknown> = { conversationId }
+    if (after) {
+      query.createdAt = { $gt: new Date(after) }
+    }
+
+    const messages = await Message.find(query)
       .populate("senderId", "name image")
       .sort({ createdAt: 1 })
-      .limit(200)
+      .limit(100)
 
-    // Mark unread messages as read
+    // Mark messages as read
     await Message.updateMany(
       { conversationId, senderId: { $ne: userId }, read: false },
       { read: true }

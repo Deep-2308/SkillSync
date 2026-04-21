@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongodb"
 import Proposal from "@/models/Proposal"
 import Project from "@/models/Project"
 import Conversation from "@/models/Conversation"
+import Message from "@/models/Message"
 
 // PATCH /api/proposals/[id] — Accept or reject a proposal
 export async function PATCH(
@@ -12,6 +13,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const cookieStore = await cookies()
     const token = cookieStore.get("session")?.value || cookieStore.get("token")?.value
     if (!token) return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
@@ -19,10 +22,8 @@ export async function PATCH(
     const payload = await verifyToken(token)
     if (!payload) return NextResponse.json({ error: "Invalid session" }, { status: 401 })
 
-    const { id } = await params
-    const userId = payload.userId || payload.id
-
     await dbConnect()
+    const userId = payload.userId || payload.id
 
     const body = await req.json()
     const { status } = body
@@ -34,20 +35,19 @@ export async function PATCH(
     const proposal = await Proposal.findById(id)
     if (!proposal) return NextResponse.json({ error: "Proposal not found" }, { status: 404 })
 
-    // Verify the logged-in user is the project owner
+    // Only the project owner can accept/reject
     const project = await Project.findById(proposal.projectId)
     if (!project) return NextResponse.json({ error: "Project not found" }, { status: 404 })
+
     if (project.clientId.toString() !== userId) {
       return NextResponse.json({ error: "Only the project owner can manage proposals" }, { status: 403 })
     }
 
-    // Update proposal status
     proposal.status = status
     await proposal.save()
 
-    // If accepted: update project, reject other proposals, create conversation
+    // If accepted: update project status + create conversation
     if (status === "accepted") {
-      // Update project status and assign freelancer
       project.status = "in-progress"
       project.freelancerId = proposal.freelancerId
       await project.save()
@@ -58,23 +58,30 @@ export async function PATCH(
         { status: "rejected" }
       )
 
-      // Create a conversation between client and freelancer
+      // Create conversation between client and freelancer
       const existingConvo = await Conversation.findOne({
         participants: { $all: [project.clientId, proposal.freelancerId] },
         projectId: project._id,
       })
 
       if (!existingConvo) {
-        await Conversation.create({
+        const conversation = await Conversation.create({
           participants: [project.clientId, proposal.freelancerId],
           projectId: project._id,
           lastMessage: "Proposal accepted! Start chatting.",
           lastMessageAt: new Date(),
         })
+
+        // Create a system message
+        await Message.create({
+          conversationId: conversation._id,
+          senderId: project.clientId,
+          content: `Proposal accepted! Let's discuss the project "${project.title}".`,
+        })
       }
     }
 
-    return NextResponse.json({ proposal, message: `Proposal ${status}` })
+    return NextResponse.json({ proposal })
   } catch (error) {
     console.error("Proposal update error:", error)
     return NextResponse.json({ error: "Failed to update proposal" }, { status: 500 })

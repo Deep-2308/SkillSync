@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AnimatedSection } from "@/components/animated-section"
 import { useAuth } from "@/context/AuthContext"
-import { useToast } from "@/hooks/use-toast"
 import { Send, MessageCircle, Loader2 } from "lucide-react"
 
 interface Participant {
@@ -30,12 +29,10 @@ interface MessageItem {
   senderId: { _id: string; name: string; image?: string }
   content: string
   createdAt: string
-  read: boolean
 }
 
 export default function MessagesPage() {
   const { user } = useAuth()
-  const { toast } = useToast()
   const [conversations, setConversations] = useState<ConversationItem[]>([])
   const [activeConvo, setActiveConvo] = useState<string | null>(null)
   const [messages, setMessages] = useState<MessageItem[]>([])
@@ -43,11 +40,11 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const pollingRef = useRef<NodeJS.Timeout | null>(null)
+  const pollRef = useRef<NodeJS.Timeout | null>(null)
 
   // Fetch conversations
   useEffect(() => {
-    const fetchConversations = async () => {
+    const fetchConvos = async () => {
       try {
         const res = await fetch("/api/conversations")
         const data = await res.json()
@@ -58,33 +55,58 @@ export default function MessagesPage() {
         setLoading(false)
       }
     }
-    fetchConversations()
+    fetchConvos()
   }, [])
 
   // Fetch messages for active conversation
-  const fetchMessages = useCallback(async () => {
-    if (!activeConvo) return
+  const fetchMessages = useCallback(async (convoId: string, afterTimestamp?: string) => {
     try {
-      const res = await fetch(`/api/messages?conversationId=${activeConvo}`)
+      let url = `/api/messages?conversationId=${convoId}`
+      if (afterTimestamp) url += `&after=${afterTimestamp}`
+
+      const res = await fetch(url)
       const data = await res.json()
-      if (data.messages) setMessages(data.messages)
+
+      if (data.messages) {
+        if (afterTimestamp) {
+          // Append new messages (polling)
+          setMessages((prev) => {
+            const existingIds = new Set(prev.map((m) => m._id))
+            const newMsgs = data.messages.filter((m: MessageItem) => !existingIds.has(m._id))
+            return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev
+          })
+        } else {
+          setMessages(data.messages)
+        }
+      }
     } catch {
       // handled
     }
-  }, [activeConvo])
+  }, [])
+
+  // Open a conversation
+  const openConversation = (convoId: string) => {
+    setActiveConvo(convoId)
+    setMessages([])
+    fetchMessages(convoId)
+  }
 
   // Poll for new messages every 3 seconds
   useEffect(() => {
-    if (activeConvo) {
-      fetchMessages()
-      pollingRef.current = setInterval(fetchMessages, 3000)
-    }
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current)
-    }
-  }, [activeConvo, fetchMessages])
+    if (!activeConvo) return
 
-  // Scroll to bottom when messages change
+    pollRef.current = setInterval(() => {
+      const lastMsg = messages[messages.length - 1]
+      const after = lastMsg?.createdAt || ""
+      if (after) fetchMessages(activeConvo, after)
+    }, 3000)
+
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [activeConvo, messages, fetchMessages])
+
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
@@ -101,25 +123,29 @@ export default function MessagesPage() {
         body: JSON.stringify({ conversationId: activeConvo, content: newMessage.trim() }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
 
-      setNewMessage("")
-      await fetchMessages()
+      if (data.message) {
+        // Add message locally with populated sender
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...data.message,
+            senderId: { _id: user!.id, name: user!.name, image: undefined },
+          },
+        ])
+        setNewMessage("")
 
-      // Update last message in conversation list
-      setConversations((prev) =>
-        prev.map((c) =>
-          c._id === activeConvo
-            ? { ...c, lastMessage: newMessage.trim(), lastMessageAt: new Date().toISOString() }
-            : c
+        // Update conversation list preview
+        setConversations((prev) =>
+          prev.map((c) =>
+            c._id === activeConvo
+              ? { ...c, lastMessage: newMessage.trim(), lastMessageAt: new Date().toISOString() }
+              : c
+          )
         )
-      )
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to send",
-        variant: "destructive",
-      })
+      }
+    } catch {
+      // handled
     } finally {
       setSending(false)
     }
@@ -129,13 +155,22 @@ export default function MessagesPage() {
     return convo.participants.find((p) => p._id !== user?.id) || convo.participants[0]
   }
 
-  const activeConversation = conversations.find((c) => c._id === activeConvo)
-  const otherUser = activeConversation ? getOtherParticipant(activeConversation) : null
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr)
+    const now = new Date()
+    const diffMs = now.getTime() - d.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+
+    if (diffMins < 1) return "Just now"
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+  }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     )
   }
@@ -143,133 +178,129 @@ export default function MessagesPage() {
   return (
     <div className="space-y-6">
       <AnimatedSection animation="slideUp" delay={0}>
-        <div>
-          <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/60 mb-2 block">Communication</span>
-          <h1 className="font-display text-2xl font-bold tracking-tight">Messages</h1>
-        </div>
+        <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary/60 mb-1 block">Communication</span>
+        <h1 className="font-display text-2xl font-bold tracking-tight">Messages</h1>
       </AnimatedSection>
 
       {conversations.length === 0 ? (
         <AnimatedSection animation="fadeIn" delay={80}>
           <div className="text-center py-20 border border-dashed border-border rounded-lg">
             <MessageCircle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-4" />
-            <p className="font-serif text-muted-foreground italic">No messages yet</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Conversations are created when a proposal is accepted
+            <p className="font-serif text-muted-foreground italic mb-2">No conversations yet</p>
+            <p className="text-xs text-muted-foreground">
+              Conversations are created when a client accepts a freelancer&apos;s proposal
             </p>
           </div>
         </AnimatedSection>
       ) : (
-        <AnimatedSection animation="slideUp" delay={80}>
-          <div className="border border-border rounded-lg overflow-hidden flex flex-col md:flex-row" style={{ height: "calc(100vh - 320px)", minHeight: "500px" }}>
-            {/* Conversation List */}
-            <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-border bg-card overflow-y-auto shrink-0" style={{ maxHeight: "200px", minHeight: "200px" }}>
-              {/* Mobile: horizontal scroll, Desktop: vertical list */}
-              <div className="md:block">
-                {conversations.map((convo) => {
-                  const other = getOtherParticipant(convo)
-                  const isActive = activeConvo === convo._id
-                  return (
-                    <button
-                      key={convo._id}
-                      onClick={() => setActiveConvo(convo._id)}
-                      className={`w-full text-left px-4 py-3.5 border-b border-border/30 transition-all ${
-                        isActive ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-9 w-9 shrink-0">
-                          <AvatarImage src={other?.image} />
-                          <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-mono">
-                            {other?.name?.charAt(0)?.toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold truncate">{other?.name}</p>
-                          <p className="text-[10px] text-muted-foreground font-mono truncate">
-                            {convo.projectId?.title}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground truncate mt-0.5 font-serif italic">
-                            {convo.lastMessage}
+        <div className="flex gap-4 h-[65vh]">
+          {/* Conversation List */}
+          <div className="w-72 shrink-0 border border-border rounded-lg overflow-y-auto bg-card">
+            {conversations.map((convo) => {
+              const other = getOtherParticipant(convo)
+              const isActive = activeConvo === convo._id
+
+              return (
+                <button
+                  key={convo._id}
+                  onClick={() => openConversation(convo._id)}
+                  className={`w-full text-left p-4 border-b border-border/40 transition-colors ${
+                    isActive ? "bg-primary/5 border-l-2 border-l-primary" : "hover:bg-muted"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9 shrink-0">
+                      <AvatarImage src={other.image || ""} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {other.name?.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{other.name}</p>
+                      <p className="text-[10px] font-mono text-primary/60 truncate">{convo.projectId.title}</p>
+                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{convo.lastMessage}</p>
+                    </div>
+                    <span className="text-[9px] font-mono text-muted-foreground shrink-0">
+                      {formatTime(convo.lastMessageAt)}
+                    </span>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Chat Area */}
+          <div className="flex-1 border border-border rounded-lg flex flex-col bg-card overflow-hidden">
+            {!activeConvo ? (
+              <div className="flex-1 flex items-center justify-center text-center">
+                <div>
+                  <MessageCircle className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="font-serif text-sm text-muted-foreground italic">Select a conversation to start chatting</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Chat Header */}
+                {(() => {
+                  const convo = conversations.find((c) => c._id === activeConvo)
+                  const other = convo ? getOtherParticipant(convo) : null
+                  return convo && other ? (
+                    <div className="px-5 py-3 border-b border-border flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={other.image || ""} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs">{other.name?.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium">{other.name}</p>
+                        <p className="text-[10px] font-mono text-primary/60">{convo.projectId.title}</p>
+                      </div>
+                    </div>
+                  ) : null
+                })()}
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+                  {messages.map((msg) => {
+                    const isMe = msg.senderId._id === user?.id
+                    return (
+                      <div key={msg._id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                        <div className={`max-w-[75%] ${isMe ? "order-2" : ""}`}>
+                          <div
+                            className={`px-4 py-2.5 rounded-2xl text-sm ${
+                              isMe
+                                ? "bg-primary text-primary-foreground rounded-br-md"
+                                : "bg-muted text-foreground rounded-bl-md"
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+                          <p className={`text-[9px] font-mono text-muted-foreground mt-1 ${isMe ? "text-right" : ""}`}>
+                            {formatTime(msg.createdAt)}
                           </p>
                         </div>
                       </div>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col bg-background min-h-0">
-              {!activeConvo ? (
-                <div className="flex-1 flex items-center justify-center text-center p-8">
-                  <div>
-                    <MessageCircle className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-                    <p className="font-serif text-muted-foreground italic text-sm">Select a conversation to start chatting</p>
-                  </div>
+                    )
+                  })}
+                  <div ref={messagesEndRef} />
                 </div>
-              ) : (
-                <>
-                  {/* Chat Header */}
-                  <div className="px-5 py-3.5 border-b border-border bg-card flex items-center gap-3 shrink-0">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={otherUser?.image} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-mono">
-                        {otherUser?.name?.charAt(0)?.toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-bold">{otherUser?.name}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{activeConversation?.projectId?.title}</p>
-                    </div>
-                  </div>
 
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3 min-h-0">
-                    {messages.length === 0 && (
-                      <p className="text-center text-xs text-muted-foreground font-serif italic py-8">
-                        No messages yet. Say hello!
-                      </p>
-                    )}
-                    {messages.map((msg) => {
-                      const isMe = msg.senderId?._id === user?.id
-                      return (
-                        <div key={msg._id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                          <div className={`max-w-[75%] rounded-lg px-4 py-2.5 ${
-                            isMe
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted text-foreground"
-                          }`}>
-                            <p className="text-sm leading-relaxed">{msg.content}</p>
-                            <p className={`text-[9px] mt-1 font-mono ${isMe ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                              {new Date(msg.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                            </p>
-                          </div>
-                        </div>
-                      )
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Input */}
-                  <form onSubmit={handleSend} className="px-4 py-3 border-t border-border bg-card flex gap-2 shrink-0">
-                    <Input
-                      placeholder="Type a message..."
-                      className="flex-1 bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10 h-10"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      disabled={sending}
-                    />
-                    <Button type="submit" size="icon" className="h-10 w-10 btn-glow shrink-0" disabled={sending || !newMessage.trim()}>
-                      {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
-                  </form>
-                </>
-              )}
-            </div>
+                {/* Input */}
+                <form onSubmit={handleSend} className="px-4 py-3 border-t border-border flex gap-2">
+                  <Input
+                    placeholder="Type a message..."
+                    className="flex-1 bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    disabled={sending}
+                  />
+                  <Button type="submit" size="icon" className="btn-glow h-10 w-10 shrink-0" disabled={sending || !newMessage.trim()}>
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  </Button>
+                </form>
+              </>
+            )}
           </div>
-        </AnimatedSection>
+        </div>
       )}
     </div>
   )

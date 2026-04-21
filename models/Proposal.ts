@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose"
 
 export interface IProposal {
+  _id?: string
   projectId: mongoose.Types.ObjectId
   freelancerId: mongoose.Types.ObjectId
   coverLetter: string
@@ -27,9 +28,9 @@ const ProposalSchema = new Schema<IProposal>(
   { timestamps: true }
 )
 
+ProposalSchema.index({ projectId: 1, createdAt: -1 })
+ProposalSchema.index({ freelancerId: 1, createdAt: -1 })
 // Prevent duplicate proposals from same freelancer on same project
 ProposalSchema.index({ projectId: 1, freelancerId: 1 }, { unique: true })
-ProposalSchema.index({ projectId: 1, status: 1 })
-ProposalSchema.index({ freelancerId: 1 })
 
 export default mongoose.models.Proposal || mongoose.model<IProposal>("Proposal", ProposalSchema)

@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose"
 
 export interface IMessage {
+  _id?: string
   conversationId: mongoose.Types.ObjectId
   senderId: mongoose.Types.ObjectId
   content: string

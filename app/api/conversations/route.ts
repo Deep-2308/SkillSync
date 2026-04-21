@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/jwt"
 import dbConnect from "@/lib/mongodb"
 import Conversation from "@/models/Conversation"
 
-// GET /api/conversations — Get all conversations for logged-in user
+// GET /api/conversations — List all conversations for logged-in user
 export async function GET() {
   try {
     const cookieStore = await cookies()
@@ -14,11 +14,12 @@ export async function GET() {
     const payload = await verifyToken(token)
     if (!payload) return NextResponse.json({ error: "Invalid session" }, { status: 401 })
 
+    await dbConnect()
     const userId = payload.userId || payload.id
 
-    await dbConnect()
-
-    const conversations = await Conversation.find({ participants: userId })
+    const conversations = await Conversation.find({
+      participants: userId,
+    })
       .populate("participants", "name username image")
       .populate("projectId", "title")
       .sort({ lastMessageAt: -1 })

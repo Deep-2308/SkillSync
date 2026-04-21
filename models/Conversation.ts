@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose"
 
 export interface IConversation {
+  _id?: string
   participants: mongoose.Types.ObjectId[]
   projectId: mongoose.Types.ObjectId
   lastMessage: string
@@ -19,7 +20,7 @@ const ConversationSchema = new Schema<IConversation>(
   { timestamps: true }
 )
 
-ConversationSchema.index({ participants: 1 })
-ConversationSchema.index({ lastMessageAt: -1 })
+ConversationSchema.index({ participants: 1, lastMessageAt: -1 })
+ConversationSchema.index({ projectId: 1 })
 
 export default mongoose.models.Conversation || mongoose.model<IConversation>("Conversation", ConversationSchema)
