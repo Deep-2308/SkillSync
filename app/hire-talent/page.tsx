@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Search, Filter, Star, MapPin, Zap, Loader2 } from "lucide-react"
+import { Search, Filter, Star, MapPin, Zap, Loader2, DollarSign, Clock, ArrowRight, Briefcase } from "lucide-react"
 import { freelancers as staticFreelancers } from "@/data/freelancers"
 import { AnimatedSection } from "@/components/animated-section"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
@@ -23,6 +23,78 @@ interface Freelancer {
   reviewCount: number
   location: string
   skills: string[]
+}
+
+// Open Projects Section Component
+function OpenProjectsSection() {
+  const [projects, setProjects] = useState<Array<{
+    _id: string; title: string; description: string; budget: number;
+    duration: number; skills: string[]; status: string; createdAt: string;
+  }>>([])
+  const [loadingProjects, setLoadingProjects] = useState(true)
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch("/api/projects")
+        const data = await res.json()
+        if (data.projects) {
+          setProjects(data.projects.filter((p: { status: string }) => p.status === "open").slice(0, 6))
+        }
+      } catch { /* handled */ } finally { setLoadingProjects(false) }
+    }
+    fetchProjects()
+  }, [])
+
+  if (loadingProjects) return null
+  if (projects.length === 0) return null
+
+  return (
+    <div className="mt-16">
+      <div className="line-accent-gold mb-10" />
+      <AnimatedSection animation="slideUp" delay={300}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary/60 block mb-1">Find Work</span>
+            <h2 className="font-display text-2xl font-bold tracking-tight">Open Projects</h2>
+          </div>
+        </div>
+      </AnimatedSection>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {projects.map((project, i) => (
+          <AnimatedSection key={project._id} animation="fadeIn" delay={320 + i * 60}>
+            <Link href={`/projects/${project._id}`}>
+              <Card className="card-shimmer cursor-pointer group h-full">
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Briefcase className="h-3.5 w-3.5 text-primary" />
+                    <span className="font-mono text-[9px] tracking-wider uppercase text-accent border border-accent/20 bg-accent/5 px-2 py-0.5 rounded">Open</span>
+                  </div>
+                  <h3 className="font-bold text-sm mb-2 group-hover:text-primary transition-colors line-clamp-2">{project.title}</h3>
+                  {project.description && (
+                    <p className="text-xs text-muted-foreground font-serif line-clamp-2 mb-3">{project.description}</p>
+                  )}
+                  {project.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {project.skills.slice(0, 3).map((s) => (
+                        <span key={s} className="font-mono text-[8px] tracking-wider uppercase text-primary/60 border border-primary/15 px-1.5 py-0.5 rounded">{s}</span>
+                      ))}
+                      {project.skills.length > 3 && <span className="text-[8px] text-muted-foreground font-mono">+{project.skills.length - 3}</span>}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+                    <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" />${project.budget}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{project.duration}d</span>
+                    <ArrowRight className="h-3 w-3 group-hover:text-primary transition-colors" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </AnimatedSection>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function HireTalentPage() {
@@ -201,8 +273,11 @@ export default function HireTalentPage() {
             </div>
           )}
 
+          {/* Open Projects Section */}
+          <OpenProjectsSection />
+
           <AnimatedSection animation="slideUp" delay={400}>
-            <div className="mt-20 p-8 md:p-10 rounded-lg border border-border/40 bg-card/60 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="mt-14 p-8 md:p-10 rounded-lg border border-border/40 bg-card/60 flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="max-w-lg">
                 <h2 className="text-xl font-bold mb-2">Can&apos;t find what you&apos;re looking for?</h2>
                 <p className="font-serif text-sm text-muted-foreground italic">

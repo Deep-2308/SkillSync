@@ -6,13 +6,15 @@ import { usePathname } from "next/navigation"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
-import { LayoutDashboard, UserCircle, Briefcase, ExternalLink } from "lucide-react"
+import { LayoutDashboard, UserCircle, Briefcase, ExternalLink, FolderOpen, MessageCircle } from "lucide-react"
 import { useAuth } from "@/context/AuthContext"
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/profile", label: "Edit Profile", icon: UserCircle },
   { href: "/dashboard/portfolio", label: "Portfolio", icon: Briefcase },
+  { href: "/dashboard/projects", label: "My Projects", icon: FolderOpen },
+  { href: "/dashboard/messages", label: "Messages", icon: MessageCircle },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {

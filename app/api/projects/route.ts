@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     // Verify authentication
     const cookieStore = await cookies()
-    const token = cookieStore.get("token")?.value
+    const token = cookieStore.get("session")?.value || cookieStore.get("token")?.value
     if (!token) {
       return NextResponse.json({ error: "Please log in to post a project" }, { status: 401 })
     }
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       budget: Number(budget) || 0,
       duration: Number(duration) || 20,
       expertiseLevel: expertiseLevel || "mid",
-      clientId: payload.id,
+      clientId: payload.userId || payload.id,
       email: email || payload.email,
       status: "open",
     })
@@ -52,9 +52,10 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     await dbConnect()
-    const projects = await Project.find({ status: "open" })
+    const projects = await Project.find({})
       .sort({ createdAt: -1 })
-      .limit(50)
+      .limit(100)
+      .lean()
 
     return NextResponse.json({ projects })
   } catch (error) {
