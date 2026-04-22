@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { VerifyEmailBanner } from "@/components/verify-email-banner"
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -36,7 +37,9 @@ export function Navigation() {
   }, [])
 
   return (
-    <nav className="sticky top-0 z-50 glass">
+    <>
+      <VerifyEmailBanner />
+      <nav className="sticky top-0 z-50 glass">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -221,5 +224,6 @@ export function Navigation() {
       {/* Bottom gradient accent */}
       <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
     </nav>
+    </>
   )
 }

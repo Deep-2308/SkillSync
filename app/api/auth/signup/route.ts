@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
+import crypto from "crypto"
 import bcrypt from "bcryptjs"
 import dbConnect from "@/lib/mongodb"
 import User from "@/models/User"
 import { signToken } from "@/lib/jwt"
 import { cookies } from "next/headers"
+import { sendVerificationEmail } from "@/lib/email"
 
 export async function POST(request: Request) {
   try {
@@ -44,17 +46,30 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex")
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
     // Create user
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       hashedPassword,
       role: role || "learner",
+      isVerified: false,
+      verificationToken,
+      verificationTokenExpiry,
     })
+
+    // Send verification email (async, don't block signup)
+    sendVerificationEmail(email.toLowerCase(), verificationToken).catch((err) =>
+      console.error("Failed to send verification email:", err)
+    )
 
     // Create JWT token
     const token = await signToken({
       id: user._id.toString(),
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
       name: user.name,
@@ -77,6 +92,7 @@ export async function POST(request: Request) {
           name: user.name,
           email: user.email,
           role: user.role,
+          isVerified: false,
         },
       },
       { status: 201 }

@@ -80,8 +80,8 @@ export default function SignupPage() {
     setLoading(false)
   }
 
-  const handleGoogleSignup = async () => {
-    toast({ title: "Coming Soon", description: "Google signup will be available soon. Please use email/password for now." })
+  const handleGoogleSignup = () => {
+    window.location.href = "/api/auth/google"
   }
 
   const inputClass = "bg-muted border-border focus-visible:border-primary/40 focus-visible:ring-primary/10"

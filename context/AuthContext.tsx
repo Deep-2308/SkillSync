@@ -11,6 +11,7 @@ export interface User {
   email: string
   role: UserRole
   username?: string
+  isVerified?: boolean
 }
 
 interface AuthContextType {

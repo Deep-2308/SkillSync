@@ -27,6 +27,22 @@ export async function POST(request: Request) {
       )
     }
 
+    // Check if account is deactivated
+    if (user.isDeactivated) {
+      return NextResponse.json(
+        { error: "This account has been deactivated. Contact support to reactivate." },
+        { status: 403 }
+      )
+    }
+
+    // Check if this is a Google-only account (no password set)
+    if (!user.hashedPassword) {
+      return NextResponse.json(
+        { error: "This account uses Google sign-in. Please use the 'Continue with Google' button." },
+        { status: 400 }
+      )
+    }
+
     // Verify password
     const isValidPassword = await bcrypt.compare(password, user.hashedPassword)
     if (!isValidPassword) {

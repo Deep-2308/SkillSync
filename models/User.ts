@@ -14,7 +14,8 @@ export interface IUser {
   _id?: string
   name: string
   email: string
-  hashedPassword: string
+  hashedPassword?: string
+  googleId?: string
   role: UserRole
   username?: string
   image?: string
@@ -25,6 +26,11 @@ export interface IUser {
   portfolio?: IPortfolioItem[]
   rating: number
   reviewCount: number
+  isVerified: boolean
+  verificationToken?: string
+  verificationTokenExpiry?: Date
+  isDeactivated: boolean
+  deactivatedAt?: Date
   resetToken?: string
   resetTokenExpiry?: Date
   createdAt: Date
@@ -45,7 +51,8 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true, lowercase: true },
-    hashedPassword: { type: String, required: true },
+    hashedPassword: { type: String },
+    googleId: { type: String, sparse: true },
     role: { type: String, enum: ["learner", "expert"], default: "learner" },
     username: { type: String, unique: true, sparse: true, lowercase: true },
     image: { type: String },
@@ -56,6 +63,11 @@ const UserSchema = new Schema<IUser>(
     portfolio: [PortfolioItemSchema],
     rating: { type: Number, default: 0 },
     reviewCount: { type: Number, default: 0 },
+    isVerified: { type: Boolean, default: false },
+    verificationToken: { type: String },
+    verificationTokenExpiry: { type: Date },
+    isDeactivated: { type: Boolean, default: false },
+    deactivatedAt: { type: Date },
     resetToken: { type: String },
     resetTokenExpiry: { type: Date },
   },

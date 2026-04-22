@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import crypto from "crypto"
 import dbConnect from "@/lib/mongodb"
 import User from "@/models/User"
+import { sendPasswordResetEmail } from "@/lib/email"
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,14 @@ export async function POST(request: Request) {
       })
     }
 
+    // Check if user signed up with Google (no password to reset)
+    if (user.googleId && !user.hashedPassword) {
+      return NextResponse.json({
+        message: "If an account with that email exists, a reset link has been sent.",
+        // Don't reveal that they used Google login
+      })
+    }
+
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString("hex")
     const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
@@ -32,16 +41,13 @@ export async function POST(request: Request) {
     user.resetTokenExpiry = resetTokenExpiry
     await user.save()
 
-    // In production, send email with reset link:
-    // https://yoursite.com/reset-password?token=${resetToken}
-    // For development, log the token:
-    console.log(`[DEV] Password reset token for ${email}: ${resetToken}`)
-    console.log(`[DEV] Reset link: http://localhost:3000/reset-password?token=${resetToken}`)
+    // Send the reset email
+    const emailResult = await sendPasswordResetEmail(email, resetToken)
 
     return NextResponse.json({
       message: "If an account with that email exists, a reset link has been sent.",
-      // DEV ONLY — remove in production:
-      ...(process.env.NODE_ENV !== "production" && { devToken: resetToken }),
+      // DEV ONLY — show token when no email service configured:
+      ...(emailResult.dev && { devToken: resetToken }),
     })
   } catch (error) {
     console.error("Forgot password error:", error)

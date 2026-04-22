@@ -49,11 +49,8 @@ export default function LoginPage() {
     setLoading(false)
   }
 
-  const handleGoogleLogin = async () => {
-    toast({
-      title: "Coming Soon",
-      description: "Google login will be available soon. Please use email/password for now.",
-    })
+  const handleGoogleLogin = () => {
+    window.location.href = "/api/auth/google"
   }
 
   return (

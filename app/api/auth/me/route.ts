@@ -22,9 +22,9 @@ export async function GET() {
     // Fetch from DB to get latest fields (including username)
     await dbConnect()
     const userId = payload.userId || payload.id
-    const dbUser = await User.findById(userId).select("name email role username")
+    const dbUser = await User.findById(userId).select("name email role username isVerified isDeactivated")
 
-    if (!dbUser) {
+    if (!dbUser || dbUser.isDeactivated) {
       return NextResponse.json({ user: null })
     }
 
@@ -35,6 +35,7 @@ export async function GET() {
         email: dbUser.email,
         role: dbUser.role,
         username: dbUser.username || null,
+        isVerified: dbUser.isVerified ?? false,
       },
     })
   } catch {
