@@ -1,37 +1,53 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Syne, Newsreader, DM_Mono, Unbounded } from "next/font/google"
+import { Geist, Geist_Mono } from "next/font/google"
 import { AuthProvider } from "@/context/AuthContext"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
-const syne = Syne({
+/* ── Font Loading ──────────────────────── */
+
+const geistSans = Geist({
   subsets: ["latin"],
-  variable: "--font-syne",
+  variable: "--font-geist-sans",
+  display: "swap",
 })
 
-const newsreader = Newsreader({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  variable: "--font-newsreader",
-  style: ["normal", "italic"],
+  variable: "--font-geist-mono",
+  display: "swap",
 })
 
-const dmMono = DM_Mono({
-  weight: ["400", "500"],
-  subsets: ["latin"],
-  variable: "--font-dm-mono",
-})
-
-const unbounded = Unbounded({
-  subsets: ["latin"],
-  variable: "--font-unbounded",
-})
+/* ── SEO Metadata ──────────────────────── */
 
 export const metadata: Metadata = {
-  title: "SkillSync — Smart Freelancer Hiring & Review Platform",
+  title: {
+    default: "SkillSync — Smart Freelancer Hiring & Review Platform",
+    template: "%s | SkillSync",
+  },
   description:
     "Hire Smarter. Work Better. Connect with top freelancers through AI-powered skill matching, secure payments, and verified reviews.",
+  keywords: [
+    "freelancer",
+    "hiring",
+    "skill matching",
+    "SkillSync",
+    "remote work",
+    "talent platform",
+  ],
+  authors: [{ name: "SkillSync" }],
+  openGraph: {
+    type: "website",
+    title: "SkillSync — Smart Freelancer Hiring & Review Platform",
+    description:
+      "Connect with top freelancers through AI-powered skill matching, secure payments, and verified reviews.",
+    siteName: "SkillSync",
+  },
 }
+
+/* ── Root Layout ───────────────────────── */
 
 export default function RootLayout({
   children,
@@ -41,16 +57,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${syne.variable} ${newsreader.variable} ${dmMono.variable} ${unbounded.variable} font-sans antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ThemeProvider>
           <AuthProvider>
             {children}
+            <Toaster
+              position="bottom-right"
+              richColors
+              closeButton
+              duration={4000}
+            />
           </AuthProvider>
         </ThemeProvider>
       </body>
