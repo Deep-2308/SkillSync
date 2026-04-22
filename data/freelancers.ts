@@ -12,7 +12,7 @@ export interface Freelancer {
 export const freelancers: Freelancer[] = [
     {
         id: "1",
-        name: "Kabariya Deep",
+        name: "Deep Kabariya",
         role: "Full-Stack Developer",
         skills: ["React", "Node.js", "AI"],
         rating: 4.9,
@@ -22,7 +22,7 @@ export const freelancers: Freelancer[] = [
     },
     {
         id: "2",
-        name: "Dangodara Pradip",
+        name: "Pradip Dangodara",
         role: "UI/UX Designer",
         skills: ["Figma", "Web Design", "Branding"],
         rating: 5.0,
@@ -32,7 +32,7 @@ export const freelancers: Freelancer[] = [
     },
     {
         id: "3",
-        name: "Gajera Akshit",
+        name: "Akshit Gajera",
         role: "Content Strategist",
         skills: ["SEO", "Copywriting", "AI Tools"],
         rating: 4.8,
@@ -42,12 +42,22 @@ export const freelancers: Freelancer[] = [
     },
     {
         id: "4",
-        name: "Pipaliya Hardik",
+        name: "Hardik Pipaliya",
         role: "Data Scientist",
         skills: ["Python", "ML", "DataViz"],
         rating: 4.9,
         reviewCount: 42,
         location: "Milan, IT",
         image: "/professional-man-scientist-portrait.jpg",
+    },
+    {
+        id: "5",
+        name: "Dip Patel",
+        role: "Freelancer",
+        skills: ["React", "Next.js", "TypeScript"],
+        rating: 4.5,
+        reviewCount: 0,
+        location: "Remote",
+        image: "",
     },
 ]
