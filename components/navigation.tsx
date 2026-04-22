@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Menu, X, LogOut, Sun, Moon, LayoutDashboard, ExternalLink } from "lucide-react"
+import { Menu, X, LogOut, Sun, Moon, LayoutDashboard, ExternalLink, Sparkles } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/context/AuthContext"
 import {
@@ -19,7 +19,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
   { href: "/services", label: "Services" },
   { href: "/hire-talent", label: "Hire Talent" },
   { href: "/post-project", label: "Post Project" },
@@ -32,18 +31,22 @@ export function Navigation() {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
-  // Avoid hydration mismatch by waiting for mount to render theme toggle
   React.useEffect(() => {
     setMounted(true)
   }, [])
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 glass">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="font-display text-xl tracking-tight text-primary hover:opacity-80 transition-opacity">
-            SkillSync
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-display text-xl font-bold tracking-tight text-gradient-brand">
+              SkillSync
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -67,16 +70,17 @@ export function Navigation() {
             )}
           </div>
 
-          {/* Action Area (Theme & Auth) */}
+          {/* Action Area */}
           <div className="hidden md:flex items-center gap-3">
             {mounted && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
+                className="relative h-9 w-9 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted"
               >
-                {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all duration-300 dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all duration-300 dark:rotate-0 dark:scale-100" />
                 <span className="sr-only">Toggle theme</span>
               </Button>
             )}
@@ -127,7 +131,7 @@ export function Navigation() {
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-sm" asChild>
                   <Link href="/login">Login</Link>
                 </Button>
-                <Button size="sm" className="btn-glow text-sm" asChild>
+                <Button size="sm" className="btn-glow text-sm bg-primary hover:bg-primary/90" asChild>
                   <Link href="/signup">Sign Up</Link>
                 </Button>
               </>
@@ -145,7 +149,7 @@ export function Navigation() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden border-t border-border/40 pb-4">
+          <div className="md:hidden border-t border-border/40 pb-4 animate-slide-up" style={{animationDuration: '0.3s'}}>
             <div className="pt-3 space-y-1">
               {navLinks.map((link) => (
                 <Link
@@ -214,7 +218,7 @@ export function Navigation() {
         )}
       </div>
 
-      {/* Bottom gold accent line */}
+      {/* Bottom gradient accent */}
       <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
     </nav>
   )
