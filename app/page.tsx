@@ -54,29 +54,7 @@ export default function HomePage() {
         <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
       </section>
 
-      {/* ─── Stats Bar ─── */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 border-b border-border/40">
-        <div className="max-w-5xl mx-auto">
-          <AnimatedSection animation="fadeIn" delay={0}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8">
-              {[
-                { icon: Users, value: "50K+", label: "Active Users" },
-                { icon: CheckCircle, value: "25K+", label: "Projects Done" },
-                { icon: Award, value: "4.9/5", label: "Avg Rating" },
-                { icon: TrendingUp, value: "98%", label: "Success Rate" },
-              ].map((stat, i) => (
-                <AnimatedSection key={stat.label} animation="scaleIn" delay={100 + i * 80}>
-                  <div className="text-center group">
-                    <stat.icon className="h-5 w-5 text-primary/60 mx-auto mb-2 group-hover:text-primary transition-colors" />
-                    <div className="stat-number text-2xl md:text-3xl font-bold text-foreground mb-1">{stat.value}</div>
-                    <div className="text-[11px] font-mono text-muted-foreground tracking-wider uppercase">{stat.label}</div>
-                  </div>
-                </AnimatedSection>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
+
 
       {/* ─── Features Section ─── */}
       <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
@@ -163,7 +141,7 @@ export default function HomePage() {
               <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4 tracking-tight">
                 What Our Users <span className="text-gradient-brand">Say</span>
               </h2>
-              <p className="text-muted-foreground">Join thousands of satisfied clients and freelancers</p>
+              <p className="text-muted-foreground">Hear from clients and freelancers who use SkillSync</p>
             </div>
           </AnimatedSection>
 
@@ -213,7 +191,7 @@ export default function HomePage() {
               Ready to Get <span className="text-gradient-brand">Started</span>?
             </h2>
             <p className="text-lg text-muted-foreground mb-10">
-              Join thousands of successful projects on SkillSync today
+              Start your first project on SkillSync today
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/post-project">

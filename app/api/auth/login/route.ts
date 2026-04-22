@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const user = await User.findOne({ email: email.toLowerCase() })
     if (!user) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "No account found with this email. Please sign up first." },
         { status: 401 }
       )
     }
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     const isValidPassword = await bcrypt.compare(password, user.hashedPassword)
     if (!isValidPassword) {
       return NextResponse.json(
-        { error: "Invalid email or password" },
+        { error: "Incorrect password. Please try again." },
         { status: 401 }
       )
     }

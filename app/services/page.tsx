@@ -7,12 +7,12 @@ import Link from "next/link"
 import { AnimatedSection } from "@/components/animated-section"
 
 const categories = [
-  { icon: Code, title: "Web Development", desc: "Full-stack developers, frontend specialists, backend engineers, and mobile app developers", tags: ["React", "Node.js", "Python", "Mobile"], count: "1,200+" },
-  { icon: Palette, title: "Design & Creative", desc: "UI/UX designers, graphic designers, brand specialists, and creative directors", tags: ["UI/UX", "Branding", "Illustration", "Video"], count: "800+" },
-  { icon: PenTool, title: "Writing & Content", desc: "Content writers, copywriters, technical writers, and content strategists", tags: ["Copywriting", "SEO", "Technical", "Blog"], count: "600+" },
-  { icon: Megaphone, title: "Digital Marketing", desc: "SEO specialists, social media managers, PPC experts, and growth marketers", tags: ["SEO", "Social Media", "PPC", "Analytics"], count: "500+" },
-  { icon: BarChart, title: "Data & Analytics", desc: "Data scientists, analysts, business intelligence experts, and researchers", tags: ["Python", "SQL", "Tableau", "ML"], count: "400+" },
-  { icon: Camera, title: "Video & Photography", desc: "Video editors, photographers, animators, and multimedia specialists", tags: ["Editing", "Photography", "Animation", "3D"], count: "350+" },
+  { icon: Code, title: "Web Development", desc: "Full-stack developers, frontend specialists, backend engineers, and mobile app developers", tags: ["React", "Node.js", "Python", "Mobile"] },
+  { icon: Palette, title: "Design & Creative", desc: "UI/UX designers, graphic designers, brand specialists, and creative directors", tags: ["UI/UX", "Branding", "Illustration", "Video"] },
+  { icon: PenTool, title: "Writing & Content", desc: "Content writers, copywriters, technical writers, and content strategists", tags: ["Copywriting", "SEO", "Technical", "Blog"] },
+  { icon: Megaphone, title: "Digital Marketing", desc: "SEO specialists, social media managers, PPC experts, and growth marketers", tags: ["SEO", "Social Media", "PPC", "Analytics"] },
+  { icon: BarChart, title: "Data & Analytics", desc: "Data scientists, analysts, business intelligence experts, and researchers", tags: ["Python", "SQL", "Tableau", "ML"] },
+  { icon: Camera, title: "Video & Photography", desc: "Video editors, photographers, animators, and multimedia specialists", tags: ["Editing", "Photography", "Animation", "3D"] },
 ]
 
 const matchingSteps = [
@@ -69,16 +69,13 @@ export default function ServicesPage() {
                     <CardDescription className="font-serif text-sm leading-relaxed">{cat.desc}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="flex flex-wrap gap-2">
                       {cat.tags.map((tag) => (
                         <span key={tag} className="font-mono text-[10px] tracking-wider uppercase text-primary/70 border border-primary/15 px-2 py-0.5 rounded bg-primary/5">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <p className="font-mono text-[11px] text-muted-foreground tracking-wider">
-                      <span className="text-foreground font-medium">{cat.count}</span> available
-                    </p>
                   </CardContent>
                 </Card>
               </AnimatedSection>
