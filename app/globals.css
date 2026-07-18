@@ -1,0 +1,365 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/*
+ * ---------------------------------------------------------------------------
+ * SkillSync Design System — Tailwind CSS v4 (CSS-first, no tailwind.config.ts)
+ *
+ * Brand:
+ *   Primary   #1D4ED8 (blue-700)    → oklch(0.488 0.243 264.376)
+ *   Secondary #10B981 (emerald-500) → oklch(0.696 0.170 162.480)
+ *   Amber     #F59E0B (amber-500)   → oklch(0.769 0.188 70.080)
+ *   Dark bg   slate-900 / slate-800
+ *
+ * All colors are authored in oklch so light/dark pairs shift lightness without
+ * drifting in hue or perceived saturation.
+ * ---------------------------------------------------------------------------
+ */
+
+/* Dark mode is class-based (next-themes toggles `.dark` on <html>). */
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------- Light mode ------------------------------ */
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(1 0 0); /* white */
+  --foreground: oklch(0.129 0.042 264.695); /* slate-950 */
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.129 0.042 264.695);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.129 0.042 264.695);
+
+  /* Brand primary — blue-700. White text passes AA on this at any size. */
+  --primary: oklch(0.488 0.243 264.376);
+  --primary-foreground: oklch(0.984 0.003 247.858); /* slate-50 */
+
+  /* Brand secondary — emerald-500. Near-black green text for AA contrast
+     (white on emerald-500 fails at small sizes). */
+  --secondary: oklch(0.696 0.17 162.48);
+  --secondary-foreground: oklch(0.262 0.051 172.552); /* emerald-950 */
+
+  --muted: oklch(0.968 0.007 247.896); /* slate-100 */
+  --muted-foreground: oklch(0.554 0.046 257.417); /* slate-500 */
+
+  /* shadcn's --accent is a *surface* (menu/hover backgrounds), so raw amber
+     would be overwhelming here. We use a soft blue tint for surfaces and
+     expose amber separately as --warning / bg-warning below. */
+  --accent: oklch(0.97 0.014 254.604); /* blue-50 */
+  --accent-foreground: oklch(0.488 0.243 264.376); /* blue-700 */
+
+  --destructive: oklch(0.577 0.245 27.325); /* red-600 */
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+
+  /* Brand amber, exposed as semantic "warning" (and chart color). */
+  --warning: oklch(0.769 0.188 70.08); /* amber-500 */
+  --warning-foreground: oklch(0.279 0.077 45.635); /* amber-950 */
+
+  /* Semantic success mirrors the secondary green. */
+  --success: oklch(0.696 0.17 162.48);
+  --success-foreground: oklch(0.262 0.051 172.552);
+
+  --border: oklch(0.929 0.013 255.508); /* slate-200 */
+  --input: oklch(0.929 0.013 255.508);
+  --ring: oklch(0.488 0.243 264.376); /* focus ring = brand blue */
+
+  --chart-1: oklch(0.488 0.243 264.376); /* blue-700 */
+  --chart-2: oklch(0.696 0.17 162.48); /* emerald-500 */
+  --chart-3: oklch(0.769 0.188 70.08); /* amber-500 */
+  --chart-4: oklch(0.707 0.165 254.624); /* blue-400 */
+  --chart-5: oklch(0.704 0.04 256.788); /* slate-400 */
+}
+
+/* ------------------------------- Dark mode ------------------------------- */
+.dark {
+  --background: oklch(0.208 0.042 265.755); /* slate-900 */
+  --foreground: oklch(0.984 0.003 247.858); /* slate-50 */
+
+  --card: oklch(0.279 0.041 260.031); /* slate-800 */
+  --card-foreground: oklch(0.984 0.003 247.858);
+  --popover: oklch(0.279 0.041 260.031);
+  --popover-foreground: oklch(0.984 0.003 247.858);
+
+  /* Brighten primary one step (blue-500) — blue-700 lacks pop on slate-900. */
+  --primary: oklch(0.623 0.214 259.815);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+
+  /* Emerald-500 already reads well on dark; keep the exact brand hue. */
+  --secondary: oklch(0.696 0.17 162.48);
+  --secondary-foreground: oklch(0.262 0.051 172.552);
+
+  --muted: oklch(0.279 0.041 260.031); /* slate-800 */
+  --muted-foreground: oklch(0.704 0.04 256.788); /* slate-400 */
+
+  --accent: oklch(0.372 0.044 257.287); /* slate-700 hover surface */
+  --accent-foreground: oklch(0.984 0.003 247.858);
+
+  --destructive: oklch(0.637 0.237 25.331); /* red-500 — brighter on dark */
+  --destructive-foreground: oklch(0.984 0.003 247.858);
+
+  --warning: oklch(0.769 0.188 70.08);
+  --warning-foreground: oklch(0.279 0.077 45.635);
+
+  --success: oklch(0.696 0.17 162.48);
+  --success-foreground: oklch(0.262 0.051 172.552);
+
+  /* Translucent borders read better than solid grays on layered dark UIs. */
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.707 0.165 254.624); /* blue-400 */
+
+  --chart-1: oklch(0.623 0.214 259.815);
+  --chart-2: oklch(0.765 0.177 163.223); /* emerald-400 */
+  --chart-3: oklch(0.828 0.189 84.429); /* amber-400 */
+  --chart-4: oklch(0.707 0.165 254.624);
+  --chart-5: oklch(0.554 0.046 257.417);
+}
+
+/* --------------------------- Theme → utilities ---------------------------
+ * Everything below replaces tailwind.config.ts. Each token generates real
+ * utilities: --color-brand → bg-brand/text-brand, --shadow-brand → shadow-brand,
+ * --animate-fade-in → animate-fade-in, --font-sans → font-sans, etc.
+ * ------------------------------------------------------------------------ */
+@theme inline {
+  /* Fonts — variables provided by next/font in app/layout.tsx */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  /* Semantic colors (shadcn contract) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Brand shorthands — mode-independent (always the exact brand hex).
+     Use for logos/marketing marks; use semantic tokens for UI surfaces. */
+  --color-brand: oklch(0.488 0.243 264.376); /* #1D4ED8 */
+  --color-brand-green: oklch(0.696 0.17 162.48); /* #10B981 */
+  --color-brand-amber: oklch(0.769 0.188 70.08); /* #F59E0B */
+
+  /* Radii */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  /* Custom shadows (shadow-card, shadow-card-hover, shadow-brand, shadow-glow) */
+  --shadow-card: 0 1px 2px oklch(0.129 0.042 264.695 / 6%),
+    0 2px 8px oklch(0.129 0.042 264.695 / 6%);
+  --shadow-card-hover: 0 2px 4px oklch(0.129 0.042 264.695 / 8%),
+    0 8px 24px oklch(0.129 0.042 264.695 / 12%);
+  --shadow-brand: 0 4px 14px oklch(0.488 0.243 264.376 / 30%);
+  --shadow-glow: 0 0 0 1px oklch(0.623 0.214 259.815 / 40%),
+    0 0 24px oklch(0.623 0.214 259.815 / 25%);
+
+  /* Custom easing */
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Animations — each token generates an `animate-*` utility. */
+  --animate-fade-in: fade-in 0.5s var(--ease-snappy) both;
+  --animate-slide-up: slide-up 0.6s var(--ease-snappy) both;
+  --animate-slide-in-left: slide-in-left 0.5s var(--ease-snappy) both;
+  --animate-slide-in-right: slide-in-right 0.5s var(--ease-snappy) both;
+  /* Continuous ambient motion (hero gradient text + background blobs). */
+  --animate-gradient-x: gradient-x 6s ease infinite;
+  --animate-blob: blob 12s ease-in-out infinite;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(1.5rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Pans a background-gradient horizontally; pair with bg-size > 100%
+     and bg-clip-text for animated gradient headlines. */
+  @keyframes gradient-x {
+    0%,
+    100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  /* Organic drifting motion for the decorative background blobs. */
+  @keyframes blob {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -40px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.95);
+    }
+  }
+
+  /* Gentle vertical bob for floating stat cards. */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+}
+
+/* Respect reduced-motion for the continuous ambient animations. Entry
+   animations are one-shot and acceptable; these loop forever, so pause them. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-x,
+  .animate-blob,
+  .animate-float {
+    animation: none !important;
+  }
+}
+
+/* -------------------------------- Base ----------------------------------- */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Respect users who opt out of motion — smooth scroll for everyone else. */
+    @media (prefers-reduced-motion: no-preference) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Typographic scale for headings — pages only set size overrides. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight text-balance;
+  }
+  h1 {
+    @apply text-4xl lg:text-5xl;
+  }
+  h2 {
+    @apply text-3xl lg:text-4xl;
+  }
+  h3 {
+    @apply text-2xl;
+  }
+  h4 {
+    @apply text-xl;
+  }
+
+  /* Brand-colored text selection. */
+  ::selection {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* Single, consistent focus treatment everywhere (keyboard-only). */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* --- Custom scrollbar: thin with a blue thumb --- */
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.488 0.243 264.376 / 50%) transparent;
+  }
+  /* WebKit (Chrome, Edge, Safari) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: oklch(0.488 0.243 264.376 / 50%);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.488 0.243 264.376 / 80%);
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: oklch(0.623 0.214 259.815 / 50%);
+  }
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(0.623 0.214 259.815 / 80%);
+  }
+}

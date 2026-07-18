@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    // --- Language / module target ---
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+
+    // --- Strictness (the whole point of "strict mode") ---
+    "strict": true,
+    "noUncheckedIndexedAccess": true, // Treat arr[i] as possibly-undefined — catches a huge class of bugs
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // --- Interop / emit ---
+    "allowJs": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+    "skipLibCheck": true, // Skip type-checking of .d.ts in node_modules for faster builds
+    "noEmit": true, // Next.js/SWC handles the actual transpilation
+
+    // --- Next.js plugin for typed routes & server components ---
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+
+    // --- Path aliases: `@/*` resolves from the project root ---
+    // The folder structure (app/, components/, lib/, ...) lives at the root,
+    // so `@` maps to `.` rather than `./src`.
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}

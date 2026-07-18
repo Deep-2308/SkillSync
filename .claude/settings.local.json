@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd \"D:\\\\Project Skillsync\" 2>/dev/null || cd \"/tmp\"; find \"D:\\\\Project Skillsync\" -type f 2>/dev/null | sort || find \"/mnt/d/Project Skillsync\" -type f 2>/dev/null | sort || echo \"trying alt path\")",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const p=require\\('next-auth/package.json'\\); console.log\\('version', p.version\\); console.log\\('exports', Object.keys\\(p.exports||{}\\).join\\(', '\\)\\)\")",
+      "Bash(MONGODB_URI=\"mongodb://localhost:27017/skillsync\" NEXTAUTH_SECRET=\"build-time-placeholder-secret-value\" npx next build)"
+    ]
+  }
+}
