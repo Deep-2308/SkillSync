@@ -76,15 +76,23 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
         <Providers session={session}>
+          {/* Skip-to-main-content link for accessibility */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-background focus:text-foreground"
+          >
+            Skip to main content
+          </a>
+          
           {/* App shell: sticky nav, page content, footer. min-h keeps the
               footer at the bottom on short pages. */}
           <div className="flex min-h-dvh flex-col">
             <Navigation />
-            <main className="flex-1">{children}</main>
+            <main id="main-content" className="flex-1">{children}</main>
             <Footer />
           </div>
           {/* Sonner toaster at the root; matches active theme automatically. */}
-          <Toaster richColors position="top-center" closeButton />
+          <Toaster richColors position="top-right" closeButton />
           <CookieConsent />
         </Providers>
         <Analytics />

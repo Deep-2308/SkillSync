@@ -267,6 +267,16 @@
       transform: translateY(-10px);
     }
   }
+
+  /* Shimmer skeleton animation */
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
 }
 
 /* Respect reduced-motion for the continuous ambient animations. Entry
@@ -286,6 +296,9 @@
   }
 
   html {
+    @view-transition {
+      navigation: auto;
+    }
     /* Respect users who opt out of motion — smooth scroll for everyone else. */
     @media (prefers-reduced-motion: no-preference) {
       scroll-behavior: smooth;
