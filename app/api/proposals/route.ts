@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
+import { sendEmail, proposalReceivedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
 
@@ -33,8 +34,8 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    // Verify project exists and is open.
-    const project = await Project.findById(projectId);
+    // Verify project exists and is open. We populate postedBy to get the client's email for the notification.
+    const project = await Project.findById(projectId).populate("postedBy", "email name");
     if (!project) {
       return NextResponse.json({ error: "Project not found." }, { status: 404 });
     }
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     // Cannot propose on own project.
-    if (project.postedBy.toString() === session.user.id) {
+    if (project.postedBy._id.toString() === session.user.id) {
       return NextResponse.json(
         { error: "You cannot submit a proposal on your own project." },
         { status: 400 }
@@ -74,6 +75,13 @@ export async function POST(request: Request) {
       proposedRate,
       timeline,
       status: "pending",
+    });
+
+    // Send email notification to project owner
+    await sendEmail({
+      to: project.postedBy.email,
+      subject: `New Proposal: ${project.title}`,
+      html: proposalReceivedEmail(project.title, session.user.name || "A freelancer"),
     });
 
     return NextResponse.json({ data: proposal.toJSON() }, { status: 201 });

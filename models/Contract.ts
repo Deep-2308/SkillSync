@@ -37,6 +37,11 @@ const contractSchema = new Schema(
       default: "active",
       index: true,
     },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "refunded"],
+      default: "pending",
+    },
   },
   {
     timestamps: true,

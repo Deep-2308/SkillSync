@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { rateLimiter } from "@/lib/rate-limit";
+import { sendEmail, welcomeEmail } from "@/lib/email";
 import { User } from "@/models/User";
 import type { ApiResponse } from "@/types";
 
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
       passwordHash,
       role,
       emailVerified: null,
+    });
+
+    await sendEmail({
+      to: email,
+      subject: "Welcome to SkillSync!",
+      html: welcomeEmail(name),
     });
 
     return NextResponse.json<ApiResponse<{ id: string }>>(

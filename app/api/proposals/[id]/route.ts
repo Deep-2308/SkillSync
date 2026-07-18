@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
+import { sendEmail, proposalAcceptedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
 import { Contract } from "@/models/Contract";
@@ -45,7 +46,7 @@ export async function PUT(
 
     await connectToDatabase();
 
-    const proposal = await Proposal.findById(id);
+    const proposal = await Proposal.findById(id).populate("freelancerId", "email name");
     if (!proposal) {
       return NextResponse.json({ error: "Proposal not found." }, { status: 404 });
     }
@@ -95,7 +96,7 @@ export async function PUT(
               projectId: proposal.projectId,
               proposalId: proposal._id,
               clientId: project.postedBy,
-              freelancerId: proposal.freelancerId,
+              freelancerId: proposal.freelancerId._id,
               agreedRate: proposal.proposedRate,
               timeline: proposal.timeline,
               status: "active",
@@ -118,6 +119,13 @@ export async function PUT(
           { $set: { status: "rejected" } },
           { session: mongoSession }
         );
+      });
+
+      // Send email to freelancer
+      await sendEmail({
+        to: proposal.freelancerId.email,
+        subject: `Proposal Accepted: ${project.title}`,
+        html: proposalAcceptedEmail(project.title, session.user.name || "A client"),
       });
 
       return NextResponse.json({

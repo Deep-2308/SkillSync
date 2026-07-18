@@ -23,6 +23,8 @@ export type ProposalStatus = "pending" | "accepted" | "rejected" | "withdrawn";
 
 export type ContractStatus = "active" | "completed" | "cancelled" | "disputed";
 
+export type PaymentStatus = "pending" | "paid" | "refunded";
+
 export interface User {
   id: string;
   name: string;
@@ -113,6 +115,7 @@ export interface Contract {
   agreedRate: number;
   timeline: string;
   status: ContractStatus;
+  paymentStatus: PaymentStatus;
   createdAt: string;
   updatedAt: string;
 }

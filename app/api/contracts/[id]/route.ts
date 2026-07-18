@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { notify } from "@/lib/notifications";
+import { sendEmail, contractCompletedEmail } from "@/lib/email";
 import { contractUpdateSchema } from "@/types/schemas";
 import { Contract } from "@/models/Contract";
 import { Project } from "@/models/Project";
@@ -105,14 +106,14 @@ export async function PUT(
 
     await connectToDatabase();
 
-    const contract = await Contract.findById(id);
+    const contract = await Contract.findById(id).populate("clientId", "email").populate("freelancerId", "email");
     if (!contract) {
       return NextResponse.json({ error: "Contract not found." }, { status: 404 });
     }
 
     const me = session.user.id;
-    const client = contract.clientId.toString();
-    const freelancer = contract.freelancerId.toString();
+    const client = contract.clientId._id.toString();
+    const freelancer = contract.freelancerId._id.toString();
     if (me !== client && me !== freelancer) {
       return NextResponse.json(
         { error: "You are not a party to this contract." },
@@ -143,6 +144,13 @@ export async function PUT(
         title: "Contract completed — leave a review",
         body: "Share how it went. Reviews build trust for everyone on SkillSync.",
         link: `/contracts/${id}`,
+      });
+
+      // Send email to both parties
+      await sendEmail({
+        to: [contract.clientId.email, contract.freelancerId.email],
+        subject: `Contract Completed`,
+        html: contractCompletedEmail(id),
       });
     } else {
       const other = me === client ? freelancer : client;
