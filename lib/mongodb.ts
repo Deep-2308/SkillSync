@@ -10,13 +10,6 @@ import mongoose, { type Mongoose } from "mongoose";
  * connection (and the in-flight promise) on `globalThis` so it survives.
  */
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "Missing MONGODB_URI environment variable. Add it to .env.local (see .env.local.example)."
-  );
-}
 
 interface MongooseCache {
   conn: Mongoose | null;
@@ -41,6 +34,12 @@ globalThis._mongoose = cached;
  * Call this at the top of any server-side code that touches the database.
  */
 export async function connectToDatabase(): Promise<Mongoose> {
+  const MONGODB_URI = process.env.MONGODB_URI;
+  if (!MONGODB_URI) {
+    throw new Error(
+      "Missing MONGODB_URI environment variable. Add it to .env.local (see .env.local.example)."
+    );
+  }
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {

@@ -24,9 +24,9 @@ async function main() {
   console.log("Creating compound indexes in the background...");
 
   try {
-    // Users: { role: 1, isVerified: 1, availability: 1 } for freelancer listing
+    // Users: { role: 1, hourlyRate: 1 } for freelancer listing
     await User.collection.createIndex(
-      { role: 1, isVerified: 1, availability: 1 },
+      { role: 1, hourlyRate: 1 },
       { background: true, name: "freelancer_listing_idx" }
     );
     console.log("Created User freelancer_listing_idx");
@@ -38,9 +38,9 @@ async function main() {
     );
     console.log("Created Project project_listing_idx");
 
-    // Skills: { category: 1, isAvailable: 1, rate: 1 } for skill search
+    // Skills: { category: 1, hourlyRate: 1 } for skill search
     await Skill.collection.createIndex(
-      { category: 1, isAvailable: 1, rate: 1 },
+      { category: 1, hourlyRate: 1 },
       { background: true, name: "skill_search_idx" }
     );
     console.log("Created Skill skill_search_idx");

@@ -32,6 +32,7 @@ const userSchema = new Schema(
     headline: { type: String, maxlength: 120, default: "" },
     bio: { type: String, maxlength: 2000, default: "" },
     location: { type: String, maxlength: 120, default: "" },
+    hourlyRate: { type: Number, min: 0 },
     skills: { type: [String], default: [] },
     emailVerified: { type: Date, default: null },
 

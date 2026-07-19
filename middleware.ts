@@ -25,7 +25,6 @@ const PROTECTED_PREFIXES = [
   "/share-skill",
   "/settings",
   "/profile",
-  "/bookings",
 ];
 
 export default auth((req) => {
@@ -34,11 +33,20 @@ export default auth((req) => {
   const isProtected = PROTECTED_PREFIXES.some((prefix) =>
     nextUrl.pathname.startsWith(prefix)
   );
+  
+  const isAuthRoute =
+    nextUrl.pathname.startsWith("/login") ||
+    nextUrl.pathname.startsWith("/register") ||
+    nextUrl.pathname === "/"; // Also redirect authenticated users from home
 
   if (isProtected && !isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (isAuthRoute && isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
   }
 
   return NextResponse.next();

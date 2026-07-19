@@ -37,6 +37,16 @@ const nextConfig = {
   // Mongoose ships optional native deps it never needs in the serverless runtime;
   // keep them external so the bundler doesn't try to resolve them.
   serverExternalPackages: ["mongoose", "bcryptjs"],
+
+  async redirects() {
+    return [
+      {
+        source: "/signup",
+        destination: "/register",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -11,12 +11,6 @@ export type UserRole = "client" | "freelancer" | "admin";
 
 export type SkillLevel = "beginner" | "intermediate" | "advanced" | "expert";
 
-export type BookingStatus =
-  | "pending"
-  | "confirmed"
-  | "completed"
-  | "cancelled";
-
 export type ProjectStatus = "open" | "in_progress" | "completed" | "cancelled";
 
 export type ProposalStatus = "pending" | "accepted" | "rejected" | "withdrawn";
@@ -54,22 +48,6 @@ export interface Skill {
   provider?: Pick<User, "id" | "name" | "image" | "headline">;
   rating: number;
   reviewCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Booking {
-  id: string;
-  skillId: string;
-  skill?: Pick<Skill, "id" | "title" | "hourlyRate">;
-  clientId: string;
-  providerId: string;
-  status: BookingStatus;
-  /** ISO 8601 datetime of the scheduled session. */
-  scheduledFor: string;
-  durationMinutes: number;
-  totalPrice: number;
-  notes?: string;
   createdAt: string;
   updatedAt: string;
 }

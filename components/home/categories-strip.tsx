@@ -58,7 +58,7 @@ export function CategoriesStrip() {
             return (
               <Link
                 key={category.id}
-                href={`/explore?category=${category.slug}`}
+                href={`/hire-talent?category=${category.slug}`}
                 className="group flex min-w-[9rem] shrink-0 flex-col items-center gap-3 rounded-xl border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:border-brand/50 hover:shadow-card-hover"
               >
                 <span className="flex size-12 items-center justify-center rounded-lg bg-brand/10 text-brand transition-transform duration-300 group-hover:scale-110">

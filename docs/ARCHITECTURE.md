@@ -108,4 +108,4 @@ graph TD
 > In Development (`npm run dev`), Next.js constantly clears the module cache on hot-reloads. If we didn't cache the Mongoose connection in `global._mongoose`, Next.js would spawn hundreds of idle connections until MongoDB rate-limits the IP.
 
 ### The Aggregation Pipeline Pattern
-For complex reads (like the Dashboard or Explore page), we bypass simple `.find()` queries and utilize **Aggregation Pipelines** located in `lib/aggregations.ts`. This allows us to push heavy computation (sorting, grouping, `$facet` pagination) directly to the database engine rather than computing it in Node.js memory.
+For complex reads (like the Dashboard or Explore page), we bypass simple `.find()` queries and utilize **Aggregation Pipelines**. This allows us to push heavy computation (sorting, grouping, `$facet` pagination) directly to the database engine rather than computing it in Node.js memory.

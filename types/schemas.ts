@@ -47,13 +47,6 @@ export const skillSchema = z.object({
 });
 export type SkillInput = z.infer<typeof skillSchema>;
 
-export const bookingSchema = z.object({
-  skillId: z.string().min(1),
-  scheduledFor: z.string().datetime("Choose a valid date and time."),
-  durationMinutes: z.coerce.number().int().min(15).max(480),
-  notes: z.string().max(1000).optional(),
-});
-export type BookingInput = z.infer<typeof bookingSchema>;
 
 export const reviewSchema = z.object({
   targetId: z.string().min(1, "Target user is required."),

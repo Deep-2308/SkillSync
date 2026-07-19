@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     await connectToDatabase();
 
     // Verify project exists and is open. We populate postedBy to get the client's email for the notification.
+    // @ts-ignore
     const project = await Project.findById(projectId).populate("postedBy", "email name");
     if (!project) {
       return NextResponse.json({ error: "Project not found." }, { status: 404 });

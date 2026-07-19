@@ -49,7 +49,8 @@ export function ProtectedRoute({
     }
 
     if (isAuthed && !roleOk) {
-      router.replace("/unauthorized");
+      router.push("/unauthorized");
+      return;
     }
   }, [status, isAuthed, roleOk, pathname, router]);
 

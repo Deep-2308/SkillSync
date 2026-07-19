@@ -47,7 +47,7 @@ export function FinalCta() {
                 variant="outline"
                 className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
-                <Link href="/explore">Browse Talent</Link>
+                <Link href="/hire-talent">Browse Talent</Link>
               </Button>
             </div>
           </div>

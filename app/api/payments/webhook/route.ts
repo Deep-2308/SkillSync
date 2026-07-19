@@ -4,13 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Contract } from "@/models/Contract";
 import { notify } from "@/lib/notifications";
 
-export const config = {
-  api: {
-    // Disable Next.js body parsing so we can access the raw body buffer for Stripe signature verification
-    bodyParser: false,
-  },
-};
-
+// Removed Pages-Router config
 /**
  * POST /api/payments/webhook
  *

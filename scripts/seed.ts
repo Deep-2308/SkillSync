@@ -4,7 +4,8 @@
  * Creates realistic development data.
  * Clears collections in reverse dependency order, then seeds.
  */
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -18,10 +19,11 @@ import { Review } from "@/models/Review";
 import { Notification } from "@/models/Notification";
 import { slugify } from "@/lib/utils";
 import { categoryNames } from "@/data/categories";
+import { recalculateUserRating } from "@/lib/reviews";
 
 // Random utility functions
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
-const randomElement = <T>(arr: T[]): T => arr[randomInt(0, arr.length - 1)];
+const randomElement = <T>(arr: T[]): T => arr[randomInt(0, arr.length - 1)] as T;
 const randomElements = <T>(arr: T[], count: number): T[] => {
   const shuffled = [...arr].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
@@ -60,11 +62,10 @@ async function main() {
     role: "admin",
     headline: "System Administrator",
     bio: "Platform administrator.",
-    isVerified: true,
   });
 
   // 10 Freelancers
-  const freelancers = [];
+  const freelancers: any[] = [];
   for (let i = 1; i <= 10; i++) {
     const freelancer = await User.create({
       name: `Freelancer User ${i}`,
@@ -75,7 +76,6 @@ async function main() {
       bio: `I am an experienced professional looking for exciting projects. This is freelancer number ${i}.`,
       location: randomElement(LOCATIONS),
       hourlyRate: randomInt(15, 150),
-      isVerified: true,
       image: `https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&q=80&w=256&h=256`, // Fake unsplash ids
       skills: ["React", "Node.js", "TypeScript", "Figma", "Python"].slice(0, randomInt(1, 5)),
     });
@@ -83,7 +83,7 @@ async function main() {
   }
 
   // 5 Clients
-  const clients = [];
+  const clients: any[] = [];
   for (let i = 1; i <= 5; i++) {
     const clientUser = await User.create({
       name: `Client User ${i}`,
@@ -93,13 +93,12 @@ async function main() {
       headline: "Startup Founder",
       bio: `Looking for top talent to build my next big idea. I am client number ${i}.`,
       location: randomElement(LOCATIONS),
-      isVerified: true,
     });
     clients.push(clientUser);
   }
 
   console.log("Seeding Skills...");
-  const skills = [];
+  const skills: any[] = [];
   for (let i = 1; i <= 30; i++) {
     const freelancer = randomElement(freelancers);
     const category = randomElement(CATEGORIES);
@@ -118,17 +117,17 @@ async function main() {
   }
 
   console.log("Seeding Projects...");
-  const projects = [];
+  const projects: any[] = [];
   for (let i = 1; i <= 20; i++) {
     const client = randomElement(clients);
-    const budgetType = randomElement(["fixed", "hourly"]);
+    const budgetType = randomElement(["fixed", "hourly"]) as "fixed" | "hourly";
     const project = await Project.create({
       postedBy: client._id,
       title: `Need a ${randomElement(CATEGORIES)} freelancer for project ${i}`,
       description: "We are looking for a skilled professional to help us with an exciting new project. Please apply if you meet the requirements.",
       category: randomElement(CATEGORIES),
-      skillsRequired: ["React", "Node.js", "Design"],
-      experienceLevel: randomElement(["beginner", "intermediate", "expert"]),
+      skills: ["React", "Node.js", "Design"],
+      experienceLevel: randomElement(["beginner", "intermediate", "expert"]) as "beginner" | "intermediate" | "expert",
       budgetType,
       budgetMin: budgetType === "fixed" ? randomInt(500, 1000) : undefined,
       budgetMax: budgetType === "fixed" ? randomInt(1000, 5000) : undefined,
@@ -141,7 +140,7 @@ async function main() {
   }
 
   console.log("Seeding Proposals...");
-  const proposals = [];
+  const proposals: any[] = [];
   // 15 proposals spread across projects
   for (let i = 1; i <= 15; i++) {
     const project = randomElement(projects);
@@ -151,7 +150,7 @@ async function main() {
     const exists = await Proposal.findOne({ projectId: project._id, freelancerId: freelancer._id });
     if (exists) continue;
 
-    const status = randomElement(["pending", "accepted", "rejected"]);
+    const status = randomElement(["pending", "accepted", "rejected"]) as "pending" | "accepted" | "rejected";
     const proposal = await Proposal.create({
       projectId: project._id,
       freelancerId: freelancer._id,
@@ -164,7 +163,7 @@ async function main() {
   }
 
   console.log("Seeding Contracts...");
-  const contracts = [];
+  const contracts: any[] = [];
   // 10 contracts based on accepted proposals
   const acceptedProposals = proposals.filter((p) => p.status === "accepted");
   for (let i = 0; i < Math.min(10, acceptedProposals.length); i++) {
@@ -194,7 +193,7 @@ async function main() {
   }
 
   console.log("Seeding Reviews...");
-  const reviews = [];
+  const reviews: any[] = [];
   const completedContracts = contracts.filter(c => c.status === "completed");
   for (const contract of completedContracts) {
     // Client reviews freelancer
@@ -206,6 +205,7 @@ async function main() {
       comment: "Excellent work! Delivered on time and exceeded expectations. Will hire again.",
     });
     reviews.push(clientReview);
+    await recalculateUserRating(contract.freelancerId.toString());
 
     // Freelancer reviews client
     const freelancerReview = await Review.create({
@@ -216,10 +216,11 @@ async function main() {
       comment: "Great client to work with. Clear requirements and prompt payment.",
     });
     reviews.push(freelancerReview);
+    await recalculateUserRating(contract.clientId.toString());
   }
 
   console.log("Seeding Notifications...");
-  const notifications = [];
+  const notifications: any[] = [];
   for (let i = 1; i <= 50; i++) {
     const user = randomElement([...freelancers, ...clients]);
     const notif = await Notification.create({

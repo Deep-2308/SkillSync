@@ -16,51 +16,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const { page, limit, skip } = parsePagination(searchParams);
 
-    // We need to find proposals on projects owned by the current user.
-    // Use an aggregation pipeline to join with projects.
-    const pipeline = [
-      {
-        $lookup: {
-          from: "projects",
-          localField: "projectId",
-          foreignField: "_id",
-          as: "project",
-        },
-      },
-      { $unwind: "$project" },
-      {
-        $match: {
-          "project.postedBy": { $eq: session.user.id },
-        },
-      },
-      // Lookup freelancer info
-      {
-        $lookup: {
-          from: "users",
-          localField: "freelancerId",
-          foreignField: "_id",
-          as: "freelancer",
-          pipeline: [
-            { $project: { name: 1, image: 1, headline: 1, location: 1 } },
-          ],
-        },
-      },
-      { $unwind: { path: "$freelancer", preserveNullAndEmptyArrays: true } },
-      { $sort: { createdAt: -1 as const } },
-      {
-        $facet: {
-          metadata: [{ $count: "total" }],
-          data: [{ $skip: skip }, { $limit: limit }],
-        },
-      },
-    ];
-
-    // We need to use Proposal.aggregate but match on ObjectId
     // Convert session.user.id to ObjectId for the match
     const mongoose = await import("mongoose");
     const userId = new mongoose.Types.ObjectId(session.user.id);
 
-    const correctedPipeline = [
+    const pipeline = [
       {
         $lookup: {
           from: "projects",
@@ -96,7 +56,7 @@ export async function GET(request: Request) {
       },
     ];
 
-    const [result] = await Proposal.aggregate(correctedPipeline);
+    const [result] = await Proposal.aggregate(pipeline);
 
     const total = result.metadata[0]?.total ?? 0;
     const proposals = result.data.map((doc: Record<string, unknown>) => ({

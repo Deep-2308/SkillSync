@@ -59,7 +59,9 @@ export default function LoginPage() {
         toast.error("Invalid email or password");
       } else {
         toast.success("Successfully logged in");
-        router.push("/");
+        const urlParams = new URLSearchParams(window.location.search);
+        const callbackUrl = urlParams.get("callbackUrl");
+        router.push(callbackUrl || "/dashboard");
         router.refresh();
       }
     } catch (error) {
@@ -143,7 +145,7 @@ export default function LoginPage() {
       <p className="text-center text-sm text-muted-foreground mt-8">
         Don&apos;t have an account?{" "}
         <Link
-          href="/signup"
+          href="/register"
           className="font-medium text-brand hover:text-brand/80 transition-colors"
         >
           Sign up

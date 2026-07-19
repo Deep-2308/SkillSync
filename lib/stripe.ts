@@ -8,7 +8,7 @@ if (!stripeSecretKey) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-12-18.acacia", // Always pin to a specific, stable API version
+  apiVersion: "2024-12-18.acacia" as any, // type workaround // Always pin to a specific, stable API version
   appInfo: {
     name: "SkillSync",
     version: "0.1.0",

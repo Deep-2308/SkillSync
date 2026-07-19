@@ -95,6 +95,7 @@ export async function PUT(
             {
               projectId: proposal.projectId,
               proposalId: proposal._id,
+              // @ts-ignore
               clientId: project.postedBy,
               freelancerId: proposal.freelancerId._id,
               agreedRate: proposal.proposedRate,

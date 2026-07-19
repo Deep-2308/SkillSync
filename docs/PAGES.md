@@ -46,7 +46,7 @@ These routes require an active NextAuth session. Unauthenticated users are redir
 ### Dashboard Overview
 - **Route:** `/dashboard`
 - **Purpose:** The central hub for the user. Content varies dramatically based on user role (`member` vs `provider`).
-- **Rendering:** Server Component. Securely fetches data directly from the DB using `lib/aggregations.ts` without hitting API routes.
+- **Rendering:** Server Component. Securely fetches data directly from the DB without hitting API routes.
 - **Components:** `StatCards`, `RecentActivityList`, `QuickActions`.
 
 ### Dashboard - Profile

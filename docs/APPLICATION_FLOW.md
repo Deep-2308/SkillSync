@@ -12,7 +12,7 @@ When a user first lands on SkillSync (unauthenticated), they are presented with 
 - **`/explore` (Search):** The primary discovery engine. Unauthenticated users can search via text and filter by category or rate.
   - *Behind the scenes:* The frontend fetches `/api/search` which utilizes a MongoDB `$text` index to return a blended list of `users` and `projects`.
 - **`/about` & `/contact`:** Informational pages. The contact form posts to `/api/contact` and saves the message to the database for admin review.
-- **`/freelancers/[id]`:** Visitors can view public freelancer profiles (fetching `/api/users/[id]`), seeing their skills and reviews, but cannot initiate a booking without logging in.
+- **`/freelancers/[id]`:** Visitors can view public freelancer profiles (fetching `/api/users/[id]`), seeing their skills and reviews, but cannot initiate a contract without logging in.
 
 ```mermaid
 graph TD

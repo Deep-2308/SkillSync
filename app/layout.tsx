@@ -4,8 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 import { auth } from "@/lib/auth";
 import { Providers } from "@/components/providers";
-import { Navigation } from "@/components/navigation";
-import { Footer } from "@/components/footer";
+
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/CookieConsent";
 import "@/app/globals.css";
@@ -84,13 +83,7 @@ export default async function RootLayout({
             Skip to main content
           </a>
           
-          {/* App shell: sticky nav, page content, footer. min-h keeps the
-              footer at the bottom on short pages. */}
-          <div className="flex min-h-dvh flex-col">
-            <Navigation />
-            <main id="main-content" className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          {children}
           {/* Sonner toaster at the root; matches active theme automatically. */}
           <Toaster richColors position="top-right" closeButton />
           <CookieConsent />
