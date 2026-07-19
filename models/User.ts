@@ -57,6 +57,16 @@ const userSchema = new Schema(
       of: Number,
       default: () => new Map([["1", 0], ["2", 0], ["3", 0], ["4", 0], ["5", 0]]),
     },
+    
+    /* --- AI Review Digest --- */
+    reviewDigest: {
+      type: {
+        strengths: { type: [String], default: [] },
+        improvements: { type: [String], default: [] },
+        lastGeneratedAt: { type: Date, default: Date.now },
+      },
+      default: null,
+    },
 
     /* --- Moderation & engagement --- */
     banned: { type: Boolean, default: false, index: true },

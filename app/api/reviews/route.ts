@@ -10,6 +10,7 @@ import { reviewSchema } from "@/types/schemas";
 import { Review } from "@/models/Review";
 import { Contract } from "@/models/Contract";
 import { User } from "@/models/User";
+import { runReviewAnomalyCheck } from "@/lib/ai/anomaly-check";
 
 /**
  * POST /api/reviews — Submit a review for the other party of a contract.
@@ -117,6 +118,12 @@ export async function POST(request: Request) {
       body: `${session.user.name ?? "Someone"} rated you ${rating}/5.`,
       link: `/freelancers/${targetId}`,
     });
+    
+    // Clear AI review digest cache so it regenerates on next profile view
+    await User.findByIdAndUpdate(targetId, { $set: { reviewDigest: null } });
+
+    // Kick off background anomaly check
+    void runReviewAnomalyCheck(review.id, comment, rating);
     
     // Fetch target user's email for notification
     const targetUser = await User.findById(targetId).select("email");

@@ -28,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalActionCard } from "./ProposalActionCard";
 import { RatingDisplay } from "@/components/shared/RatingDisplay";
 import { SmartMatchesPanel } from "./SmartMatchesPanel";
+import { HiringCopilot } from "./HiringCopilot";
 
 export async function generateMetadata({
   params,
@@ -290,6 +291,7 @@ export default async function ProjectDetailPage({
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    <HiringCopilot projectId={id} proposals={ownerProposals} />
                     {ownerProposals.map((proposal) => (
                       <ProposalActionCard 
                         key={proposal.id} 

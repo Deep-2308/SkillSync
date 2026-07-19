@@ -22,6 +22,7 @@ import { auth } from "@/lib/auth";
 import { MessageButton } from "@/components/messages/MessageButton";
 import { RatingDisplay } from "@/components/shared/RatingDisplay";
 import { HelpfulButton } from "@/components/reviews/HelpfulButton";
+import { ReviewDigestWidget } from "./ReviewDigestWidget";
 
 async function getFreelancer(id: string, viewerId?: string, sort: string = "recent") {
   try {
@@ -186,6 +187,9 @@ export default async function FreelancerProfilePage({
                 </div>
               </div>
             )}
+
+            {/* Review Summary */}
+            <ReviewDigestWidget userId={resolvedParams.id} totalReviews={reviewCount} />
 
             {/* Reviews Section */}
             <div className="bg-card rounded-2xl border p-6 sm:p-8 space-y-6">

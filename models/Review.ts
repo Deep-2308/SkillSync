@@ -40,6 +40,7 @@ const reviewSchema = new Schema(
       default: [],
     },
     helpfulCount: { type: Number, default: 0, min: 0 },
+    flaggedForReview: { type: Boolean, default: false, index: true },
   },
   {
     timestamps: true,
