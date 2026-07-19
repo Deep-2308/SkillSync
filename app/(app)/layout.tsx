@@ -9,6 +9,13 @@ import { VerifyEmailBanner } from "./VerifyEmailBanner";
 import { SyncMate } from "@/components/app/SyncMate";
 import { aiEnabled } from "@/lib/ai";
 
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
+
 export default async function AppLayout({
   children,
 }: {

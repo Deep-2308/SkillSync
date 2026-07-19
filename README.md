@@ -21,6 +21,11 @@ SkillSync is an open-source, full-stack marketplace platform connecting clients 
 - **File Storage:** Cloudinary (Project Attachments & Avatars)
 - **Payments:** Stripe & `@stripe/react-stripe-js`
 - **Transactional Email:** Resend API
+- **AI Foundation:** Google Gemini (Generative AI & Embeddings)
+
+### Testing
+- **Unit Testing:** Vitest
+- **E2E Testing:** Playwright
 
 ---
 
@@ -65,6 +70,8 @@ SkillSync utilizes a **Serverless Monolith** architecture powered by the Next.js
 - **Robust Authentication:** Credential and Google OAuth flows with strict role-based access control (Client vs. Freelancer).
 - **Advanced Search:** MongoDB `$text` search powers the Explore page, aggregating results across Skills and Projects with relevance scoring.
 - **Contract Lifecycle:** End-to-end workflow covering Proposals → Active Contracts → Secure Funding (Stripe) → Completion → Dual Reviews.
+- **AI-Powered Features:** Smart matching (embeddings), AI Writing Studio, Hiring Copilot, and SyncMate Assistant built on a robust Gemini foundation.
+- **Admin Panel:** A comprehensive operations cockpit for platform moderation, review oversight, and user ban enforcement.
 - **Real-time Notifications:** In-app notification bell and transactional emails (Resend) alert users to crucial contract updates.
 - **File Management:** Secure Cloudinary integration for project briefs and portfolio attachments.
 
@@ -101,6 +108,7 @@ You must provide values for:
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `CLOUDINARY_*`
 - `RESEND_*`
+- `GEMINI_API_KEY` (Required for AI matching and text generation)
 
 ### 4. Database Setup
 Ensure you are connected to a safe development database, then run the background indexing and seed scripts to populate mock data:

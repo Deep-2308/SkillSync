@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { LayoutDashboard, Users, Shield, Gavel, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Admin Panel | SkillSync",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

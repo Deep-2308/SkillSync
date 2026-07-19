@@ -24,6 +24,33 @@ import { RatingDisplay } from "@/components/shared/RatingDisplay";
 import { HelpfulButton } from "@/components/reviews/HelpfulButton";
 import { ReviewDigestWidget } from "./ReviewDigestWidget";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const { connectToDatabase } = await import("@/lib/mongodb");
+    const { User } = await import("@/models/User");
+    await connectToDatabase();
+    const user = await User.findById(id).select("name headline bio");
+    if (!user || user.role !== "freelancer") return { title: "Freelancer Not Found | SkillSync" };
+    
+    return { 
+      title: `${user.name} - ${user.headline || "Freelancer"} | SkillSync`,
+      description: user.bio ? user.bio.substring(0, 160) : `Hire ${user.name} on SkillSync for your next project.`,
+      openGraph: {
+        title: `${user.name} | SkillSync`,
+        description: user.bio ? user.bio.substring(0, 160) : `Hire ${user.name} on SkillSync.`,
+        type: "profile",
+      }
+    };
+  } catch {
+    return { title: "Freelancer Not Found | SkillSync" };
+  }
+}
+
 async function getFreelancer(id: string, viewerId?: string, sort: string = "recent") {
   try {
     await connectToDatabase();
