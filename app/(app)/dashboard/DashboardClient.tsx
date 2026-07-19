@@ -12,10 +12,7 @@ import {
   Plus,
   TrendingUp,
   DollarSign,
-  Users,
-  Star,
   Clock,
-  ArrowRight,
   ChevronRight,
 } from "lucide-react";
 import {
@@ -35,13 +32,6 @@ const sparklineData = [
   { v: 30 }, { v: 45 }, { v: 35 }, { v: 50 }, { v: 48 }, { v: 60 }, { v: 55 }, { v: 70 }, { v: 65 }, { v: 80 }, { v: 78 }, { v: 90 },
 ];
 
-const clientStats = [
-  { label: "Posted Projects", value: "12", icon: Briefcase, color: "text-brand", bg: "bg-brand/10" },
-  { label: "Active Contracts", value: "3", icon: FileText, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/30" },
-  { label: "Total Spent", value: "$4,280", icon: DollarSign, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-900/30" },
-  { label: "Saved Freelancers", value: "8", icon: Star, color: "text-brand-green", bg: "bg-brand-green/10" },
-];
-
 const freelancerStats = [
   { label: "My Skills", value: "5", icon: Sparkles, color: "text-brand", bg: "bg-brand/10" },
   { label: "Proposals", value: "18", icon: FileText, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-900/30" },
@@ -50,9 +40,6 @@ const freelancerStats = [
 ];
 
 const recentActivity = [
-  { text: "New proposal received for 'Landing Page Redesign'", time: "2 hours ago", type: "proposal" },
-  { text: "Contract with Alex M. completed successfully", time: "5 hours ago", type: "contract" },
-  { text: "Payment of $850 processed", time: "1 day ago", type: "payment" },
   { text: "New message from Sarah K.", time: "1 day ago", type: "message" },
   { text: "Profile views increased by 23% this week", time: "2 days ago", type: "insight" },
   { text: "You received a 5-star review", time: "3 days ago", type: "review" },
@@ -94,9 +81,11 @@ function Sparkline({ color = "#1D4ED8" }: { color?: string }) {
 export function DashboardClient() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("overview");
-  const isFreelancer = user?.role === "freelancer";
-  const stats = isFreelancer ? freelancerStats : clientStats;
-  const sparkColors = ["#1D4ED8", "#10B981", "#F59E0B", "#1D4ED8"];
+  
+  // This component now strictly serves the freelancer mock view. 
+  // The client view is handled by the server component ClientDashboard.tsx
+  const stats = freelancerStats;
+  const sparkColors = ["#1D4ED8", "#10B981", "#F59E0B", "#10B981"];
 
   return (
     <div className="min-h-screen bg-muted/40 pt-20">
@@ -110,7 +99,7 @@ export function DashboardClient() {
                 <p className="text-sm text-muted-foreground">Welcome back,</p>
                 <p className="font-semibold text-foreground truncate">{user?.name || "User"}</p>
                 <span className="inline-block mt-2 px-2 py-0.5 text-xs rounded-full bg-brand/10 text-brand font-medium">
-                  {isFreelancer ? "Freelancer" : "Client"}
+                  Freelancer
                 </span>
               </div>
 
@@ -146,15 +135,9 @@ export function DashboardClient() {
                 <p className="text-muted-foreground text-sm">Here&apos;s what&apos;s happening with your account</p>
               </div>
               <div className="flex gap-3">
-                {isFreelancer ? (
-                  <Button asChild>
-                    <Link href="/share-skill"><Plus className="w-4 h-4 mr-1" /> Share Skill</Link>
-                  </Button>
-                ) : (
-                  <Button asChild>
-                    <Link href="/post-project"><Plus className="w-4 h-4 mr-1" /> Post Project</Link>
-                  </Button>
-                )}
+                <Button asChild>
+                  <Link href="/share-skill"><Plus className="w-4 h-4 mr-1" /> Share Skill</Link>
+                </Button>
               </div>
             </div>
 
@@ -206,20 +189,12 @@ export function DashboardClient() {
               <div className="rounded-xl border bg-card p-6">
                 <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
                 <div className="space-y-3">
-                  {(isFreelancer
-                    ? [
-                        { label: "Share a New Skill", href: "/share-skill" },
-                        { label: "View Proposals", href: "/dashboard" },
-                        { label: "Update Profile", href: "/profile" },
-                        { label: "Browse Projects", href: "/hire-talent" },
-                      ]
-                    : [
-                        { label: "Post a Project", href: "/post-project" },
-                        { label: "Browse Talent", href: "/hire-talent" },
-                        { label: "View Contracts", href: "/dashboard" },
-                        { label: "Update Profile", href: "/profile" },
-                      ]
-                  ).map((action) => (
+                  {[
+                    { label: "Share a New Skill", href: "/share-skill" },
+                    { label: "View Proposals", href: "/dashboard" },
+                    { label: "Update Profile", href: "/profile" },
+                    { label: "Browse Projects", href: "/hire-talent" },
+                  ].map((action) => (
                     <Link
                       key={action.label}
                       href={action.href}

@@ -12,9 +12,8 @@ import { User } from "@/models/User";
 /**
  * GET /api/dashboard/stats — Role-aware dashboard overview numbers.
  *
- * client:     { totalProjects, activeContracts, totalSpent, savedFreelancers }
- * freelancer: { totalSkills, receivedProposals, activeContracts,
- *               totalEarnings, profileViews }
+ * client:     { totalProjects, activeProjects, proposalsAwaitingReview, activeContracts, totalSpent, savedFreelancers }
+ * freelancer: { totalSkills, receivedProposals, activeContracts, totalEarnings, profileViews }
  * admins get the freelancer shape (they can use /api/admin/stats for platform data).
  *
  * Money figures aggregate completed contracts' agreedRate. Every metric is one
@@ -30,8 +29,9 @@ export async function GET() {
       session.user.role === "freelancer" || session.user.role === "admin";
 
     if (!isFreelancer) {
-      const [totalProjects, activeContracts, spentAgg, me] = await Promise.all([
+      const [totalProjects, activeProjects, activeContracts, spentAgg, me] = await Promise.all([
         Project.countDocuments({ postedBy: userId }),
+        Project.countDocuments({ postedBy: userId, status: "open" }),
         Contract.countDocuments({ clientId: userId, status: "active" }),
         Contract.aggregate<{ total: number }>([
           { $match: { clientId: userId, status: "completed" } },
@@ -40,10 +40,22 @@ export async function GET() {
         User.findById(userId).select("savedFreelancers").lean(),
       ]);
 
+      // Proposals awaiting review
+      let proposalsAwaitingReview = 0;
+      if (totalProjects > 0) {
+        const userProjects = await Project.find({ postedBy: userId }).select("_id").lean();
+        proposalsAwaitingReview = await Proposal.countDocuments({
+          projectId: { $in: userProjects.map(p => p._id) },
+          status: "pending"
+        });
+      }
+
       return NextResponse.json({
         data: {
           role: "client",
           totalProjects,
+          activeProjects,
+          proposalsAwaitingReview,
           activeContracts,
           totalSpent: spentAgg[0]?.total ?? 0,
           savedFreelancers: me?.savedFreelancers?.length ?? 0,
