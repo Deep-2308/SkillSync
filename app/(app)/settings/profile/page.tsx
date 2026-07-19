@@ -6,7 +6,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Camera, UserCircle } from "lucide-react";
+import { Loader2, Camera, UserCircle, Sparkles, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
 import {
@@ -21,6 +21,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useAIStatus } from "@/hooks/use-ai-status";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(80),
@@ -39,10 +46,14 @@ export default function ProfileSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   
-  // Avatar state
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // AI State
+  const aiStatus = useAIStatus();
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<{ type: string; text: string; rationale: string; applied?: boolean }[]>([]);
 
   const form = useForm<ProfileValues>({
     resolver: zodResolver(profileSchema),
@@ -146,6 +157,47 @@ export default function ProfileSettingsPage() {
     }
   };
 
+  const handleOptimizeProfile = async () => {
+    setIsOptimizing(true);
+    try {
+      const res = await fetch("/api/ai/compose/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          headline: form.getValues("headline"),
+          bio: form.getValues("bio"),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setAiSuggestions(data.data.suggestions || []);
+      toast.success("Profile suggestions generated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate suggestions.");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  const applySuggestion = (index: number) => {
+    const sug = aiSuggestions[index];
+    if (!sug) return;
+    if (sug.type === "headline") form.setValue("headline", sug.text, { shouldDirty: true, shouldValidate: true });
+    else if (sug.type === "bio") form.setValue("bio", sug.text, { shouldDirty: true, shouldValidate: true });
+    else if (sug.type === "skills") {
+      const current = form.getValues("skills");
+      form.setValue("skills", current ? `${current}, ${sug.text}` : sug.text, { shouldDirty: true, shouldValidate: true });
+    }
+    
+    setAiSuggestions(prev => {
+      const next = [...prev];
+      if (next[index]) next[index].applied = true;
+      return next;
+    });
+    toast.success("Suggestion applied!");
+  };
+
   const onSubmit = async (values: ProfileValues) => {
     setIsSaving(true);
     try {
@@ -205,12 +257,71 @@ export default function ProfileSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-medium">Public Profile</h3>
-        <p className="text-sm text-muted-foreground">
-          This is how others will see you on the site.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 className="text-lg font-medium">Public Profile</h3>
+          <p className="text-sm text-muted-foreground">
+            This is how others will see you on the site.
+          </p>
+        </div>
+        
+        {role === "freelancer" && (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Button 
+                    type="button" 
+                    variant="secondary"
+                    className="bg-brand/10 text-brand hover:bg-brand/20 border-0"
+                    onClick={handleOptimizeProfile}
+                    disabled={!aiStatus.enabled || isOptimizing}
+                  >
+                    {isOptimizing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                    Optimize with AI
+                  </Button>
+                </div>
+              </TooltipTrigger>
+              {!aiStatus.enabled && (
+                <TooltipContent>
+                  <p>AI features are currently unavailable.</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
+
+      {aiSuggestions.length > 0 && (
+        <div className="bg-brand/5 border border-brand/20 rounded-xl p-5 space-y-4 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-5 h-5 text-brand" />
+            <h4 className="font-semibold text-brand">AI Suggestions</h4>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {aiSuggestions.map((sug, i) => (
+              <div key={i} className="bg-background rounded-lg border p-4 flex flex-col justify-between">
+                <div>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1 block">
+                    {sug.type}
+                  </span>
+                  <p className="text-sm font-medium text-foreground mb-2">{sug.text}</p>
+                  <p className="text-xs text-muted-foreground mb-4">{sug.rationale}</p>
+                </div>
+                <Button 
+                  size="sm" 
+                  variant={sug.applied ? "secondary" : "default"} 
+                  className="w-full"
+                  disabled={sug.applied}
+                  onClick={() => applySuggestion(i)}
+                >
+                  {sug.applied ? <><CheckCircle2 className="w-4 h-4 mr-2" /> Applied</> : "Apply Suggestion"}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       <div className="border-t pt-6">
         <div className="flex items-center gap-6 mb-8">

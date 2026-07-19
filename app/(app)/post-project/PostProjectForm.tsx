@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm, Controller } from "react-hook-form";
@@ -22,7 +22,16 @@ import {
   Pencil,
   DollarSign,
   Info,
+  Sparkles,
 } from "lucide-react";
+
+import { useAIStatus } from "@/hooks/use-ai-status";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   Form,
@@ -157,6 +166,12 @@ export function PostProjectForm() {
   const [files, setFiles] = useState<UploadedFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [aiBrief, setAiBrief] = useState("");
+  const [isDrafting, setIsDrafting] = useState(false);
+  const [isPricing, setIsPricing] = useState(false);
+  const [aiBudgetRange, setAiBudgetRange] = useState<{min: number, max: number, rationale: string} | null>(null);
+  const aiStatus = useAIStatus();
+
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues: {
@@ -190,6 +205,56 @@ export function PostProjectForm() {
     const hours = watchEstimatedHours ?? 0;
     return `$${rate}/hr × ${hours}h = $${rate * hours}`;
   }, [watchBudgetType, watchFixedMin, watchFixedMax, watchHourlyRate, watchEstimatedHours]);
+
+  useEffect(() => {
+    if (currentStep === 2 && watchCategory && aiStatus.enabled && !aiBudgetRange) {
+      setIsPricing(true);
+      fetch("/api/ai/pricing", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contextType: "project",
+          category: watchCategory,
+          skills: form.getValues("skills"),
+        }),
+      })
+      .then(res => res.json())
+      .then(data => {
+         if (data.data) setAiBudgetRange(data.data);
+      })
+      .catch(console.error)
+      .finally(() => setIsPricing(false));
+    }
+  }, [currentStep, watchCategory, form, aiStatus.enabled, aiBudgetRange]);
+
+  const handleDraftWithAI = async () => {
+    if (!aiBrief) return;
+    setIsDrafting(true);
+    try {
+      const res = await fetch("/api/ai/compose/project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ brief: aiBrief }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      
+      form.setValue("title", data.data.title);
+      form.setValue("description", data.data.description);
+      if (data.data.skills && Array.isArray(data.data.skills)) {
+        form.setValue("skills", data.data.skills.slice(0, 5));
+      }
+      if (data.data.experienceLevel) {
+        form.setValue("experienceLevel", data.data.experienceLevel);
+      }
+      toast.success("Draft generated! Please review it below.");
+      setAiBrief("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to generate draft.");
+    } finally {
+      setIsDrafting(false);
+    }
+  };
 
   /* ---- Dropzone ---- */
   const onDrop = useCallback(
@@ -363,6 +428,47 @@ export function PostProjectForm() {
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-1">Project Basics</h2>
                 <p className="text-muted-foreground">Tell us about your project</p>
+              </div>
+
+              {/* AI Assistant */}
+              <div className="p-5 bg-brand/5 border border-brand/20 rounded-xl space-y-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-brand" />
+                  <h3 className="font-semibold text-brand">Write with AI</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Describe your project in a few words, and our AI will draft a complete job post for you to review.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Textarea
+                    placeholder="e.g. I need a Next.js developer to build a landing page for my new AI SaaS. Must be good at Tailwind."
+                    className="resize-none min-h-[60px] flex-1 bg-background"
+                    value={aiBrief}
+                    onChange={(e) => setAiBrief(e.target.value)}
+                    disabled={!aiStatus.enabled}
+                  />
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="shrink-0 self-end">
+                          <Button 
+                            type="button" 
+                            onClick={handleDraftWithAI} 
+                            disabled={!aiBrief || isDrafting || !aiStatus.enabled}
+                          >
+                            {isDrafting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                            Draft with AI
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      {!aiStatus.enabled && (
+                        <TooltipContent>
+                          <p>AI features are currently unavailable.</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </div>
 
               <FormField
@@ -690,8 +796,24 @@ export function PostProjectForm() {
                 </div>
               </div>
 
+              {/* AI Smart Pricing */}
+              {aiBudgetRange && aiStatus.enabled && (
+                <div className="flex items-start gap-3 p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50">
+                  <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                      Smart Pricing Estimate 
+                      <span className="text-xs bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">
+                        ${aiBudgetRange.min} – ${aiBudgetRange.max}
+                      </span>
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{aiBudgetRange.rationale}</p>
+                  </div>
+                </div>
+              )}
+
               {/* Budget tip */}
-              {watchCategory && BUDGET_TIPS[watchCategory] && (
+              {!aiBudgetRange && watchCategory && BUDGET_TIPS[watchCategory] && (
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50">
                   <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
