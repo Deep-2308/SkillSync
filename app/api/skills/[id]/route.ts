@@ -13,6 +13,8 @@ const updateSkillSchema = z.object({
   hourlyRate: z.number().min(0).max(10000).optional(),
   tags: z.array(z.string()).max(10).optional(),
   isPublished: z.boolean().optional(),
+  deliveryTime: z.string().min(1).max(50).optional(),
+  revisions: z.number().min(0).max(50).optional(),
 });
 
 /**

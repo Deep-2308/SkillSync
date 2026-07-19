@@ -21,8 +21,8 @@ const { auth } = NextAuth(authConfig);
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/post-project",
-  "/hire-talent",
-  "/share-skill",
+  "/client",
+  "/freelancer",
   "/settings",
   "/profile",
 ];

@@ -25,6 +25,8 @@ const skillSchema = new Schema(
     rating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0, min: 0 },
     isPublished: { type: Boolean, default: true, index: true },
+    deliveryTime: { type: String, required: true, maxlength: 50 },
+    revisions: { type: Number, default: 0, min: 0, max: 50 },
   },
   {
     timestamps: true,

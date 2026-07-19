@@ -14,6 +14,8 @@ const createSkillSchema = z.object({
   tags: z.array(z.string()).max(10).default([]),
   portfolioUrls: z.array(z.string().url()).max(5).default([]),
   experience: z.string().max(200).default(""),
+  deliveryTime: z.string().min(1, "Delivery time is required").max(50),
+  revisions: z.number().min(0).max(50).default(0),
 });
 
 /**

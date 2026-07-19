@@ -39,9 +39,16 @@ async function getFreelancer(id: string, viewerId?: string) {
       .sort({ createdAt: -1 })
       .limit(10); // get last 10 reviews for now
 
+    // Fetch published gigs
+    const { Skill } = await import("@/models/Skill");
+    const gigs = await Skill.find({ providerId: id, isPublished: true })
+      .sort({ createdAt: -1 })
+      .lean();
+
     return {
       user: JSON.parse(JSON.stringify(user)),
       reviews: JSON.parse(JSON.stringify(reviews)),
+      gigs: JSON.parse(JSON.stringify(gigs)),
     };
   } catch (err) {
     console.error("[getFreelancer] error", err);
@@ -90,7 +97,7 @@ export default async function FreelancerProfilePage({
     notFound();
   }
 
-  const { user, reviews } = data;
+  const { user, reviews, gigs } = data;
   const rating = user.averageRating || 0;
   const reviewCount = user.reviewCount || 0;
 
@@ -219,6 +226,34 @@ export default async function FreelancerProfilePage({
               )}
             </div>
 
+            {/* Gigs Section */}
+            {gigs && gigs.length > 0 && (
+              <div className="bg-card rounded-2xl border p-6 sm:p-8 space-y-6 mt-6">
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                  Gigs by {user.name.split(" ")[0]}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {gigs.map((gig: any) => (
+                    <Link key={gig._id} href={`/gigs/${gig.slug}`} className="group bg-muted/40 rounded-xl border p-4 hover:border-brand/30 hover:shadow-sm transition-all flex flex-col h-full">
+                      <h3 className="font-bold text-foreground text-sm line-clamp-2 mb-2 group-hover:text-brand transition-colors">
+                        {gig.title}
+                      </h3>
+                      <div className="mt-auto flex items-center justify-between">
+                        <span className="flex items-center gap-1 text-xs font-medium">
+                          <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                          {gig.rating.toFixed(1)} <span className="text-muted-foreground font-normal">({gig.reviewCount})</span>
+                        </span>
+                        <span className="font-bold text-foreground text-sm">
+                          <span className="text-[10px] text-muted-foreground font-normal mr-1">From</span>
+                          ${gig.hourlyRate}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            
           </div>
 
           {/* Sidebar Column */}
