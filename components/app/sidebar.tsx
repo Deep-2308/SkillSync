@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
+import { useEffect, useState } from "react";
 
 type Role = "client" | "freelancer" | "admin";
 
@@ -55,6 +56,43 @@ const sharedNav = [
 
 export function Sidebar({ role }: SidebarProps) {
   const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    const fetchUnread = async () => {
+      try {
+        const res = await fetch("/api/messages/unread-count");
+        if (res.ok) {
+          const json = await res.json();
+          setUnreadCount(json.data?.unreadCount || 0);
+        }
+      } catch (err) {
+        // Silent fail for polling
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchUnread();
+        interval = setInterval(fetchUnread, 30000); // Poll every 30s
+      } else {
+        clearInterval(interval);
+      }
+    };
+
+    if (document.visibilityState === "visible") {
+      fetchUnread();
+      interval = setInterval(fetchUnread, 30000);
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   // Safely default to client if role is unexpected or missing
   const isFreelancer = role === "freelancer";
@@ -81,13 +119,25 @@ export function Sidebar({ role }: SidebarProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon
-                className={cn(
-                  "h-5 w-5 shrink-0",
-                  isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"
+              <div className="relative">
+                <item.icon
+                  className={cn(
+                    "h-5 w-5 shrink-0",
+                    isActive ? "text-brand" : "text-muted-foreground group-hover:text-foreground"
+                  )}
+                />
+                {item.title === "Messages" && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-primary-foreground border-2 border-background">
+                    <span className="sr-only">Unread messages</span>
+                  </span>
                 )}
-              />
+              </div>
               {item.title}
+              {item.title === "Messages" && unreadCount > 0 && (
+                <span className="ml-auto bg-brand text-primary-foreground text-xs font-bold px-1.5 py-0.5 rounded-md">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}

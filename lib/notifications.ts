@@ -16,6 +16,7 @@ export async function notify(
       | "review_received"
       | "proposal_received"
       | "proposal_update"
+      | "new_message"
       | "system";
     title: string;
     body?: string;

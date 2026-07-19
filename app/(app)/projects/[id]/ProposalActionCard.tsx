@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 type ProposalActionCardProps = {
   proposal: any;
@@ -191,6 +192,11 @@ export function ProposalActionCard({ proposal, projectStatus }: ProposalActionCa
                 >
                   <XCircle className="w-4 h-4 mr-2" /> Decline
                 </Button>
+                <MessageButton 
+                  participantId={freelancer?._id || freelancer?.id}
+                  projectId={proposal.projectId || proposal.project?._id || proposal.project}
+                  variant="outline"
+                />
               </>
             ) : proposal.status === "pending" && projectStatus !== "open" ? (
               <p className="text-sm text-amber-600 font-medium">

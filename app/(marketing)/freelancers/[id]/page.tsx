@@ -18,6 +18,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { Review } from "@/models/Review";
 import { auth } from "@/lib/auth";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 async function getFreelancer(id: string, viewerId?: string) {
   try {
@@ -273,9 +274,11 @@ export default async function FreelancerProfilePage({
               
               <div className="space-y-3">
                 <Button className="w-full h-12 text-base">Hire {user.name.split(' ')[0]}</Button>
-                <Button variant="outline" className="w-full h-12 text-base">
-                  <MessageSquare className="w-4 h-4 mr-2" /> Message
-                </Button>
+                <MessageButton 
+                  participantId={user._id.toString()} 
+                  variant="outline" 
+                  className="w-full h-12 text-base" 
+                />
               </div>
 
               <div className="mt-6 pt-6 border-t border-border space-y-3 text-sm">

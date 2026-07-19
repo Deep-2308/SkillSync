@@ -20,6 +20,7 @@ const notificationSchema = new Schema(
         "review_received",
         "proposal_received",
         "proposal_update",
+        "new_message",
         "system",
       ],
       required: true,

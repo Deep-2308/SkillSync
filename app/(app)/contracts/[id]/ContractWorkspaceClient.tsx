@@ -18,6 +18,7 @@ import {
 import { CheckoutForm } from "@/components/payments/CheckoutForm";
 import { StripeProvider } from "@/components/payments/StripeProvider";
 import { cn } from "@/lib/utils";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 type ContractWorkspaceProps = {
   contract: any;
@@ -145,12 +146,23 @@ export function ContractWorkspaceClient({ contract, currentUserId }: ContractWor
 
       {/* Action Panel */}
       <div className="bg-card rounded-2xl border p-6 sm:p-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <h2 className="text-lg font-bold text-foreground">Action Center</h2>
-          <Button variant="ghost" size="sm" onClick={handleManualRefresh} className="text-muted-foreground">
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh Status
-          </Button>
+          <div className="flex items-center gap-2">
+            <MessageButton 
+              participantId={isClient ? (contract.freelancerId._id || contract.freelancerId.id || contract.freelancerId) : (contract.clientId._id || contract.clientId.id || contract.clientId)}
+              contractId={contract.id || contract._id}
+              projectId={contract.projectId?._id || contract.projectId?.id || contract.projectId}
+              variant="outline"
+              size="sm"
+            >
+              Message {isClient ? "Freelancer" : "Client"}
+            </MessageButton>
+            <Button variant="ghost" size="sm" onClick={handleManualRefresh} className="text-muted-foreground">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh Status
+            </Button>
+          </div>
         </div>
         
         {contract.status === "cancelled" && (

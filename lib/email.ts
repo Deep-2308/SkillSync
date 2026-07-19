@@ -8,7 +8,7 @@ interface EmailPayload {
   to: string | string[];
   subject: string;
   html: string;
-  category?: "proposals" | "contracts" | "payments" | "reviews" | "system";
+  category?: "proposals" | "contracts" | "payments" | "reviews" | "messages" | "system";
 }
 
 /**

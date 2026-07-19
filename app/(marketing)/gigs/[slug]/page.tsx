@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MessageButton } from "@/components/messages/MessageButton";
 
 export async function generateMetadata({
   params,
@@ -172,20 +173,14 @@ export default async function GigDetailPage({
                   </div>
                 </div>
                 
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="w-full">
-                        <Button className="w-full h-12 text-base" disabled>
-                          <MessageSquare className="w-4 h-4 mr-2" /> Contact Freelancer
-                        </Button>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-sm">
-                      <p>Messaging coming soon in Phase 5</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <div className="w-full">
+                  <MessageButton 
+                    participantId={provider._id.toString()}
+                    className="w-full h-12 text-base"
+                  >
+                    Contact Freelancer
+                  </MessageButton>
+                </div>
 
                 <div className="mt-6 pt-6 border-t text-center">
                   <Link href={`/freelancers/${provider._id}`} className="text-sm text-brand font-medium hover:underline">
