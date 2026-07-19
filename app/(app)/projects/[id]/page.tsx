@@ -21,6 +21,8 @@ import { Project } from "@/models/Project";
 import { Proposal } from "@/models/Proposal";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProposalComposer } from "./ProposalComposer";
+import { User } from "@/models/User";
 
 export async function generateMetadata({
   params,
@@ -72,12 +74,17 @@ export default async function ProjectDetailPage({
 
   // For freelancers, check if they already applied
   let hasApplied = false;
+  let freelancerHourlyRate = 0;
   if (isFreelancer) {
     const existing = await Proposal.exists({
       projectId: id,
       freelancerId: session.user.id,
     });
     hasApplied = !!existing;
+    
+    // Get freelancer's own hourly rate
+    const me = await User.findById(session.user.id).select("hourlyRate").lean();
+    freelancerHourlyRate = me?.hourlyRate || 0;
   }
 
   const getStatusBadge = (status: string) => {
@@ -265,12 +272,14 @@ export default async function ProjectDetailPage({
                     </div>
                   ) : (
                     <>
-                      <Button className="w-full h-12 text-base" asChild>
-                        <Link href={`/projects/${id}/apply`}>Submit Proposal</Link>
-                      </Button>
-                      <p className="text-xs text-center text-muted-foreground">
-                        Requires {project.budgetType === "fixed" ? "Fixed Price" : "Hourly"} proposal.
-                      </p>
+                      <ProposalComposer 
+                        projectId={id}
+                        budgetType={project.budgetType}
+                        budgetMin={project.budgetMin}
+                        budgetMax={project.budgetMax}
+                        hourlyRate={project.hourlyRate}
+                        freelancerHourlyRate={freelancerHourlyRate}
+                      />
                     </>
                   )
                 ) : (

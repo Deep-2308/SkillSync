@@ -20,6 +20,14 @@ const createProposalSchema = z.object({
 export async function POST(request: Request) {
   try {
     const session = await getAuthSession();
+    
+    if (session.user.role !== "freelancer") {
+      return NextResponse.json(
+        { error: "Only freelancers can submit proposals." },
+        { status: 403 }
+      );
+    }
+    
     const body = await request.json();
     const parsed = createProposalSchema.safeParse(body);
 
@@ -84,6 +92,16 @@ export async function POST(request: Request) {
       subject: `New Proposal: ${project.title}`,
       html: proposalReceivedEmail(project.title, session.user.name || "A freelancer"),
       category: "proposals",
+    });
+
+    // In-app notification
+    const { Notification } = await import("@/models/Notification");
+    await Notification.create({
+      userId: project.postedBy._id,
+      type: "proposal_received",
+      title: `New Proposal from ${session.user.name || "A freelancer"}`,
+      body: `You received a new proposal for "${project.title}".`,
+      link: `/projects/${projectId}/proposals`,
     });
 
     return NextResponse.json({ data: proposal.toJSON() }, { status: 201 });

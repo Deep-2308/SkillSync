@@ -10,8 +10,8 @@ import { Project } from "@/models/Project";
 import { Contract } from "@/models/Contract";
 
 const updateProposalSchema = z.object({
-  status: z.enum(["accepted", "rejected"], {
-    errorMap: () => ({ message: "Status must be 'accepted' or 'rejected'." }),
+  status: z.enum(["accepted", "rejected", "withdrawn"], {
+    errorMap: () => ({ message: "Status must be 'accepted', 'rejected', or 'withdrawn'." }),
   }),
 });
 
@@ -53,9 +53,30 @@ export async function PUT(
 
     if (proposal.status !== "pending") {
       return NextResponse.json(
-        { error: "This proposal has already been processed." },
+        { error: "This proposal has already been processed or withdrawn." },
         { status: 400 }
       );
+    }
+
+    // Handle Withdraw branch for freelancers
+    if (status === "withdrawn") {
+      if (session.user.role !== "freelancer") {
+        return NextResponse.json(
+          { error: "Only freelancers can withdraw proposals." },
+          { status: 403 }
+        );
+      }
+      // Check ownership
+      if (proposal.freelancerId._id.toString() !== session.user.id) {
+        return NextResponse.json(
+          { error: "You can only withdraw your own proposals." },
+          { status: 403 }
+        );
+      }
+      
+      proposal.status = "withdrawn";
+      await proposal.save();
+      return NextResponse.json({ data: proposal.toJSON() });
     }
 
     // Verify the current user owns the project.
@@ -75,6 +96,17 @@ export async function PUT(
     if (status === "rejected") {
       proposal.status = "rejected";
       await proposal.save();
+      
+      // Notify freelancer
+      const { Notification } = await import("@/models/Notification");
+      await Notification.create({
+        userId: proposal.freelancerId._id,
+        type: "proposal_update",
+        title: "Proposal Rejected",
+        body: `Your proposal for "${project.title}" was declined.`,
+        link: `/freelancer/proposals`,
+      });
+
       return NextResponse.json({ data: proposal.toJSON() });
     }
 
@@ -128,6 +160,16 @@ export async function PUT(
         subject: `Proposal Accepted: ${project.title}`,
         html: proposalAcceptedEmail(project.title, session.user.name || "A client"),
         category: "proposals",
+      });
+
+      // Notify freelancer in-app
+      const { Notification } = await import("@/models/Notification");
+      await Notification.create({
+        userId: proposal.freelancerId._id,
+        type: "proposal_update",
+        title: "Proposal Accepted!",
+        body: `Your proposal for "${project.title}" was accepted. A new contract has been created.`,
+        link: `/contracts/${contract?._id.toString() || ""}`,
       });
 
       return NextResponse.json({
