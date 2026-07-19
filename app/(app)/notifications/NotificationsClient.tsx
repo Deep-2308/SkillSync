@@ -90,8 +90,9 @@ export function NotificationsClient() {
     else if (isYesterday(date)) key = "Yesterday";
     else key = format(date, "MMMM d, yyyy");
 
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(notif);
+    const group = acc[key] || [];
+    group.push(notif);
+    acc[key] = group;
     return acc;
   }, {} as Record<string, NotificationData[]>);
 

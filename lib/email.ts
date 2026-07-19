@@ -33,7 +33,8 @@ export async function sendEmail({ to, subject, html, category }: EmailPayload): 
       const emailToCheck = Array.isArray(to) ? to[0] : to;
       const user = await User.findOne({ email: emailToCheck });
 
-      if (user?.notificationPreferences && !user.notificationPreferences[category]) {
+      const prefs = user?.notificationPreferences as Record<string, boolean> | undefined;
+      if (prefs && prefs[category] === false) {
         console.log(`[Email] Suppressed ${category} email to ${to} due to user preferences.`);
         return;
       }
