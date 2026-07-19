@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Contract } from "@/models/Contract";
+import { Transaction } from "@/models/Transaction";
 import { notify } from "@/lib/notifications";
 
 // Removed Pages-Router config
@@ -44,20 +45,83 @@ export async function POST(request: Request) {
         if (contractId) {
           console.log(`[Webhook] Payment succeeded for contract ${contractId}`);
 
-          const contract = await Contract.findByIdAndUpdate(
-            contractId,
-            { paymentStatus: "paid" },
-            { new: true }
-          );
+          const existingTx = await Transaction.findOne({
+            stripePaymentIntentId: paymentIntent.id,
+            type: "funding",
+          });
 
-          if (contract) {
-            // Notify the freelancer that payment was secured
-            await notify([contract.freelancerId.toString()], {
-              type: "contract_update",
-              title: "Payment secured",
-              body: `The client has successfully funded the contract.`,
-              link: `/contracts/${contractId}`,
+          if (!existingTx) {
+            const contract = await Contract.findByIdAndUpdate(
+              contractId,
+              { paymentStatus: "paid" },
+              { new: true }
+            );
+
+            if (contract) {
+              const charge = paymentIntent.latest_charge ? await stripe.charges.retrieve(paymentIntent.latest_charge as string) : null;
+              
+              await Transaction.create({
+                contractId: contract._id,
+                clientId: contract.clientId,
+                freelancerId: contract.freelancerId,
+                amount: contract.agreedRate,
+                type: "funding",
+                stripePaymentIntentId: paymentIntent.id,
+                metadata: {
+                  cardBrand: charge?.payment_method_details?.card?.brand,
+                  cardLast4: charge?.payment_method_details?.card?.last4,
+                  receiptUrl: charge?.receipt_url,
+                },
+              });
+
+              // Notify the freelancer that payment was secured
+              await notify([contract.freelancerId.toString()], {
+                type: "contract_update",
+                title: "Payment secured",
+                body: `The client has successfully funded the contract.`,
+                link: `/contracts/${contractId}`,
+              });
+            }
+          }
+        }
+        break;
+      }
+
+      case "charge.refunded": {
+        const charge = event.data.object as Record<string, any>;
+        const paymentIntentId = charge.payment_intent as string;
+        
+        if (paymentIntentId) {
+          console.log(`[Webhook] Charge refunded for payment intent ${paymentIntentId}`);
+          
+          const existingTx = await Transaction.findOne({
+            stripePaymentIntentId: paymentIntentId,
+            type: "refund",
+          });
+
+          if (!existingTx) {
+            const fundingTx = await Transaction.findOne({
+              stripePaymentIntentId: paymentIntentId,
+              type: "funding",
             });
+
+            if (fundingTx) {
+              await Transaction.create({
+                contractId: fundingTx.contractId,
+                clientId: fundingTx.clientId,
+                freelancerId: fundingTx.freelancerId,
+                amount: fundingTx.amount,
+                type: "refund",
+                stripePaymentIntentId: paymentIntentId,
+                metadata: {
+                  refundedAt: new Date(),
+                },
+              });
+
+              await Contract.findByIdAndUpdate(fundingTx.contractId, {
+                paymentStatus: "refunded",
+              });
+            }
           }
         }
         break;

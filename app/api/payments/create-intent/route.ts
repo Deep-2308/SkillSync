@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
     await connectToDatabase();
 
-    const contract = await Contract.findById(contractId);
+    const contract = await Contract.findById(contractId).populate("clientId", "email");
 
     if (!contract) {
       return NextResponse.json({ error: "Contract not found." }, { status: 404 });
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     }
 
     // Ensure the user is the client who must pay for the contract
-    if (contract.clientId.toString() !== session.user.id) {
+    if ((contract.clientId as any)._id.toString() !== session.user.id) {
       return NextResponse.json(
         { error: "Only the client can initiate a payment for this contract." },
         { status: 403 }
@@ -77,6 +77,7 @@ export async function POST(request: Request) {
         metadata: {
           contractId: contract._id.toString(),
         },
+        receipt_email: (contract.clientId as any).email,
       },
       idempotencyKey ? { idempotencyKey } : undefined
     );

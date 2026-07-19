@@ -96,7 +96,7 @@ export default function TermsPage() {
           <section id="payments">
             <h2>4. Payments & Fees</h2>
             <p>SkillSync charges a service fee on each transaction completed through the Platform. The current fee structure is displayed at the time of transaction.</p>
-            <p>Payments are processed through our secure payment partner. Funds are held in escrow until the Client confirms satisfactory completion of work. Freelancers receive payment within 5 business days of release from escrow.</p>
+            <p>Payments are processed through our secure payment partner and held until the Client confirms satisfactory completion of work. Once work is approved, funds are released to the Freelancer&apos;s available balance on the Platform. Freelancers may then submit a withdrawal request for their available balance. Currently, all withdrawals are reviewed and processed manually by our administration team to ensure security. Please allow up to 7 business days for a withdrawal request to be processed and for funds to reach your account.</p>
           </section>
 
           <section id="ip">

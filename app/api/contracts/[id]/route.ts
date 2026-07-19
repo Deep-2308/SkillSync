@@ -7,6 +7,7 @@ import { notify } from "@/lib/notifications";
 import { sendEmail, contractCompletedEmail } from "@/lib/email";
 import { contractUpdateSchema } from "@/types/schemas";
 import { Contract } from "@/models/Contract";
+import { Transaction } from "@/models/Transaction";
 import { Project } from "@/models/Project";
 import { Review } from "@/models/Review";
 
@@ -153,6 +154,23 @@ export async function PUT(
       }
       if (contract.paymentStatus !== "paid") {
         return NextResponse.json({ error: "Cannot complete an unpaid contract." }, { status: 400 });
+      }
+
+      // Record release transaction
+      const fundingTx = await Transaction.findOne({
+        contractId: contract._id,
+        type: "funding",
+      });
+
+      if (fundingTx) {
+        await Transaction.create({
+          contractId: contract._id,
+          clientId: contract.clientId,
+          freelancerId: contract.freelancerId,
+          amount: contract.agreedRate,
+          type: "release",
+          stripePaymentIntentId: fundingTx.stripePaymentIntentId,
+        });
       }
     }
 
