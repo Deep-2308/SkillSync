@@ -31,10 +31,12 @@ export function CheckoutForm({ contractId, amount }: CheckoutFormProps) {
 
     async function fetchClientSecret() {
       try {
+        const idempotencyKey = crypto.randomUUID();
+
         const res = await fetch("/api/payments/create-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contractId }),
+          body: JSON.stringify({ contractId, idempotencyKey }),
         });
         
         const json = await res.json();

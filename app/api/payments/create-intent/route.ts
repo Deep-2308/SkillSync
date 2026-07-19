@@ -8,6 +8,7 @@ import { Contract } from "@/models/Contract";
 
 const createIntentSchema = z.object({
   contractId: z.string().min(1, "Contract ID is required."),
+  idempotencyKey: z.string().optional(),
 });
 
 /**
@@ -29,7 +30,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { contractId } = parsed.data;
+    const { contractId, idempotencyKey } = parsed.data;
+
+    if (!contractId.match(/^[0-9a-fA-F]{24}$/)) {
+      return NextResponse.json({ error: "Invalid contract id." }, { status: 400 });
+    }
 
     await connectToDatabase();
 
@@ -37,6 +42,13 @@ export async function POST(request: Request) {
 
     if (!contract) {
       return NextResponse.json({ error: "Contract not found." }, { status: 404 });
+    }
+
+    if (contract.status !== "active") {
+      return NextResponse.json(
+        { error: `Cannot fund a contract that is ${contract.status}.` },
+        { status: 400 }
+      );
     }
 
     // Ensure the user is the client who must pay for the contract
@@ -58,14 +70,16 @@ export async function POST(request: Request) {
     const amountInCents = Math.round(contract.agreedRate * 100);
 
     // Create the PaymentIntent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amountInCents,
-      currency: "usd",
-      metadata: {
-        contractId: contract._id.toString(),
+    const paymentIntent = await stripe.paymentIntents.create(
+      {
+        amount: amountInCents,
+        currency: "usd",
+        metadata: {
+          contractId: contract._id.toString(),
+        },
       },
-      // You can also pass customer email or other fields for receipts
-    });
+      idempotencyKey ? { idempotencyKey } : undefined
+    );
 
     return NextResponse.json({
       data: {

@@ -65,7 +65,8 @@ export type ReviewInput = z.infer<typeof reviewSchema>;
  * route (PUT /api/contracts/[id]).
  */
 export const contractUpdateSchema = z.object({
-  status: z.enum(["completed", "disputed", "cancelled"]),
+  status: z.enum(["delivered", "completed", "disputed", "cancelled"]),
+  disputeReason: z.string().max(1000).optional(),
 });
 export type ContractUpdateInput = z.infer<typeof contractUpdateSchema>;
 

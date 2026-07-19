@@ -33,7 +33,7 @@ const contractSchema = new Schema(
     timeline: { type: String, required: true },
     status: {
       type: String,
-      enum: ["active", "completed", "cancelled", "disputed"],
+      enum: ["active", "delivered", "completed", "cancelled", "disputed"],
       default: "active",
       index: true,
     },
@@ -42,6 +42,7 @@ const contractSchema = new Schema(
       enum: ["pending", "paid", "refunded"],
       default: "pending",
     },
+    disputeReason: { type: String, maxlength: 1000 },
   },
   {
     timestamps: true,

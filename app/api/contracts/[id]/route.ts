@@ -102,7 +102,7 @@ export async function PUT(
         { status: 400 }
       );
     }
-    const { status } = parsed.data;
+    const { status, disputeReason } = parsed.data;
 
     await connectToDatabase();
 
@@ -121,11 +121,46 @@ export async function PUT(
       );
     }
 
-    if (contract.status !== "active") {
+    // Only transitions from active or delivered are permitted for the standard flow.
+    // (A disputed contract is frozen until admin resolution, which isn't handled here).
+    if (contract.status !== "active" && contract.status !== "delivered") {
       return NextResponse.json(
         { error: `A ${contract.status} contract can no longer be updated.` },
         { status: 400 }
       );
+    }
+
+    // --- State Machine Rules ---
+
+    if (status === "delivered") {
+      if (me !== freelancer) {
+        return NextResponse.json({ error: "Only the freelancer can deliver work." }, { status: 403 });
+      }
+      if (contract.status !== "active") {
+        return NextResponse.json({ error: "Only active contracts can be delivered." }, { status: 400 });
+      }
+      if (contract.paymentStatus !== "paid") {
+        return NextResponse.json({ error: "Cannot deliver an unpaid contract." }, { status: 400 });
+      }
+    }
+
+    if (status === "completed") {
+      if (me !== client) {
+        return NextResponse.json({ error: "Only the client can complete a contract." }, { status: 403 });
+      }
+      if (contract.status !== "delivered") {
+        return NextResponse.json({ error: "Contract must be delivered before it can be completed." }, { status: 400 });
+      }
+      if (contract.paymentStatus !== "paid") {
+        return NextResponse.json({ error: "Cannot complete an unpaid contract." }, { status: 400 });
+      }
+    }
+
+    if (status === "disputed") {
+      if (!disputeReason || disputeReason.trim().length < 5) {
+        return NextResponse.json({ error: "A detailed reason is required to open a dispute." }, { status: 400 });
+      }
+      contract.disputeReason = disputeReason.trim();
     }
 
     contract.status = status;
@@ -148,7 +183,7 @@ export async function PUT(
 
       // Send email to both parties
       await sendEmail({
-        to: [contract.clientId.email, contract.freelancerId.email],
+        to: [(contract.clientId as any).email, (contract.freelancerId as any).email],
         subject: `Contract Completed`,
         html: contractCompletedEmail(contract._id.toString()),
         category: "contracts",

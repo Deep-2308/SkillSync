@@ -88,7 +88,7 @@ export async function POST(request: Request) {
 
     // Send email notification to project owner
     await sendEmail({
-      to: project.postedBy.email,
+      to: (project.postedBy as any).email,
       subject: `New Proposal: ${project.title}`,
       html: proposalReceivedEmail(project.title, session.user.name || "A freelancer"),
       category: "proposals",
