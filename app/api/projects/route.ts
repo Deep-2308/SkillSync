@@ -9,7 +9,7 @@ const createProjectSchema = z.object({
   title: z.string().min(4, "Title must be at least 4 characters.").max(200),
   description: z.string().min(20, "Description must be at least 20 characters.").max(5000),
   category: z.string().min(1, "Category is required."),
-  skills: z.array(z.string()).max(15).default([]),
+  skills: z.array(z.string()).max(5, "Maximum 5 skills allowed.").default([]),
   budgetType: z.enum(["fixed", "hourly"]).default("fixed"),
   budgetMin: z.number().min(0).default(0),
   budgetMax: z.number().min(0).default(0),
@@ -18,7 +18,18 @@ const createProjectSchema = z.object({
   timeline: z.string().max(100).default(""),
   experienceLevel: z.enum(["beginner", "intermediate", "expert"]).default("intermediate"),
   attachments: z.array(z.string()).max(5).default([]),
-});
+}).refine(
+  (data) => {
+    if (data.budgetType === "fixed") {
+      return data.budgetMax >= data.budgetMin;
+    }
+    return true; // hourly doesn't use budgetMin/Max strictly in the same way here, though UI might
+  },
+  {
+    message: "Maximum budget must be greater than or equal to minimum budget.",
+    path: ["budgetMax"],
+  }
+);
 
 /**
  * POST /api/projects — Create a new project (auth required).
@@ -26,12 +37,21 @@ const createProjectSchema = z.object({
 export async function POST(request: Request) {
   try {
     const session = await getAuthSession();
+    
+    // Restrict to client role only
+    if (session.user.role !== "client") {
+      return NextResponse.json(
+        { error: "Only clients can post projects." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const parsed = createProjectSchema.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Invalid input." },
+        { error: parsed.error.issues[0]?.message ?? "Invalid input.", details: parsed.error.format() },
         { status: 400 }
       );
     }
@@ -54,7 +74,7 @@ export async function POST(request: Request) {
 
 /**
  * GET /api/projects — List projects with filters (public).
- * ?status=open&category=design&q=search&page=1&limit=12
+ * ?status=open&category=design&q=search&page=1&limit=12&clientId=123
  */
 export async function GET(request: Request) {
   try {
@@ -66,10 +86,12 @@ export async function GET(request: Request) {
     const status = searchParams.get("status")?.trim();
     const category = searchParams.get("category")?.trim();
     const q = searchParams.get("q")?.trim();
+    const clientId = searchParams.get("clientId")?.trim();
 
     const filter: Record<string, unknown> = {};
     if (status) filter.status = status;
     if (category) filter.category = category;
+    if (clientId) filter.postedBy = clientId;
     if (q) {
       filter.$or = [
         { title: { $regex: q, $options: "i" } },

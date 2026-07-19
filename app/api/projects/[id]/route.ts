@@ -10,7 +10,7 @@ const updateProjectSchema = z.object({
   title: z.string().min(4).max(200).optional(),
   description: z.string().min(20).max(5000).optional(),
   category: z.string().min(1).optional(),
-  skills: z.array(z.string()).max(15).optional(),
+  skills: z.array(z.string()).max(5).optional(), // Updated to max 5 to match create schema
   budgetType: z.enum(["fixed", "hourly"]).optional(),
   budgetMin: z.number().min(0).optional(),
   budgetMax: z.number().min(0).optional(),
@@ -77,7 +77,34 @@ export async function PUT(
       return NextResponse.json({ error: "Not authorized to update this project." }, { status: 403 });
     }
 
-    Object.assign(project, parsed.data);
+    const { status: newStatus, ...coreFields } = parsed.data;
+
+    // Restrict status transitions
+    if (newStatus && newStatus !== project.status) {
+      // Owning client may only directly transition from open -> cancelled
+      if (project.status === "open" && newStatus === "cancelled") {
+        project.status = newStatus;
+      } else {
+        return NextResponse.json(
+          { error: "Illegal status transition. Only open -> cancelled is permitted directly." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Do not allow editing a project's core fields once it has left the open status
+    if (project.status !== "open" && Object.keys(coreFields).length > 0) {
+      return NextResponse.json(
+        { error: "Cannot edit project details once it is no longer open." },
+        { status: 400 }
+      );
+    }
+
+    // If it is open, we can update core fields
+    if (project.status === "open") {
+      Object.assign(project, coreFields);
+    }
+
     await project.save();
 
     return NextResponse.json({ data: project.toJSON() });

@@ -96,12 +96,11 @@ const projectSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters").max(100, "Title is too long"),
   category: z.string().min(1, "Category is required"),
   description: z.string().min(30, "Description must be at least 30 characters").max(2000, "Description is too long"),
-  skills: z.array(z.string()).min(1, "Add at least one skill").max(10),
+  skills: z.array(z.string()).min(1, "Add at least one skill").max(5, "Maximum 5 skills allowed"),
 
   // Step 2
   experienceLevel: z.enum(["beginner", "intermediate", "expert"]),
   timeline: z.string().min(1, "Timeline is required"),
-  // Files are managed outside zod (File objects aren't serializable)
 
   // Step 3
   budgetType: z.enum(["fixed", "hourly"]),
@@ -115,7 +114,7 @@ const projectSchema = z.object({
       ctx.addIssue({ code: "custom", path: ["fixedMin"], message: "Minimum budget must be at least $5" });
     }
     if (!data.fixedMax || data.fixedMax < (data.fixedMin ?? 0)) {
-      ctx.addIssue({ code: "custom", path: ["fixedMax"], message: "Maximum must be greater than minimum" });
+      ctx.addIssue({ code: "custom", path: ["fixedMax"], message: "Maximum must be greater than or equal to minimum" });
     }
   }
   if (data.budgetType === "hourly") {
@@ -233,7 +232,6 @@ export function PostProjectForm() {
   /* ---- Step navigation ---- */
   const nextStep = async () => {
     const fieldsToValidate = STEP_FIELDS[currentStep];
-    // trigger() accepts a field-name array; STEP_FIELDS is already keyed to the form values.
     const isValid = await form.trigger(fieldsToValidate);
     if (isValid) setCurrentStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
@@ -245,13 +243,77 @@ export function PostProjectForm() {
   const onSubmit = async (data: ProjectFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Project data:", data, "Files:", files);
+      const attachmentUrls: string[] = [];
+
+      // 1. Upload files first if any
+      if (files.length > 0) {
+        for (const { file } of files) {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await res.json();
+          if (!res.ok) {
+            throw new Error(result.error || `Failed to upload ${file.name}`);
+          }
+          attachmentUrls.push(result.data.url);
+        }
+      }
+
+      // 2. Map form data to API schema
+      const payload = {
+        title: data.title,
+        category: data.category,
+        description: data.description,
+        skills: data.skills,
+        experienceLevel: data.experienceLevel,
+        timeline: data.timeline,
+        budgetType: data.budgetType,
+        budgetMin: data.budgetType === "fixed" ? data.fixedMin : undefined,
+        budgetMax: data.budgetType === "fixed" ? data.fixedMax : undefined,
+        hourlyRate: data.budgetType === "hourly" ? data.hourlyRate : undefined,
+        estimatedHours: data.budgetType === "hourly" ? data.estimatedHours : undefined,
+        attachments: attachmentUrls,
+      };
+
+      // 3. Submit to API
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        if (result.details) {
+          // Map Zod errors back to form
+          const firstErrorPath = Object.keys(result.details)[1]; // 0 is _errors, 1 is the first field
+          if (firstErrorPath) {
+             const pathObj = result.details as any;
+             if (pathObj[firstErrorPath]?._errors?.length) {
+               form.setError(firstErrorPath as keyof ProjectFormValues, { 
+                 type: "server", 
+                 message: pathObj[firstErrorPath]._errors[0] 
+               });
+               // Attempt to find which step the error is on and navigate there
+               const stepIndex = STEP_FIELDS.findIndex(fields => fields.includes(firstErrorPath as any));
+               if (stepIndex !== -1 && stepIndex !== currentStep) {
+                 setCurrentStep(stepIndex);
+               }
+             }
+          }
+        }
+        throw new Error(result.error || "Failed to post project.");
+      }
+
       toast.success("Project posted successfully!");
-      router.push("/dashboard");
-    } catch {
-      toast.error("Failed to post project. Please try again.");
+      router.push(`/projects/${result.data.id}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
     }
@@ -366,13 +428,13 @@ export function PostProjectForm() {
                 name="skills"
                 render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Skills Required</FormLabel>
+                    <FormLabel>Skills Required (Max 5)</FormLabel>
                     <FormControl>
                       <TagInput
                         value={field.value}
                         onChange={field.onChange}
                         placeholder="Type a skill and press Enter..."
-                        maxTags={10}
+                        maxTags={5}
                       />
                     </FormControl>
                     {fieldState.error && <p className="text-sm font-medium text-destructive">{fieldState.error.message}</p>}
@@ -709,14 +771,14 @@ export function PostProjectForm() {
               type="button"
               variant="outline"
               onClick={prevStep}
-              disabled={currentStep === 0}
+              disabled={currentStep === 0 || isSubmitting}
               className={cn(currentStep === 0 && "invisible")}
             >
               <ChevronLeft className="w-4 h-4 mr-1" /> Back
             </Button>
 
             {currentStep < STEPS.length - 1 ? (
-              <Button type="button" onClick={nextStep}>
+              <Button type="button" onClick={nextStep} disabled={isSubmitting}>
                 Next <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
