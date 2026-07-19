@@ -8,16 +8,39 @@ interface EmailPayload {
   to: string | string[];
   subject: string;
   html: string;
+  category?: "proposals" | "contracts" | "payments" | "reviews" | "system";
 }
 
 /**
  * Sends a transactional email using Resend.
  * Wrapped in try/catch to ensure it never throws and breaks a main API flow.
  */
-export async function sendEmail({ to, subject, html }: EmailPayload): Promise<void> {
+export async function sendEmail({ to, subject, html, category }: EmailPayload): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
     console.warn("[Email] RESEND_API_KEY missing. Skipping email send:", { to, subject });
     return;
+  }
+
+  // 1. Fetch user to check notification preferences if category is provided
+  if (category && category !== "system") {
+    try {
+      const { User } = await import("@/models/User");
+      const { connectToDatabase } = await import("@/lib/mongodb");
+      
+      await connectToDatabase();
+      
+      // If `to` is an array, we'd need to check all of them, but in our app it's always a string.
+      const emailToCheck = Array.isArray(to) ? to[0] : to;
+      const user = await User.findOne({ email: emailToCheck });
+
+      if (user?.notificationPreferences && !user.notificationPreferences[category]) {
+        console.log(`[Email] Suppressed ${category} email to ${to} due to user preferences.`);
+        return;
+      }
+    } catch (err) {
+      console.error("[Email] Error checking user preferences:", err);
+      // Fail open: send the email if DB check fails
+    }
   }
 
   try {

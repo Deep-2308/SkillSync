@@ -12,7 +12,14 @@ const updateProfileSchema = z.object({
   image: z.string().url().optional().nullable(),
   location: z.string().max(120).optional(),
   skills: z.array(z.string()).max(30).optional(),
+  categories: z.array(z.string()).max(30).optional(),
   hourlyRate: z.number().min(0).max(10000).optional(),
+  notificationPreferences: z.object({
+    proposals: z.boolean(),
+    contracts: z.boolean(),
+    payments: z.boolean(),
+    reviews: z.boolean(),
+  }).optional(),
 });
 
 /**
@@ -28,7 +35,10 @@ export async function GET() {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    return NextResponse.json({ data: user.toJSON() });
+    const userData = user.toJSON();
+    const hasPassword = Boolean(user.passwordHash);
+    
+    return NextResponse.json({ data: { ...userData, hasPassword } });
   } catch (error) {
     if (error instanceof Response) return error;
     console.error("[GET /api/users/me]", error);

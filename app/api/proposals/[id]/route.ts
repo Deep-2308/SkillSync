@@ -127,6 +127,7 @@ export async function PUT(
         to: proposal.freelancerId.email,
         subject: `Proposal Accepted: ${project.title}`,
         html: proposalAcceptedEmail(project.title, session.user.name || "A client"),
+        category: "proposals",
       });
 
       return NextResponse.json({

@@ -150,7 +150,8 @@ export async function PUT(
       await sendEmail({
         to: [contract.clientId.email, contract.freelancerId.email],
         subject: `Contract Completed`,
-        html: contractCompletedEmail(id),
+        html: contractCompletedEmail(contract._id.toString()),
+        category: "contracts",
       });
     } else {
       const other = me === client ? freelancer : client;

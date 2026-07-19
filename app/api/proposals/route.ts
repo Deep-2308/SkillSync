@@ -83,6 +83,7 @@ export async function POST(request: Request) {
       to: project.postedBy.email,
       subject: `New Proposal: ${project.title}`,
       html: proposalReceivedEmail(project.title, session.user.name || "A freelancer"),
+      category: "proposals",
     });
 
     return NextResponse.json({ data: proposal.toJSON() }, { status: 201 });

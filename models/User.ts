@@ -29,6 +29,15 @@ const userSchema = new Schema(
       enum: ["client", "freelancer", "admin"],
     },
     categories: { type: [String], default: [] },
+    notificationPreferences: {
+      type: {
+        proposals: { type: Boolean, default: true },
+        contracts: { type: Boolean, default: true },
+        payments: { type: Boolean, default: true },
+        reviews: { type: Boolean, default: true },
+      },
+      default: () => ({ proposals: true, contracts: true, payments: true, reviews: true }),
+    },
     headline: { type: String, maxlength: 120, default: "" },
     bio: { type: String, maxlength: 2000, default: "" },
     location: { type: String, maxlength: 120, default: "" },
