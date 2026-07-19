@@ -6,6 +6,8 @@ import { User } from "@/models/User";
 import { Sidebar } from "@/components/app/sidebar";
 import { Topbar } from "@/components/app/topbar";
 import { VerifyEmailBanner } from "./VerifyEmailBanner";
+import { SyncMate } from "@/components/app/SyncMate";
+import { aiEnabled } from "@/lib/ai";
 
 export default async function AppLayout({
   children,
@@ -37,6 +39,8 @@ export default async function AppLayout({
           </div>
         </main>
       </div>
+
+      {aiEnabled() && <SyncMate role={session.user.role || ""} firstName={session.user.name?.split(" ")[0] || ""} />}
     </div>
   );
 }
