@@ -48,6 +48,7 @@ export const {
         // `passwordHash` is `select: false` in the schema, so we must ask for it explicitly.
         const user = await User.findOne({ email }).select("+passwordHash");
         if (!user?.passwordHash) return null;
+        if (user.banned) return null;
 
         const isValid = await bcrypt.compare(password, user.passwordHash);
         if (!isValid) return null;
@@ -80,12 +81,15 @@ export const {
           const existingUser = await User.findOne({ email: user.email });
 
           if (existingUser) {
+            if (existingUser.banned) return false;
+            
             // Existing user — populate the user object with DB fields so the
             // jwt callback can persist id/role onto the token.
             user.id = existingUser._id.toString();
             user.role = (existingUser.role ?? undefined) as "client" | "freelancer" | "admin" | undefined;
             user.name = existingUser.name;
             user.image = existingUser.image ?? user.image ?? null;
+            user.banned = existingUser.banned;
 
             // Mark email as verified if not already (Google-verified email).
             if (!existingUser.emailVerified) {
@@ -103,6 +107,7 @@ export const {
 
             user.id = newUser._id.toString();
             user.role = (newUser.role ?? undefined) as "client" | "freelancer" | "admin" | undefined;
+            user.banned = newUser.banned;
           }
         } catch (error) {
           console.error("[auth] Google signIn callback error:", error);
@@ -110,6 +115,33 @@ export const {
         }
       }
       return true;
+    },
+    async jwt({ token, user, account, profile, trigger, session }) {
+      // First, let the edge-safe base config do its work.
+      let newToken = await authConfig.callbacks?.jwt?.({ token, user, account, profile, trigger, session }) ?? token;
+
+      // Stale JWT fix: Refresh role and ban status from DB every 15 minutes.
+      const now = Math.floor(Date.now() / 1000);
+      const REFRESH_INTERVAL = 15 * 60; // 15 minutes
+
+      if (!newToken.lastCheckAt || now - (newToken.lastCheckAt as number) > REFRESH_INTERVAL) {
+        try {
+          await connectToDatabase();
+          const dbUser = await User.findById(newToken.id).select("role banned").lean();
+          if (dbUser) {
+            newToken.role = (dbUser.role ?? undefined) as "client" | "freelancer" | "admin" | undefined;
+            newToken.banned = dbUser.banned ?? false;
+          } else {
+            newToken.banned = true;
+          }
+          newToken.lastCheckAt = now;
+        } catch (error) {
+          console.error("[auth] JWT refresh error:", error);
+          // On DB error, don't update lastCheckAt so it retries next time.
+        }
+      }
+
+      return newToken;
     },
   },
 });

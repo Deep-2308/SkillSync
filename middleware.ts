@@ -27,6 +27,8 @@ const PROTECTED_PREFIXES = [
   "/profile",
 ];
 
+const ADMIN_PREFIX = "/admin";
+
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = Boolean(req.auth);
@@ -49,6 +51,18 @@ export default auth((req) => {
     }
     // Let them access /register so they can set their role
     return NextResponse.next();
+  }
+
+  const isAdminRoute = nextUrl.pathname.startsWith(ADMIN_PREFIX);
+  if (isAdminRoute) {
+    if (!isLoggedIn) {
+      const loginUrl = new URL("/login", nextUrl.origin);
+      loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    if (req.auth?.user?.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
+    }
   }
 
   if (isProtected && !isLoggedIn) {

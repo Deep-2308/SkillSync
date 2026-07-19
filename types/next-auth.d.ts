@@ -15,11 +15,13 @@ declare module "next-auth" {
     user: {
       id: string;
       role?: "client" | "freelancer" | "admin";
+      banned?: boolean;
     } & DefaultSession["user"];
   }
 
   interface User {
     role?: "client" | "freelancer" | "admin";
+    banned?: boolean;
   }
 }
 
@@ -27,5 +29,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role?: "client" | "freelancer" | "admin";
+    banned?: boolean;
+    lastCheckAt?: number;
   }
 }

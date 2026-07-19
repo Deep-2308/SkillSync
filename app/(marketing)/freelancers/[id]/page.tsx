@@ -29,7 +29,7 @@ async function getFreelancer(id: string, viewerId?: string, sort: string = "rece
     await connectToDatabase();
     const user = await User.findById(id);
 
-    if (!user || user.role !== "freelancer") {
+    if (!user || user.role !== "freelancer" || user.banned) {
       return null;
     }
 

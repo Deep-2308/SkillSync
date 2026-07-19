@@ -45,7 +45,19 @@ export async function PUT(
 
     const update: Record<string, unknown> = {};
     if (parsed.data.role !== undefined) update.role = parsed.data.role;
-    if (parsed.data.banned !== undefined) update.banned = parsed.data.banned;
+    if (parsed.data.banned !== undefined) {
+      update.banned = parsed.data.banned;
+      
+      if (parsed.data.banned === true) {
+        const targetUser = await User.findById(id).select("role");
+        if (targetUser?.role === "admin") {
+          const activeAdminCount = await User.countDocuments({ role: "admin", banned: { $ne: true } });
+          if (activeAdminCount <= 1) {
+            return NextResponse.json({ error: "Cannot ban the last remaining admin." }, { status: 400 });
+          }
+        }
+      }
+    }
 
     const user = await User.findByIdAndUpdate(
       id,

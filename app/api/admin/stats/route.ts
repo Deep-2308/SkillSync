@@ -19,6 +19,10 @@ export async function GET() {
     await connectToDatabase();
 
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
 
     const [
       totalUsers,
@@ -34,6 +38,9 @@ export async function GET() {
       disputedContracts,
       totalReviews,
       gmvAgg,
+      signupsSeries,
+      projectsSeries,
+      gmvSeries,
     ] = await Promise.all([
       User.countDocuments({}),
       User.countDocuments({ role: "freelancer" }),
@@ -51,7 +58,29 @@ export async function GET() {
         { $match: { status: "completed" } },
         { $group: { _id: null, total: { $sum: "$agreedRate" } } },
       ]),
+      User.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo } } },
+        { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
+      Project.aggregate([
+        { $match: { createdAt: { $gte: sixMonthsAgo } } },
+        { $group: { _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } }, count: { $sum: 1 } } },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
+      Contract.aggregate([
+        { $match: { status: "completed", updatedAt: { $gte: sixMonthsAgo } } },
+        { $group: { _id: { year: { $year: "$updatedAt" }, month: { $month: "$updatedAt" } }, total: { $sum: "$agreedRate" } } },
+        { $sort: { "_id.year": 1, "_id.month": 1 } }
+      ]),
     ]);
+
+    const formatSeries = (data: any[], valueKey: string) => {
+      return data.map(d => ({
+        date: `${d._id.year}-${String(d._id.month).padStart(2, '0')}`,
+        value: d[valueKey],
+      }));
+    };
 
     return NextResponse.json({
       data: {
@@ -74,6 +103,11 @@ export async function GET() {
           gmv: gmvAgg[0]?.total ?? 0,
         },
         reviews: { total: totalReviews },
+        timeSeries: {
+          signups: formatSeries(signupsSeries || [], "count"),
+          projects: formatSeries(projectsSeries || [], "count"),
+          gmv: formatSeries(gmvSeries || [], "total"),
+        }
       },
     });
   } catch (error) {

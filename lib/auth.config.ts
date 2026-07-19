@@ -32,6 +32,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id as string;
         token.role = user.role as "client" | "freelancer" | "admin" | undefined;
+        token.banned = user.banned;
       }
       return token;
     },
@@ -39,6 +40,7 @@ export const authConfig = {
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
+        session.user.banned = token.banned;
       }
       return session;
     },

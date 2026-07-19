@@ -18,6 +18,12 @@ export async function getAuthSession(): Promise<Session> {
       { status: 401 }
     );
   }
+  if (session.user.banned) {
+    throw NextResponse.json(
+      { error: "Account suspended." },
+      { status: 403 }
+    );
+  }
   return session;
 }
 
