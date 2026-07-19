@@ -6,17 +6,9 @@ import { AnimatedSection } from "@/components/animated-section";
 import { WatchDemoDialog } from "@/components/home/watch-demo-dialog";
 import { HeroIllustration } from "@/components/home/hero-illustration";
 
-const stats = [
-  { value: "50K+", label: "Users" },
-  { value: "25K+", label: "Projects" },
-  { value: "4.9", label: "Rating" },
-  { value: "98%", label: "Success" },
-] as const;
-
 /**
  * Hero section — near-full-viewport, gradient background, animated headline,
- * dual CTAs, an SVG network illustration, floating stat cards, and pure-CSS
- * background blobs.
+ * dual CTAs, an SVG network illustration, and pure-CSS background blobs.
  */
 export function Hero() {
   return (
@@ -37,7 +29,7 @@ export function Hero() {
           <AnimatedSection animation="fadeIn">
             <span className="inline-flex items-center gap-2 rounded-full border bg-background/60 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur">
               <Sparkles className="size-4 text-brand" />
-              The smart freelancer marketplace for modern teams
+              The AI-powered freelancer marketplace
             </span>
           </AnimatedSection>
 
@@ -52,17 +44,20 @@ export function Hero() {
 
           <AnimatedSection animation="slideUp" delay={160}>
             <p className="max-w-xl text-pretty text-lg text-muted-foreground">
-              SkillSync connects businesses with vetted freelance professionals —
-              matched by AI, protected by secure payments, and backed by real
-              reviews.
+              SkillSync connects businesses with vetted freelance professionals — matched by AI, protected by secure payments, and backed by real reviews.
             </p>
           </AnimatedSection>
 
           <AnimatedSection animation="slideUp" delay={240}>
             <div className="flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="gap-2 shadow-brand">
-                <Link href="/signup">
-                  Get Started Free <ArrowRight className="size-4" />
+              <Button asChild size="lg" className="shadow-brand">
+                <Link href="/register?role=client">
+                  Hire a Freelancer
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="shadow-sm">
+                <Link href="/register?role=freelancer">
+                  Become a Freelancer
                 </Link>
               </Button>
               <WatchDemoDialog />
@@ -70,43 +65,13 @@ export function Hero() {
           </AnimatedSection>
         </div>
 
-        {/* Right: illustration + floating stat cards */}
+        {/* Right: illustration */}
         <div className="relative">
           <AnimatedSection animation="slideInRight" delay={200}>
             <HeroIllustration className="w-full drop-shadow-xl" />
           </AnimatedSection>
-
-          {/* Floating stat cards — staggered slide-up on load, then gentle float */}
-          <div className="pointer-events-none absolute inset-0">
-            {stats.map((stat, i) => (
-              <AnimatedSection
-                key={stat.label}
-                animation="slideUp"
-                delay={400 + i * 120}
-                className={statCardPosition(i)}
-              >
-                <div className="animate-float rounded-xl border bg-background/80 px-4 py-3 shadow-lg backdrop-blur [animation-delay:var(--d)]"
-                  style={{ ["--d" as string]: `${i * 0.6}s` }}
-                >
-                  <p className="text-xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
         </div>
       </div>
     </section>
   );
-}
-
-/** Scatter the four stat cards around the illustration's corners. */
-function statCardPosition(index: number): string {
-  const positions = [
-    "absolute -left-2 top-4",
-    "absolute right-0 top-1/4",
-    "absolute -left-4 bottom-8",
-    "absolute right-4 bottom-0",
-  ];
-  return positions[index] ?? "";
 }

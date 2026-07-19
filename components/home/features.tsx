@@ -1,10 +1,10 @@
 import {
-  BadgeCheck,
   BrainCircuit,
-  MessagesSquare,
-  ShieldCheck,
+  FileEdit,
   Sparkles,
-  Zap,
+  Calculator,
+  MessageSquareQuote,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,39 +20,39 @@ interface Feature {
 const features: Feature[] = [
   {
     icon: BrainCircuit,
-    title: "AI Matching",
+    title: "Smart Matching",
     description:
       "Our matching engine reads intent, skills, and budget to surface the right people in seconds.",
   },
   {
-    icon: ShieldCheck,
-    title: "Secure Payments",
+    icon: FileEdit,
+    title: "Hiring Copilot",
     description:
-      "Escrow-backed payments release only when work is delivered. No chasing invoices.",
-  },
-  {
-    icon: BadgeCheck,
-    title: "Freelancer Verification",
-    description:
-      "Every freelancer is identity-checked and portfolio-reviewed before they can take work.",
-  },
-  {
-    icon: MessagesSquare,
-    title: "Real-time Chat",
-    description:
-      "Scope projects, share files, and hop on calls without ever leaving the platform.",
+      "AI assists with drafting project briefs and evaluating proposals to find the perfect fit.",
   },
   {
     icon: Sparkles,
-    title: "Portfolio Showcase",
+    title: "AI Writing Studio",
     description:
-      "Beautiful profiles that put work front and center and convert visitors into contracts.",
+      "Assist freelancers in writing proposals and profiles that stand out and win work.",
   },
   {
-    icon: Zap,
-    title: "Instant Hire",
+    icon: Calculator,
+    title: "Smart Pricing",
     description:
-      "Skip the back-and-forth. Hire a vetted freelancer and kick off your project in one click.",
+      "Data-driven rate recommendations ensure projects are priced fairly for the current market.",
+  },
+  {
+    icon: MessageSquareQuote,
+    title: "Review Intelligence",
+    description:
+      "Summarizes past feedback to highlight strengths and weaknesses at a glance.",
+  },
+  {
+    icon: Bot,
+    title: "SyncMate Assistant",
+    description:
+      "Your dedicated chatbot for platform help, onboarding, and quick actions.",
   },
 ];
 
@@ -65,10 +65,10 @@ export function Features() {
     <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6">
       <AnimatedSection animation="slideUp" className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Everything you need to hire or get hired
+          Powered by AI
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
-          A complete toolkit for matching, collaborating, and getting paid — built for speed and trust.
+          A complete suite of intelligent tools designed to streamline hiring and collaboration.
         </p>
       </AnimatedSection>
 
