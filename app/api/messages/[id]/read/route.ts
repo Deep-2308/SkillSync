@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { Conversation } from "@/models/Conversation";
 import { Message } from "@/models/Message";
 
@@ -15,10 +15,8 @@ export async function POST(
   try {
     const session = await getAuthSession();
     const { id } = await params;
-
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return NextResponse.json({ error: "Invalid conversation ID" }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
     

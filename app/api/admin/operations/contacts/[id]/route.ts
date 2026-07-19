@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAdminSession } from "@/lib/admin";
+import { isValidObjectId } from "@/lib/api-utils";
 import { Contact } from "@/models/Contact";
 import { Types } from "mongoose";
 
@@ -12,10 +13,8 @@ export async function PATCH(
     await getAdminSession();
     await connectToDatabase();
     const { id } = await params;
-    
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     const contact = await Contact.findById(id);
     if (!contact) {

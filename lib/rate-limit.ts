@@ -107,3 +107,12 @@ export function rateLimiter(options: RateLimiterOptions): RateLimiter {
     },
   };
 }
+
+export const rateLimits = {
+  auth: rateLimiter({ limit: 3, window: 60 * 60 }), // 3 per hour (forgot/reset pwd)
+  login: rateLimiter({ limit: 5, window: 60 * 15 }), // 5 per 15 min (credentials)
+  submission: rateLimiter({ limit: 10, window: 60 * 60 }), // 10 per hour (proposals/reviews)
+  message: rateLimiter({ limit: 60, window: 60 }), // 60 per min (messages)
+  ai: rateLimiter({ limit: 20, window: 60 * 60 }), // 20 per hour (AI generation)
+  upload: rateLimiter({ limit: 50, window: 60 * 60 * 24 }), // 50 per day (File uploads)
+};

@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, parsePagination } from "@/lib/api-utils";
+import { rateLimits } from "@/lib/rate-limit";
 import { notify } from "@/lib/notifications";
 import { sendEmail, proposalReceivedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
@@ -20,6 +21,9 @@ const createProposalSchema = z.object({
  */
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.submission.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const session = await getAuthSession();
     
     if (session.user.role !== "freelancer") {

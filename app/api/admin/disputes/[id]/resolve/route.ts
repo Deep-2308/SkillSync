@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAdminSession } from "@/lib/admin";
+import { isValidObjectId } from "@/lib/api-utils";
 import { Contract } from "@/models/Contract";
 import { Transaction } from "@/models/Transaction";
 import { notify } from "@/lib/notifications";
@@ -14,11 +15,9 @@ export async function POST(
     await getAdminSession();
     await connectToDatabase();
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
     
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
-
     const body = await request.json();
     const { resolution, auditNote } = body; // resolution: "completed" or "cancelled"
     

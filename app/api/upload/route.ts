@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/api-utils";
+import { rateLimits } from "@/lib/rate-limit";
 import { uploadImage } from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
@@ -15,7 +16,10 @@ const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
  */
 export async function POST(request: Request) {
   try {
-    // 1. Verify authentication
+    // 1. Verify authentication and rate limit
+    const rateLimitError = rateLimits.upload.check(request);
+    if (rateLimitError) return rateLimitError;
+
     await getAuthSession();
 
     // 2. Parse form data

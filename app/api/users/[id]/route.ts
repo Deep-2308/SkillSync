@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isValidObjectId } from "@/lib/api-utils";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
@@ -13,6 +14,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAdminSession } from "@/lib/admin";
+import { isValidObjectId } from "@/lib/api-utils";
 import { Review } from "@/models/Review";
 import { Types } from "mongoose";
 import { recalculateUserRating } from "@/lib/reviews";
@@ -13,11 +14,9 @@ export async function PATCH(
     await getAdminSession();
     await connectToDatabase();
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
     
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-    }
-
     const body = await request.json();
     const action = body.action; // 'approve' or 'remove'
     

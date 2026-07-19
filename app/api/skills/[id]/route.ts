@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { Skill } from "@/models/Skill";
 import { updateUserEmbedding } from "@/lib/ai/matching";
 
@@ -27,6 +27,9 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
+
     await connectToDatabase();
 
     const skill = await Skill.findById(id)
@@ -53,6 +56,9 @@ export async function PUT(
   try {
     const session = await getAuthSession();
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
+
     const body = await request.json();
     const parsed = updateSkillSchema.safeParse(body);
 
@@ -95,6 +101,8 @@ export async function DELETE(
   try {
     const session = await getAuthSession();
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
 

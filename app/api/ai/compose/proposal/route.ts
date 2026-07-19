@@ -1,26 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/api-utils";
-import { generateText, aiEnabled, aiRateLimiter, AIUnavailableError } from "@/lib/ai";
+import { generateText, aiEnabled, AIUnavailableError } from "@/lib/ai";
 import { SchemaType } from "@google/generative-ai";
-import { z } from "zod";
-
-const requestSchema = z.object({
-  projectContext: z.object({
-    title: z.string(),
-    description: z.string(),
-    skills: z.array(z.string()),
-    budgetType: z.string(),
-    budgetMin: z.number().optional(),
-    budgetMax: z.number().optional(),
-    hourlyRate: z.number().optional(),
-  }),
-  freelancerContext: z.object({
-    name: z.string(),
-    headline: z.string().optional().nullable(),
-    bio: z.string().optional().nullable(),
-    skills: z.array(z.string()),
-  }),
-});
+import { aiProposalSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
 
 const proposalComposerSchema = {
   type: SchemaType.OBJECT,
@@ -37,6 +20,9 @@ const proposalComposerSchema = {
 
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.ai.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const session = await getAuthSession();
     if (session.user.role !== "freelancer") {
       return NextResponse.json({ error: "Only freelancers can use the proposal assistant." }, { status: 403 });
@@ -46,11 +32,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "AI features are currently unavailable." }, { status: 503 });
     }
 
-    const rateLimitResponse = await aiRateLimiter.check(request, session.user.id);
-    if (rateLimitResponse) return rateLimitResponse;
-
     const body = await request.json();
-    const parsed = requestSchema.safeParse(body);
+    const parsed = aiProposalSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request payload.", details: parsed.error.format() }, { status: 400 });
     }

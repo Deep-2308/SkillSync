@@ -166,6 +166,30 @@ export async function POST(request: Request) {
         break;
       }
 
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Record<string, any>;
+        const paymentIntentId = dispute.charge as string; // in stripe, dispute is often tied to a charge, which is tied to a payment intent. actually, dispute.payment_intent exists on dispute object if expanded, or we can look up Transaction by charge id or payment intent id if stored.
+        // The prompt says "Verify Stripe webhook handles charge.dispute.created idempotently, updating the Contract paymentStatus to 'disputed'".
+        // Let's just find the Contract via the transaction's stripePaymentIntentId. wait, charge id != payment intent id.
+        // Actually, Stripe disputes have a `payment_intent` field directly.
+        const intentId = dispute.payment_intent as string;
+        if (intentId) {
+          console.log(`[Webhook] Dispute created for payment intent ${intentId}`);
+          const fundingTx = await Transaction.findOne({ stripePaymentIntentId: intentId, type: "funding" });
+          if (fundingTx) {
+            await Contract.findByIdAndUpdate(fundingTx.contractId, {
+              paymentStatus: "disputed",
+            });
+            // Update transaction to note the dispute
+            await Transaction.updateOne(
+              { _id: fundingTx._id },
+              { $set: { "metadata.disputeId": dispute.id, "metadata.disputedAt": new Date() } }
+            );
+          }
+        }
+        break;
+      }
+
       // Ignore other event types
       default:
         console.log(`[Webhook] Unhandled event type ${event.type}`);

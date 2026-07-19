@@ -3,12 +3,14 @@ import NextAuth, { type DefaultSession } from "next-auth";
 // `declare module` augmentation below (required under moduleResolution: bundler).
 import type { JWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import { headers } from "next/headers";
 import bcrypt from "bcryptjs";
 
 import { authConfig } from "@/lib/auth.config";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { signInSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
 
 /**
  * Central NextAuth (Auth.js v5) configuration.
@@ -42,6 +44,15 @@ export const {
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
+
+        const headersList = await headers();
+        const ip = headersList.get("x-forwarded-for")?.split(",")[0]?.trim() || headersList.get("x-real-ip") || "unknown";
+        const rateLimitKey = `${ip}_${email}`;
+        // We can pass a dummy request because we provide an explicit key
+        const rateLimitError = rateLimits.login.check(new Request("http://localhost"), rateLimitKey);
+        if (rateLimitError) {
+          throw new Error("Too many login attempts. Please try again later.");
+        }
 
         await connectToDatabase();
 

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { sendEmail, proposalAcceptedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
@@ -34,6 +34,9 @@ export async function PUT(
   try {
     const session = await getAuthSession();
     const { id } = await params;
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
+
     const body = await request.json();
     const parsed = updateProposalSchema.safeParse(body);
 

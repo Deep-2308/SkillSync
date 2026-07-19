@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { Notification } from "@/models/Notification";
 
 /**
@@ -16,10 +16,8 @@ export async function PUT(
   try {
     const session = await getAuthSession();
     const { id } = await params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid notification id." }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
 

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Session } from "next-auth";
+import { Types } from "mongoose";
 
 import { auth } from "@/lib/auth";
 
@@ -38,4 +39,18 @@ export function parsePagination(searchParams: URLSearchParams) {
   );
   const skip = (page - 1) * limit;
   return { page, limit, skip };
+}
+
+/**
+ * Validate MongoDB ObjectId format.
+ * Returns a 400 NextResponse if invalid, or null if valid.
+ */
+export function isValidObjectId(id: string): NextResponse | null {
+  if (!Types.ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { error: "Invalid ID format." },
+      { status: 400 }
+    );
+  }
+  return null;
 }

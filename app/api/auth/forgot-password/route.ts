@@ -7,9 +7,8 @@ import { sendEmail, passwordResetEmail } from "@/lib/email";
 import { User } from "@/models/User";
 import type { ApiResponse } from "@/types";
 
-const forgotPasswordSchema = z.object({
-  email: z.string().email("Enter a valid email address."),
-});
+import { forgotPasswordSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/forgot-password
@@ -23,6 +22,9 @@ const forgotPasswordSchema = z.object({
  */
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.auth.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const body = await request.json();
     const parsed = forgotPasswordSchema.safeParse(body);
 

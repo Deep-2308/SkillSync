@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { parsePagination } from "@/lib/api-utils";
+import { parsePagination, isValidObjectId } from "@/lib/api-utils";
 import { Review } from "@/models/Review";
 import { User } from "@/models/User";
 
@@ -21,10 +21,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: userId } = await params;
-    if (!Types.ObjectId.isValid(userId)) {
-      return NextResponse.json({ error: "Invalid user id." }, { status: 400 });
-    }
+    const { id } = await params;
+    const userId = id;
+
+    const badId = isValidObjectId(userId);
+    if (badId) return badId;
 
     const { searchParams } = new URL(request.url);
     const { page, limit, skip } = parsePagination(searchParams);

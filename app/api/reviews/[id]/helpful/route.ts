@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { Review } from "@/models/Review";
 
 /**
@@ -20,10 +20,8 @@ export async function POST(
   try {
     const session = await getAuthSession();
     const { id } = await params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid review id." }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
 

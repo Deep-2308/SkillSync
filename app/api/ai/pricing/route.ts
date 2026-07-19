@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAuthSession } from "@/lib/api-utils";
-import { generateText, aiEnabled, aiRateLimiter, AIUnavailableError } from "@/lib/ai";
+import { generateText, aiEnabled, AIUnavailableError } from "@/lib/ai";
 import { SchemaType } from "@google/generative-ai";
-import { z } from "zod";
-
-const requestSchema = z.object({
-  contextType: z.enum(["project", "proposal"]),
-  // For project context
-  category: z.string().optional(),
-  skills: z.array(z.string()).optional(),
-  // For proposal context
-  projectBudget: z.string().optional(),
-  freelancerRate: z.number().optional(),
-});
+import { aiPricingSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
 
 const pricingSchema = {
   type: SchemaType.OBJECT,
@@ -26,16 +17,16 @@ const pricingSchema = {
 
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.ai.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const session = await getAuthSession();
     if (!aiEnabled()) {
       return NextResponse.json({ error: "AI features are currently unavailable." }, { status: 503 });
     }
 
-    const rateLimitResponse = await aiRateLimiter.check(request, session.user.id);
-    if (rateLimitResponse) return rateLimitResponse;
-
     const body = await request.json();
-    const parsed = requestSchema.safeParse(body);
+    const parsed = aiPricingSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid request payload.", details: parsed.error.format() }, { status: 400 });
     }

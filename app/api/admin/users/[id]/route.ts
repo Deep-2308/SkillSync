@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAdminSession } from "@/lib/admin";
+import { isValidObjectId } from "@/lib/api-utils";
 import { notify } from "@/lib/notifications";
 import { adminUserUpdateSchema } from "@/types/schemas";
 import { User } from "@/models/User";
@@ -21,10 +22,8 @@ export async function PUT(
   try {
     const session = await getAdminSession();
     const { id } = await params;
-
-    if (!Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ error: "Invalid user id." }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
     if (id === session.user.id) {
       return NextResponse.json(
         { error: "You cannot modify your own account." },

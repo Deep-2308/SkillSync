@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 
 import { connectToDatabase } from "@/lib/mongodb";
-import { getAuthSession } from "@/lib/api-utils";
+import { getAuthSession, isValidObjectId } from "@/lib/api-utils";
 import { notify } from "@/lib/notifications";
 import { sendEmail, reviewReceivedEmail } from "@/lib/email";
 import { recalculateUserRating } from "@/lib/reviews";
+import { rateLimits } from "@/lib/rate-limit";
 import { reviewSchema } from "@/types/schemas";
 import { Review } from "@/models/Review";
 import { Contract } from "@/models/Contract";
@@ -29,6 +30,9 @@ import { runReviewAnomalyCheck } from "@/lib/ai/anomaly-check";
  */
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.submission.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const session = await getAuthSession();
     const body = await request.json();
     const parsed = reviewSchema.safeParse(body);
@@ -40,11 +44,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const { targetId, contractId, rating, comment } = parsed.data;
+    const { contractId, targetId, rating, comment } = parsed.data;
 
-    if (!Types.ObjectId.isValid(contractId) || !Types.ObjectId.isValid(targetId)) {
-      return NextResponse.json({ error: "Invalid id format." }, { status: 400 });
-    }
+    const badContractId = isValidObjectId(contractId);
+    if (badContractId) return badContractId;
+
+    const badTargetId = isValidObjectId(targetId);
+    if (badTargetId) return badTargetId;
 
     await connectToDatabase();
 

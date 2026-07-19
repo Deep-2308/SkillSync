@@ -8,11 +8,9 @@ import { sendEmail, messageReceivedEmail } from "@/lib/email";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { User } from "@/models/User";
-
-const sendMessageSchema = z.object({
-  body: z.string().min(1, "Message cannot be empty").max(4000, "Message is too long"),
-  attachmentUrl: z.string().url().optional().or(z.literal("")),
-});
+import { sendMessageSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
+import { isValidObjectId } from "@/lib/api-utils";
 
 /**
  * GET /api/messages/[id]
@@ -26,9 +24,8 @@ export async function GET(
     const session = await getAuthSession();
     const { id } = await params;
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return NextResponse.json({ error: "Invalid conversation ID" }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
     
@@ -78,6 +75,9 @@ export async function POST(
   try {
     const session = await getAuthSession();
     const { id } = await params;
+    
+    const rateLimitError = rateLimits.message.check(request);
+    if (rateLimitError) return rateLimitError;
     const bodyText = await request.json();
     const parsed = sendMessageSchema.safeParse(bodyText);
 
@@ -88,9 +88,8 @@ export async function POST(
       );
     }
 
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return NextResponse.json({ error: "Invalid conversation ID" }, { status: 400 });
-    }
+    const badId = isValidObjectId(id);
+    if (badId) return badId;
 
     await connectToDatabase();
 

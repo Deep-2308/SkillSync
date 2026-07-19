@@ -7,15 +7,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import type { ApiResponse } from "@/types";
 
-const resetPasswordSchema = z.object({
-  token: z.string().min(1, "Reset token is required."),
-  newPassword: z
-    .string()
-    .min(8, "Password must be at least 8 characters.")
-    .regex(/[A-Z]/, "Include at least one uppercase letter.")
-    .regex(/[a-z]/, "Include at least one lowercase letter.")
-    .regex(/[0-9]/, "Include at least one number."),
-});
+import { resetPasswordSchema } from "@/types/schemas";
+import { rateLimits } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/reset-password
@@ -29,6 +22,9 @@ const resetPasswordSchema = z.object({
  */
 export async function POST(request: Request) {
   try {
+    const rateLimitError = rateLimits.auth.check(request);
+    if (rateLimitError) return rateLimitError;
+
     const body = await request.json();
     const parsed = resetPasswordSchema.safeParse(body);
 
