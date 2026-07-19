@@ -20,6 +20,16 @@ export async function GET(request: Request) {
     const mongoose = await import("mongoose");
     const userId = new mongoose.Types.ObjectId(session.user.id);
 
+    const status = searchParams.get("status");
+
+    const matchQuery: any = {
+      "project.postedBy": userId,
+    };
+
+    if (status) {
+      matchQuery.status = status;
+    }
+
     const pipeline = [
       {
         $lookup: {
@@ -30,11 +40,7 @@ export async function GET(request: Request) {
         },
       },
       { $unwind: "$project" },
-      {
-        $match: {
-          "project.postedBy": userId,
-        },
-      },
+      { $match: matchQuery },
       {
         $lookup: {
           from: "users",

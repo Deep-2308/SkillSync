@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ProposalComposer } from "./ProposalComposer";
 import { User } from "@/models/User";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProposalActionCard } from "./ProposalActionCard";
 
 export async function generateMetadata({
   params,
@@ -72,6 +74,26 @@ export default async function ProjectDetailPage({
   // Get proposal stats
   const proposalCount = await Proposal.countDocuments({ projectId: id });
 
+  // For the owner, fetch all proposals
+  let ownerProposals: any[] = [];
+  if (isOwner) {
+    const rawProposals = await Proposal.find({ projectId: id })
+      .sort({ createdAt: -1 })
+      .populate("freelancerId", "name image headline location averageRating")
+      .lean();
+    
+    ownerProposals = rawProposals.map(p => ({
+      ...p,
+      id: p._id.toString(),
+      _id: p._id.toString(),
+      freelancerId: {
+        ...p.freelancerId,
+        id: p.freelancerId?._id?.toString(),
+        _id: p.freelancerId?._id?.toString(),
+      }
+    }));
+  }
+
   // For freelancers, check if they already applied
   let hasApplied = false;
   let freelancerHourlyRate = 0;
@@ -118,114 +140,269 @@ export default async function ProjectDetailPage({
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Header */}
-          <div className="bg-card rounded-2xl border p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {project.title}
-              </h1>
-              <div className="shrink-0">{getStatusBadge(project.status)}</div>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4" />
-                Posted {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <MapPin className="w-4 h-4" />
-                {postedBy?.location || "Remote"}
-              </span>
-            </div>
-
-            <div className="pt-6 border-t border-border">
-              <h2 className="text-lg font-bold text-foreground mb-4">Project Description</h2>
-              <div className="prose dark:prose-invert max-w-none text-muted-foreground text-sm sm:text-base leading-relaxed">
-                {project.description.split("\n").map((para: string, i: number) => (
-                  <p key={i}>{para}</p>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Details & Skills */}
-          <div className="bg-card rounded-2xl border p-6 sm:p-8">
-            <h2 className="text-lg font-bold text-foreground mb-6">Project Details</h2>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="text-sm font-medium">Budget</span>
-                </div>
-                <p className="font-semibold text-foreground">
-                  {project.budgetType === "fixed" 
-                    ? `$${project.budgetMin} - $${project.budgetMax}` 
-                    : `$${project.hourlyRate}/hr`}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {project.budgetType === "fixed" ? "Fixed Price" : `~${project.estimatedHours} hrs`}
-                </p>
-              </div>
+          {isOwner ? (
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="mb-6 w-full justify-start border-b rounded-none pb-0 h-auto bg-transparent p-0">
+                <TabsTrigger 
+                  value="details" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2"
+                >
+                  Project Details
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="proposals" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2"
+                >
+                  Proposals ({proposalCount})
+                </TabsTrigger>
+              </TabsList>
               
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                  <Briefcase className="w-4 h-4" />
-                  <span className="text-sm font-medium">Experience</span>
-                </div>
-                <p className="font-semibold text-foreground capitalize">
-                  {project.experienceLevel}
-                </p>
-              </div>
+              <TabsContent value="details" className="space-y-6 mt-0">
+                <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                      {project.title}
+                    </h1>
+                    <div className="shrink-0">{getStatusBadge(project.status)}</div>
+                  </div>
+                  
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
+                    <span className="flex items-center gap-1.5">
+                      <Clock className="w-4 h-4" />
+                      Posted {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="w-4 h-4" />
+                      {postedBy?.location || "Remote"}
+                    </span>
+                  </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm font-medium">Timeline</span>
+                  <div className="pt-6 border-t border-border">
+                    <h2 className="text-lg font-bold text-foreground mb-4">Project Description</h2>
+                    <div className="prose dark:prose-invert max-w-none text-muted-foreground text-sm sm:text-base leading-relaxed">
+                      {project.description.split("\n").map((para: string, i: number) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <p className="font-semibold text-foreground capitalize">
-                  {project.timeline.replace(/_/g, " ")}
-                </p>
-              </div>
-            </div>
 
-            <div className="pt-6 border-t border-border">
-              <h3 className="font-bold text-foreground mb-3 text-sm">Skills Required</h3>
-              <div className="flex flex-wrap gap-2">
-                {project.skills.map((skill: string) => (
-                  <span key={skill} className="px-3 py-1.5 bg-muted rounded-md text-sm font-medium text-foreground/80">
-                    {skill}
+                <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                  <h2 className="text-lg font-bold text-foreground mb-6">Project Details</h2>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <DollarSign className="w-4 h-4" />
+                        <span className="text-sm font-medium">Budget</span>
+                      </div>
+                      <p className="font-semibold text-foreground">
+                        {project.budgetType === "fixed" 
+                          ? `$${project.budgetMin} - $${project.budgetMax}` 
+                          : `$${project.hourlyRate}/hr`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {project.budgetType === "fixed" ? "Fixed Price" : `~${project.estimatedHours} hrs`}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <Briefcase className="w-4 h-4" />
+                        <span className="text-sm font-medium">Experience</span>
+                      </div>
+                      <p className="font-semibold text-foreground capitalize">
+                        {project.experienceLevel}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-sm font-medium">Timeline</span>
+                      </div>
+                      <p className="font-semibold text-foreground capitalize">
+                        {project.timeline.replace(/_/g, " ")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-6 border-t border-border">
+                    <h3 className="font-bold text-foreground mb-3 text-sm">Skills Required</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {project.skills.map((skill: string) => (
+                        <span key={skill} className="px-3 py-1.5 bg-muted rounded-md text-sm font-medium text-foreground/80">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {project.attachments && project.attachments.length > 0 && (
+                  <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                    <h2 className="text-lg font-bold text-foreground mb-4">Attachments</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {project.attachments.map((url: string, index: number) => {
+                        const filename = url.split("/").pop() || `Attachment ${index + 1}`;
+                        return (
+                          <a 
+                            key={url} 
+                            href={url} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-3 p-4 rounded-xl border hover:border-brand/30 hover:bg-brand/5 transition-colors group"
+                          >
+                            <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 text-brand">
+                              <FileText className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{filename}</p>
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="proposals" className="space-y-6 mt-0">
+                {ownerProposals.length === 0 ? (
+                  <div className="p-12 text-center border border-dashed rounded-2xl bg-card">
+                    <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4 text-muted-foreground">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-lg font-bold mb-2">No proposals yet</h3>
+                    <p className="text-muted-foreground">
+                      When freelancers bid on your project, their proposals will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {ownerProposals.map((proposal) => (
+                      <ProposalActionCard 
+                        key={proposal.id} 
+                        proposal={proposal} 
+                        projectStatus={project.status} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="space-y-6">
+              {/* Fallback layout for non-owners */}
+              <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+                    {project.title}
+                  </h1>
+                  <div className="shrink-0">{getStatusBadge(project.status)}</div>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-6">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    Posted {formatDistanceToNow(new Date(project.createdAt), { addSuffix: true })}
                   </span>
-                ))}
-              </div>
-            </div>
-          </div>
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="w-4 h-4" />
+                    {postedBy?.location || "Remote"}
+                  </span>
+                </div>
 
-          {/* Attachments */}
-          {project.attachments && project.attachments.length > 0 && (
-            <div className="bg-card rounded-2xl border p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-foreground mb-4">Attachments</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {project.attachments.map((url: string, index: number) => {
-                  const filename = url.split("/").pop() || `Attachment ${index + 1}`;
-                  return (
-                    <a 
-                      key={url} 
-                      href={url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-xl border hover:border-brand/30 hover:bg-brand/5 transition-colors group"
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 text-brand">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-foreground truncate">{filename}</p>
-                      </div>
-                    </a>
-                  );
-                })}
+                <div className="pt-6 border-t border-border">
+                  <h2 className="text-lg font-bold text-foreground mb-4">Project Description</h2>
+                  <div className="prose dark:prose-invert max-w-none text-muted-foreground text-sm sm:text-base leading-relaxed">
+                    {project.description.split("\n").map((para: string, i: number) => (
+                      <p key={i}>{para}</p>
+                    ))}
+                  </div>
+                </div>
               </div>
+
+              {/* Details & Skills */}
+              <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                <h2 className="text-lg font-bold text-foreground mb-6">Project Details</h2>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="text-sm font-medium">Budget</span>
+                    </div>
+                    <p className="font-semibold text-foreground">
+                      {project.budgetType === "fixed" 
+                        ? `$${project.budgetMin} - $${project.budgetMax}` 
+                        : `$${project.hourlyRate}/hr`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {project.budgetType === "fixed" ? "Fixed Price" : `~${project.estimatedHours} hrs`}
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                      <Briefcase className="w-4 h-4" />
+                      <span className="text-sm font-medium">Experience</span>
+                    </div>
+                    <p className="font-semibold text-foreground capitalize">
+                      {project.experienceLevel}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm font-medium">Timeline</span>
+                    </div>
+                    <p className="font-semibold text-foreground capitalize">
+                      {project.timeline.replace(/_/g, " ")}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-border">
+                  <h3 className="font-bold text-foreground mb-3 text-sm">Skills Required</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {project.skills.map((skill: string) => (
+                      <span key={skill} className="px-3 py-1.5 bg-muted rounded-md text-sm font-medium text-foreground/80">
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Attachments */}
+              {project.attachments && project.attachments.length > 0 && (
+                <div className="bg-card rounded-2xl border p-6 sm:p-8">
+                  <h2 className="text-lg font-bold text-foreground mb-4">Attachments</h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {project.attachments.map((url: string, index: number) => {
+                      const filename = url.split("/").pop() || `Attachment ${index + 1}`;
+                      return (
+                        <a 
+                          key={url} 
+                          href={url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 p-4 rounded-xl border hover:border-brand/30 hover:bg-brand/5 transition-colors group"
+                        >
+                          <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0 text-brand">
+                            <FileText className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{filename}</p>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -248,9 +425,6 @@ export default async function ProjectDetailPage({
                 
                 {isOpen ? (
                   <div className="space-y-3 pt-4">
-                    <Button className="w-full" asChild>
-                      <Link href={`/projects/${id}/proposals`}>View Proposals</Link>
-                    </Button>
                     <Button variant="outline" className="w-full" asChild>
                       <Link href={`/client/projects`}>Back to My Projects</Link>
                     </Button>

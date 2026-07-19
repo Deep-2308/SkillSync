@@ -26,6 +26,7 @@ const proposalSchema = new Schema(
       default: "pending",
       index: true,
     },
+    clientNote: { type: String, maxlength: 1000, default: null },
   },
   {
     timestamps: true,

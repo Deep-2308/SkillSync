@@ -8,11 +8,13 @@ import { sendEmail, proposalAcceptedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
 import { Contract } from "@/models/Contract";
+import { Notification } from "@/models/Notification";
 
 const updateProposalSchema = z.object({
   status: z.enum(["accepted", "rejected", "withdrawn"], {
     errorMap: () => ({ message: "Status must be 'accepted', 'rejected', or 'withdrawn'." }),
   }),
+  clientNote: z.string().max(1000).optional().nullable(),
 });
 
 /**
@@ -42,7 +44,7 @@ export async function PUT(
       );
     }
 
-    const { status } = parsed.data;
+    const { status, clientNote } = parsed.data;
 
     await connectToDatabase();
 
@@ -95,19 +97,28 @@ export async function PUT(
     // Simple rejection — no transaction needed.
     if (status === "rejected") {
       proposal.status = "rejected";
+      if (clientNote) {
+        proposal.clientNote = clientNote;
+      }
       await proposal.save();
       
       // Notify freelancer
-      const { Notification } = await import("@/models/Notification");
       await Notification.create({
         userId: proposal.freelancerId._id,
         type: "proposal_update",
         title: "Proposal Rejected",
-        body: `Your proposal for "${project.title}" was declined.`,
+        body: `Your proposal for "${project.title}" was declined.${clientNote ? ` Reason: ${clientNote}` : ""}`,
         link: `/freelancer/proposals`,
       });
 
       return NextResponse.json({ data: proposal.toJSON() });
+    }
+
+    if (status === "accepted" && project.status !== "open") {
+      return NextResponse.json(
+        { error: "This project is no longer accepting new hires." },
+        { status: 400 }
+      );
     }
 
     // Acceptance — use a transaction for atomicity.
@@ -143,27 +154,45 @@ export async function PUT(
         await project.save({ session: mongoSession });
 
         // 4. Reject all other pending proposals on this project.
-        await Proposal.updateMany(
+        const siblingsToReject = await Proposal.find(
           {
             projectId: proposal.projectId,
             _id: { $ne: proposal._id },
             status: "pending",
           },
-          { $set: { status: "rejected" } },
+          { freelancerId: 1 },
           { session: mongoSession }
         );
+
+        if (siblingsToReject.length > 0) {
+          await Proposal.updateMany(
+            { _id: { $in: siblingsToReject.map(s => s._id) } },
+            { $set: { status: "rejected" } },
+            { session: mongoSession }
+          );
+
+          // Prepare notifications for auto-rejected freelancers
+          const notificationsToCreate = siblingsToReject.map(sibling => ({
+            userId: sibling.freelancerId,
+            type: "proposal_update",
+            title: "Proposal Rejected",
+            body: `Your proposal for "${project.title}" was declined because the project was awarded to another freelancer.`,
+            link: `/freelancer/proposals`,
+          }));
+          
+          await Notification.insertMany(notificationsToCreate, { session: mongoSession });
+        }
       });
 
       // Send email to freelancer
       await sendEmail({
-        to: proposal.freelancerId.email,
+        to: (proposal.freelancerId as any).email,
         subject: `Proposal Accepted: ${project.title}`,
         html: proposalAcceptedEmail(project.title, session.user.name || "A client"),
         category: "proposals",
       });
 
       // Notify freelancer in-app
-      const { Notification } = await import("@/models/Notification");
       await Notification.create({
         userId: proposal.freelancerId._id,
         type: "proposal_update",
