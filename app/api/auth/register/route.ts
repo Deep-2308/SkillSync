@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { rateLimiter } from "@/lib/rate-limit";
-import { sendEmail, welcomeEmail } from "@/lib/email";
+import { sendEmail, welcomeEmail, verificationEmail } from "@/lib/email";
 import { User } from "@/models/User";
 import type { ApiResponse } from "@/types";
 
@@ -68,19 +69,38 @@ export async function POST(request: Request) {
     // Cost factor 12 balances security and latency for interactive sign-up.
     const passwordHash = await bcrypt.hash(password, 12);
 
+    const token = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+    
+    // Expires in 24 hours
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24);
+
     const user = await User.create({
       name,
       email,
       passwordHash,
       role,
       emailVerified: null,
+      emailVerificationToken: tokenHash,
+      emailVerificationExpires: expires,
     });
 
-    await sendEmail({
+    const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/verify-email?token=${token}`;
+
+    sendEmail({
+      to: email,
+      subject: "Verify your email address",
+      html: verificationEmail(verifyUrl, name),
+      category: "system",
+    }).catch(console.error);
+    
+    sendEmail({
       to: email,
       subject: "Welcome to SkillSync!",
       html: welcomeEmail(name),
-    });
+      category: "system",
+    }).catch(console.error);
 
     return NextResponse.json<ApiResponse<{ id: string }>>(
       { success: true, data: { id: user._id.toString() } },

@@ -1,5 +1,10 @@
-import { ComingSoon } from "@/components/app/coming-soon";
+import { Metadata } from "next";
+import { NotificationsClient } from "./NotificationsClient";
+
+export const metadata: Metadata = {
+  title: "Notifications | SkillSync",
+};
 
 export default function NotificationsPage() {
-  return <ComingSoon title="All Notifications" description="View and manage all your notifications." />;
+  return <NotificationsClient />;
 }

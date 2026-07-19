@@ -147,3 +147,102 @@ export function passwordResetEmail(resetUrl: string, name: string): string {
     </div>
   `;
 }
+
+export function contractFundedEmail(projectTitle: string, amount: number): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #16a34a; margin-bottom: 8px;">Contract Funded</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <p style="font-size: 16px; line-height: 1.6;">
+        Great news! The contract for <em>${projectTitle}</em> has been funded with <strong>$${amount}</strong>.
+      </p>
+      <p style="font-size: 16px; line-height: 1.6;">
+        The funds are now secure, and work can officially begin.
+      </p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard" style="${buttonStyles}">View Contract</a>
+    </div>
+  `;
+}
+
+export function workDeliveredEmail(projectTitle: string, freelancerName: string): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #1D4ED8; margin-bottom: 8px;">Work Delivered</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <p style="font-size: 16px; line-height: 1.6;">
+        <strong>${freelancerName}</strong> has marked the work for <em>${projectTitle}</em> as delivered.
+      </p>
+      <p style="font-size: 16px; line-height: 1.6;">
+        Please review the deliverables and complete the contract to release the funds.
+      </p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard" style="${buttonStyles}">Review Work</a>
+    </div>
+  `;
+}
+
+export function paymentFailedEmail(projectTitle: string, errorMessage: string): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #dc2626; margin-bottom: 8px;">Payment Failed</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <p style="font-size: 16px; line-height: 1.6;">
+        Unfortunately, a payment attempt for the project <em>${projectTitle}</em> has failed.
+      </p>
+      <p style="font-size: 16px; line-height: 1.6;">
+        <strong>Reason:</strong> ${errorMessage}
+      </p>
+      <p style="font-size: 16px; line-height: 1.6;">
+        Please update your payment method to ensure the contract can proceed.
+      </p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard" style="${buttonStyles}">Go to Dashboard</a>
+    </div>
+  `;
+}
+
+export function reviewReceivedEmail(reviewerName: string): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #1D4ED8; margin-bottom: 8px;">New Review Received</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <p style="font-size: 16px; line-height: 1.6;">
+        <strong>${reviewerName}</strong> just left you a review!
+      </p>
+      <p style="font-size: 16px; line-height: 1.6;">
+        Check out your profile to see what they said and how it affects your overall rating.
+      </p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard" style="${buttonStyles}">View Review</a>
+    </div>
+  `;
+}
+
+export function messageReceivedEmail(senderName: string): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #1D4ED8; margin-bottom: 8px;">New Message</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <p style="font-size: 16px; line-height: 1.6;">
+        You have received a new message from <strong>${senderName}</strong>.
+      </p>
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard" style="${buttonStyles}">Reply to Message</a>
+    </div>
+  `;
+}
+
+export function verificationEmail(verifyUrl: string, name: string): string {
+  return `
+    <div style="${baseStyles}">
+      <h2 style="color: #1D4ED8; margin-bottom: 8px;">Verify Your Email</h2>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
+      <h3 style="color: #18181b;">Welcome to SkillSync, ${name}!</h3>
+      <p style="color: #52525b; line-height: 1.6;">
+        Please verify your email address to get full access to the platform. Click the button below to complete your registration.
+      </p>
+      <a href="${verifyUrl}" style="${buttonStyles}">
+        Verify Email
+      </a>
+      <p style="color: #71717a; font-size: 14px; line-height: 1.6;">
+        This link expires in <strong>24 hours</strong>. If you did not create an account, you can safely ignore this email.
+      </p>
+    </div>
+  `;
+}

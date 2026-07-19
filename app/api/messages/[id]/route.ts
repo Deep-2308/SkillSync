@@ -4,7 +4,7 @@ import { getAuthSession } from "@/lib/api-utils";
 import { Conversation } from "@/models/Conversation";
 import { Message } from "@/models/Message";
 import { notify } from "@/lib/notifications";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, messageReceivedEmail } from "@/lib/email";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { User } from "@/models/User";
@@ -127,7 +127,7 @@ export async function POST(
 
     // Dispatch notification to recipient
     if (recipientId) {
-      await notify([recipientId.toString()], {
+      void notify([recipientId.toString()], {
         type: "new_message",
         title: "New Message",
         body: `You received a new message from ${sender?.name}.`,
@@ -136,13 +136,13 @@ export async function POST(
       
       // Attempt to send email Notification
       const recipient = await User.findById(recipientId).select("email notificationPreferences");
-      if (recipient && (recipient.notificationPreferences as any)?.messages !== false) {
-        await sendEmail({
+      if (recipient) {
+        sendEmail({
           to: recipient.email,
           subject: `New message from ${sender?.name}`,
-          html: `<p>You have received a new message on SkillSync from ${sender?.name}:</p><blockquote style="border-left: 3px solid #ccc; padding-left: 10px; color: #555;">${parsed.data.body}</blockquote><a href="${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/messages?id=${conversation._id}">Reply to Message</a>`,
+          html: messageReceivedEmail(sender?.name || "A user"),
           category: "messages"
-        });
+        }).catch(console.error);
       }
     }
 

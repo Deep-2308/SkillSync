@@ -4,10 +4,12 @@ import { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { notify } from "@/lib/notifications";
+import { sendEmail, reviewReceivedEmail } from "@/lib/email";
 import { recalculateUserRating } from "@/lib/reviews";
 import { reviewSchema } from "@/types/schemas";
 import { Review } from "@/models/Review";
 import { Contract } from "@/models/Contract";
+import { User } from "@/models/User";
 
 /**
  * POST /api/reviews — Submit a review for the other party of a contract.
@@ -115,6 +117,17 @@ export async function POST(request: Request) {
       body: `${session.user.name ?? "Someone"} rated you ${rating}/5.`,
       link: `/freelancers/${targetId}`,
     });
+    
+    // Fetch target user's email for notification
+    const targetUser = await User.findById(targetId).select("email");
+    if (targetUser) {
+      sendEmail({
+        to: targetUser.email,
+        subject: `New Review Received`,
+        html: reviewReceivedEmail(session.user.name || "A user"),
+        category: "reviews",
+      }).catch(console.error);
+    }
 
     return NextResponse.json({ data: review.toJSON() }, { status: 201 });
   } catch (error) {

@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { notify } from "@/lib/notifications";
-import { sendEmail, contractCompletedEmail } from "@/lib/email";
+import { sendEmail, contractCompletedEmail, workDeliveredEmail } from "@/lib/email";
 import { contractUpdateSchema } from "@/types/schemas";
 import { Contract } from "@/models/Contract";
 import { Transaction } from "@/models/Transaction";
@@ -199,13 +199,20 @@ export async function PUT(
         link: `/contracts/${id}`,
       });
 
-      // Send email to both parties
-      await sendEmail({
-        to: [(contract.clientId as any).email, (contract.freelancerId as any).email],
+      // Send email to both parties individually so preferences apply correctly
+      sendEmail({
+        to: (contract.clientId as any).email,
         subject: `Contract Completed`,
         html: contractCompletedEmail(contract._id.toString()),
         category: "contracts",
-      });
+      }).catch(console.error);
+      
+      sendEmail({
+        to: (contract.freelancerId as any).email,
+        subject: `Contract Completed`,
+        html: contractCompletedEmail(contract._id.toString()),
+        category: "contracts",
+      }).catch(console.error);
     } else {
       const other = me === client ? freelancer : client;
       void notify([other], {
@@ -213,6 +220,17 @@ export async function PUT(
         title: `Contract marked as ${status}`,
         link: `/contracts/${id}`,
       });
+      
+      if (status === "delivered") {
+        const projectTitle = (contract.projectId as any)?.title || "Direct Contract";
+        const freelancerName = (contract.freelancerId as any)?.name || "The freelancer";
+        sendEmail({
+          to: (contract.clientId as any).email,
+          subject: `Work Delivered for ${projectTitle}`,
+          html: workDeliveredEmail(projectTitle, freelancerName),
+          category: "contracts",
+        }).catch(console.error);
+      }
     }
 
     return NextResponse.json({ data: contract.toJSON() });

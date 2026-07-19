@@ -8,6 +8,7 @@ import { getAuthSession } from "@/lib/api-utils";
 import { Contract } from "@/models/Contract";
 import { Review } from "@/models/Review";
 import { ContractWorkspaceClient } from "./ContractWorkspaceClient";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 export const metadata: Metadata = {
   title: "Contract Workspace | SkillSync",
@@ -26,10 +27,9 @@ export default async function ContractPage({
   }
 
   await connectToDatabase();
-  
   const rawContract = await Contract.findById(id)
-    .populate("clientId", "name image headline")
-    .populate("freelancerId", "name image headline")
+    .populate("clientId", "name image headline averageRating reviewCount")
+    .populate("freelancerId", "name image headline averageRating reviewCount")
     .populate("projectId", "title")
     .lean();
 
@@ -153,9 +153,12 @@ export default async function ContractPage({
             </div>
             <div>
               <p className="text-xs font-semibold text-brand tracking-wider uppercase mb-0.5">Client</p>
-              <Link href={`/freelancers/${(contract.clientId as any)?._id}`} className="font-bold text-foreground hover:underline">
+              <Link href={`/freelancers/${(contract.clientId as any)?._id}`} className="font-bold text-foreground hover:underline block mb-1">
                 {(contract.clientId as any)?.name || "Unknown"}
               </Link>
+              {(contract.clientId as any)?.averageRating !== undefined && (
+                <RatingDisplay rating={(contract.clientId as any).averageRating} count={(contract.clientId as any).reviewCount || 0} />
+              )}
             </div>
           </div>
 
@@ -171,9 +174,12 @@ export default async function ContractPage({
             </div>
             <div>
               <p className="text-xs font-semibold text-brand tracking-wider uppercase mb-0.5">Freelancer</p>
-              <Link href={`/freelancers/${(contract.freelancerId as any)?._id}`} className="font-bold text-foreground hover:underline">
+              <Link href={`/freelancers/${(contract.freelancerId as any)?._id}`} className="font-bold text-foreground hover:underline block mb-1">
                 {(contract.freelancerId as any)?.name || "Unknown"}
               </Link>
+              {(contract.freelancerId as any)?.averageRating !== undefined && (
+                <RatingDisplay rating={(contract.freelancerId as any).averageRating} count={(contract.freelancerId as any).reviewCount || 0} />
+              )}
             </div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { sendEmail, proposalAcceptedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
 import { Contract } from "@/models/Contract";
-import { Notification } from "@/models/Notification";
+import { notify } from "@/lib/notifications";
 
 const updateProposalSchema = z.object({
   status: z.enum(["accepted", "rejected", "withdrawn"], {
@@ -78,6 +78,17 @@ export async function PUT(
       
       proposal.status = "withdrawn";
       await proposal.save();
+      
+      const project = await Project.findById(proposal.projectId);
+      if (project) {
+        void notify([project.postedBy], {
+          type: "proposal_update",
+          title: "Proposal Withdrawn",
+          body: `${(proposal.freelancerId as any)?.name || "A freelancer"} withdrew their proposal for "${project.title}".`,
+          link: `/projects/${project._id}`,
+        });
+      }
+      
       return NextResponse.json({ data: proposal.toJSON() });
     }
 
@@ -103,8 +114,7 @@ export async function PUT(
       await proposal.save();
       
       // Notify freelancer
-      await Notification.create({
-        userId: proposal.freelancerId._id,
+      void notify([proposal.freelancerId._id], {
         type: "proposal_update",
         title: "Proposal Rejected",
         body: `Your proposal for "${project.title}" was declined.${clientNote ? ` Reason: ${clientNote}` : ""}`,
@@ -171,30 +181,29 @@ export async function PUT(
             { session: mongoSession }
           );
 
-          // Prepare notifications for auto-rejected freelancers
-          const notificationsToCreate = siblingsToReject.map(sibling => ({
-            userId: sibling.freelancerId,
+          // Collect user IDs for auto-rejected freelancers
+          const rejectedFreelancerIds = siblingsToReject.map(s => s.freelancerId);
+          
+          // Fire-and-forget notification outside the transaction scope (runs concurrently)
+          void notify(rejectedFreelancerIds, {
             type: "proposal_update",
             title: "Proposal Rejected",
             body: `Your proposal for "${project.title}" was declined because the project was awarded to another freelancer.`,
             link: `/freelancer/proposals`,
-          }));
-          
-          await Notification.insertMany(notificationsToCreate, { session: mongoSession });
+          });
         }
       });
 
-      // Send email to freelancer
-      await sendEmail({
+      // Send email to freelancer (fire-and-forget)
+      sendEmail({
         to: (proposal.freelancerId as any).email,
         subject: `Proposal Accepted: ${project.title}`,
         html: proposalAcceptedEmail(project.title, session.user.name || "A client"),
         category: "proposals",
-      });
+      }).catch(console.error);
 
       // Notify freelancer in-app
-      await Notification.create({
-        userId: proposal.freelancerId._id,
+      void notify([proposal.freelancerId._id], {
         type: "proposal_update",
         title: "Proposal Accepted!",
         body: `Your proposal for "${project.title}" was accepted. A new contract has been created.`,

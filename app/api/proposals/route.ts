@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
+import { notify } from "@/lib/notifications";
 import { sendEmail, proposalReceivedEmail } from "@/lib/email";
 import { Proposal } from "@/models/Proposal";
 import { Project } from "@/models/Project";
@@ -86,22 +87,20 @@ export async function POST(request: Request) {
       status: "pending",
     });
 
-    // Send email notification to project owner
-    await sendEmail({
+    // Send email notification to project owner (fire-and-forget)
+    sendEmail({
       to: (project.postedBy as any).email,
       subject: `New Proposal: ${project.title}`,
       html: proposalReceivedEmail(project.title, session.user.name || "A freelancer"),
       category: "proposals",
-    });
+    }).catch(console.error);
 
     // In-app notification
-    const { Notification } = await import("@/models/Notification");
-    await Notification.create({
-      userId: project.postedBy._id,
+    void notify([project.postedBy._id], {
       type: "proposal_received",
       title: `New Proposal from ${session.user.name || "A freelancer"}`,
       body: `You received a new proposal for "${project.title}".`,
-      link: `/projects/${projectId}/proposals`,
+      link: `/projects/${projectId}`, // Deep link updated from /projects/${projectId}/proposals as that tab doesn't have its own path
     });
 
     return NextResponse.json({ data: proposal.toJSON() }, { status: 201 });

@@ -25,6 +25,7 @@ import { ProposalComposer } from "./ProposalComposer";
 import { User } from "@/models/User";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalActionCard } from "./ProposalActionCard";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 export async function generateMetadata({
   params,
@@ -58,7 +59,7 @@ export default async function ProjectDetailPage({
   
   const project = await Project.findById(id).populate(
     "postedBy",
-    "name image headline location createdAt"
+    "name image headline location createdAt averageRating reviewCount"
   );
 
   if (!project) {
@@ -486,6 +487,9 @@ export default async function ProjectDetailPage({
               <div>
                 <p className="font-medium text-foreground">{postedBy.name}</p>
                 <p className="text-sm text-muted-foreground">{postedBy.location || "Remote"}</p>
+                {postedBy.averageRating !== undefined && (
+                  <RatingDisplay rating={postedBy.averageRating} count={postedBy.reviewCount || 0} className="mt-1" />
+                )}
               </div>
             </div>
             

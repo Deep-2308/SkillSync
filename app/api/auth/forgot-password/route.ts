@@ -66,11 +66,12 @@ export async function POST(request: Request) {
     const resetUrl = `${appUrl}/reset-password?token=${rawToken}`;
 
     // Send the email via our utility
-    await sendEmail({
+    sendEmail({
       to: email,
       subject: "Reset your SkillSync password",
       html: passwordResetEmail(resetUrl, user.name),
-    });
+      category: "system",
+    }).catch(console.error);
 
     return NextResponse.json<ApiResponse<{ message: string }>>(
       { success: true, data: { message: "If an account with that email exists, a reset link has been sent." } },

@@ -23,6 +23,8 @@ const userSchema = new Schema(
     passwordResetToken: { type: String, select: false },
     /** Expiry timestamp for the reset token (1 hour from generation). */
     passwordResetExpires: { type: Date, select: false },
+    emailVerificationToken: { type: String, select: false },
+    emailVerificationExpires: { type: Date, select: false },
     image: { type: String, default: null },
     role: {
       type: String,

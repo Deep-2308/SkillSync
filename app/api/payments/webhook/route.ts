@@ -4,6 +4,7 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { Contract } from "@/models/Contract";
 import { Transaction } from "@/models/Transaction";
 import { notify } from "@/lib/notifications";
+import { sendEmail, contractFundedEmail, paymentFailedEmail } from "@/lib/email";
 
 // Removed Pages-Router config
 /**
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
               contractId,
               { paymentStatus: "paid" },
               { new: true }
-            );
+            ).populate("clientId", "email name").populate("freelancerId", "email name").populate("projectId", "title");
 
             if (contract) {
               const charge = paymentIntent.latest_charge ? await stripe.charges.retrieve(paymentIntent.latest_charge as string) : null;
@@ -75,12 +76,21 @@ export async function POST(request: Request) {
               });
 
               // Notify the freelancer that payment was secured
-              await notify([contract.freelancerId.toString()], {
+              void notify([contract.freelancerId._id], {
                 type: "contract_update",
                 title: "Payment secured",
                 body: `The client has successfully funded the contract.`,
                 link: `/contracts/${contractId}`,
               });
+              
+              // Email the freelancer
+              const projectTitle = (contract.projectId as any)?.title || "Direct Contract";
+              sendEmail({
+                to: (contract.freelancerId as any).email,
+                subject: `Contract Funded: ${projectTitle}`,
+                html: contractFundedEmail(projectTitle, contract.agreedRate),
+                category: "contracts",
+              }).catch(console.error);
             }
           }
         }
@@ -134,15 +144,23 @@ export async function POST(request: Request) {
 
         if (contractId) {
           console.error(`[Webhook] Payment failed for contract ${contractId}: ${errorMessage}`);
-          const contract = await Contract.findById(contractId);
+          const contract = await Contract.findById(contractId).populate("clientId", "email name").populate("projectId", "title");
           if (contract) {
              // Notify the client that their payment failed
-             await notify([contract.clientId.toString()], {
+             void notify([contract.clientId._id], {
                type: "contract_update",
                title: "Payment failed",
                body: `Your payment attempt failed: ${errorMessage || 'Unknown error'}. Please try again.`,
                link: `/contracts/${contractId}`,
              });
+             
+             const projectTitle = (contract.projectId as any)?.title || "Direct Contract";
+             sendEmail({
+               to: (contract.clientId as any).email,
+               subject: `Payment Failed: ${projectTitle}`,
+               html: paymentFailedEmail(projectTitle, errorMessage || 'Unknown error'),
+               category: "system",
+             }).catch(console.error);
           }
         }
         break;

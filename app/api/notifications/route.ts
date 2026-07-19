@@ -19,13 +19,19 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const { page, limit, skip } = parsePagination(searchParams);
+    
+    const filter = searchParams.get("filter");
+    const query: any = { userId: session.user.id };
+    if (filter === "unread") {
+      query.read = false;
+    }
 
     const [notifications, total, unread] = await Promise.all([
-      Notification.find({ userId: session.user.id })
+      Notification.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit),
-      Notification.countDocuments({ userId: session.user.id }),
+      Notification.countDocuments(query),
       Notification.countDocuments({ userId: session.user.id, read: false }),
     ]);
 
