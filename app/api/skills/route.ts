@@ -96,10 +96,12 @@ export async function GET(request: Request) {
     if (category) filter.category = category;
     if (level) filter.level = level;
     if (q) {
+      const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const safeQ = escapeRegExp(q);
       filter.$or = [
-        { title: { $regex: q, $options: "i" } },
-        { description: { $regex: q, $options: "i" } },
-        { tags: { $regex: q, $options: "i" } },
+        { title: { $regex: safeQ, $options: "i" } },
+        { description: { $regex: safeQ, $options: "i" } },
+        { tags: { $regex: safeQ, $options: "i" } },
       ];
     }
 

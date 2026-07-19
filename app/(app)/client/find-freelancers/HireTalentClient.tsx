@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -29,35 +29,41 @@ import { categoryNames } from "@/data/categories";
 
 const CATEGORIES = categoryNames;
 
-const ITEMS_PER_PAGE = 12;
-
 interface HireTalentClientProps {
-  initialFreelancers: Freelancer[];
+  freelancers: Freelancer[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
 }
 
-export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) {
+export function HireTalentClient({ freelancers, total, currentPage, totalPages }: HireTalentClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // URL state sync
   const initialSearch = searchParams.get("search") || "";
-  const initialCategories = searchParams.get("category")?.split(",") || [];
-  const initialPage = parseInt(searchParams.get("page") || "1", 10);
+  const initialCategories = searchParams.get("category")?.split(",").filter(Boolean) || [];
   const initialSort = searchParams.get("sort") || "best_match";
+  const initialMinRate = searchParams.get("minRate") || "5";
+  const initialMaxRate = searchParams.get("maxRate") || "200";
+  const initialMinRating = searchParams.get("rating") || "0";
+  const initialAvailableNow = searchParams.get("available") === "true";
 
-  // Local state
+  // Local state for UI
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+  
   const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
   const [experienceLevel, setExperienceLevel] = useState("Any");
-  const [hourlyRate, setHourlyRate] = useState<number[]>([5, 200]);
-  const [minRating, setMinRating] = useState("0");
-  const [availableNow, setAvailableNow] = useState(false);
+  const [hourlyRate, setHourlyRate] = useState<number[]>([
+    parseInt(initialMinRate, 10), 
+    parseInt(initialMaxRate, 10)
+  ]);
+  const [minRating, setMinRating] = useState(initialMinRating);
+  const [availableNow, setAvailableNow] = useState(initialAvailableNow);
   const [sortBy, setSortBy] = useState(initialSort);
-  const [currentPage, setCurrentPage] = useState(initialPage);
   
   const [isClient, setIsClient] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -76,84 +82,18 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
     const params = new URLSearchParams();
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (selectedCategories.length > 0) params.set("category", selectedCategories.join(","));
-    if (currentPage > 1) params.set("page", currentPage.toString());
+    if (hourlyRate[0] !== undefined && hourlyRate[0] > 5) params.set("minRate", hourlyRate[0].toString());
+    if (hourlyRate[1] !== undefined && hourlyRate[1] < 200) params.set("maxRate", hourlyRate[1].toString());
+    if (minRating !== "0") params.set("rating", minRating);
+    if (availableNow) params.set("available", "true");
     if (sortBy !== "best_match") params.set("sort", sortBy);
 
-    router.replace(`/hire-talent?${params.toString()}`, { scroll: false });
-  }, [debouncedSearch, selectedCategories, currentPage, sortBy, router, isClient]);
+    router.replace(`/client/find-freelancers?${params.toString()}`, { scroll: false });
+  }, [debouncedSearch, selectedCategories, hourlyRate, minRating, availableNow, sortBy, router, isClient]);
 
   useEffect(() => {
     updateUrlParams();
   }, [updateUrlParams]);
-
-  // Filtering Logic
-  const filteredFreelancers = useMemo(() => {
-    let result = [...initialFreelancers];
-
-    // Search
-    if (debouncedSearch) {
-      const q = debouncedSearch.toLowerCase();
-      result = result.filter(
-        (f) =>
-          f.name.toLowerCase().includes(q) ||
-          f.title.toLowerCase().includes(q) ||
-          f.skills.some((s) => s.toLowerCase().includes(q))
-      );
-    }
-
-    // Category
-    if (selectedCategories.length > 0) {
-      // In a real app, freelancer would have a category field. We'll simulate by checking skills vs categories
-      result = result.filter((f) =>
-        selectedCategories.some(cat =>
-          f.skills.some(skill => skill.toLowerCase().includes(cat.toLowerCase().split(" ")[0] ?? "")) || true // Just returning true for mock simplicity unless we map it properly
-        )
-      );
-    }
-
-    // Rate
-    result = result.filter((f) => f.rate >= (hourlyRate[0] ?? 0) && f.rate <= (hourlyRate[1] ?? Infinity));
-
-    // Rating
-    if (minRating !== "0") {
-      result = result.filter((f) => f.rating >= parseFloat(minRating));
-    }
-
-    // Availability
-    if (availableNow) {
-      result = result.filter((f) => f.isOnline);
-    }
-
-    // Sort
-    switch (sortBy) {
-      case "highest_rated":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case "most_reviews":
-        result.sort((a, b) => b.reviewCount - a.reviewCount);
-        break;
-      case "lowest_rate":
-        result.sort((a, b) => a.rate - b.rate);
-        break;
-      default: // best_match
-        // Keeping original order as best match
-        break;
-    }
-
-    return result;
-  }, [initialFreelancers, debouncedSearch, selectedCategories, hourlyRate, minRating, availableNow, sortBy]);
-
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredFreelancers.length / ITEMS_PER_PAGE);
-  const paginatedFreelancers = filteredFreelancers.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
-  useEffect(() => {
-    // Reset to page 1 if filters change
-    setCurrentPage(1);
-  }, [debouncedSearch, selectedCategories, hourlyRate, minRating, availableNow, sortBy]);
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -168,16 +108,24 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
     setMinRating("0");
     setAvailableNow(false);
     setSearchQuery("");
+    setSortBy("best_match");
+    router.push("/client/find-freelancers");
   };
 
-  if (!isClient) return null; // Prevent hydration errors
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`/client/find-freelancers?${params.toString()}`);
+  };
+
+  if (!isClient) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold text-foreground">Hire Top Talent</h1>
         <p className="text-muted-foreground">
-          Showing {paginatedFreelancers.length} of {filteredFreelancers.length} freelancers
+          Showing {freelancers.length} of {total} freelancers
         </p>
       </div>
 
@@ -262,13 +210,13 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
           </div>
 
           {/* Grid */}
-          {isLoading ? (
+          {!freelancers ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {Array.from({ length: 6 }).map((_, i) => (
                 <FreelancerCardSkeleton key={i} />
               ))}
             </div>
-          ) : filteredFreelancers.length === 0 ? (
+          ) : freelancers.length === 0 ? (
             <div className="py-24 text-center">
               <h3 className="text-xl font-semibold mb-2">No freelancers found</h3>
               <p className="text-muted-foreground mb-6">Try adjusting your filters or search query.</p>
@@ -276,7 +224,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {paginatedFreelancers.map((freelancer) => (
+              {freelancers.map((freelancer) => (
                 <FreelancerCard key={freelancer.id} freelancer={freelancer} />
               ))}
             </div>
@@ -292,7 +240,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(currentPage - 1);
+                        if (currentPage > 1) handlePageChange(currentPage - 1);
                       }}
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                     />
@@ -300,7 +248,6 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                   
                   {Array.from({ length: totalPages }).map((_, i) => {
                     const page = i + 1;
-                    // Simple pagination logic for displaying 5 pages around current
                     if (
                       page === 1 ||
                       page === totalPages ||
@@ -313,7 +260,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                             isActive={page === currentPage}
                             onClick={(e) => {
                               e.preventDefault();
-                              setCurrentPage(page);
+                              handlePageChange(page);
                             }}
                           >
                             {page}
@@ -321,7 +268,6 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                         </PaginationItem>
                       );
                     }
-                    
                     if (page === currentPage - 2 || page === currentPage + 2) {
                       return (
                         <PaginationItem key={page}>
@@ -329,7 +275,6 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                         </PaginationItem>
                       );
                     }
-                    
                     return null;
                   })}
 
@@ -338,7 +283,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
                       href="#" 
                       onClick={(e) => {
                         e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+                        if (currentPage < totalPages) handlePageChange(currentPage + 1);
                       }}
                       className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
                     />

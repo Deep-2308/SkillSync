@@ -26,9 +26,11 @@ export async function GET(request: Request) {
     if (banned === "true") filter.banned = true;
     if (banned === "false") filter.banned = { $ne: true };
     if (q) {
+      const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const safeQ = escapeRegExp(q);
       filter.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { email: { $regex: q, $options: "i" } },
+        { name: { $regex: safeQ, $options: "i" } },
+        { email: { $regex: safeQ, $options: "i" } },
       ];
     }
 

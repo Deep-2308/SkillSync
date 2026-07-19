@@ -37,10 +37,12 @@ export async function GET(request: Request) {
 
     // Text search on name or skills
     if (q) {
+      const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const safeQ = escapeRegExp(q);
       matchStage.$or = [
-        { name: { $regex: q, $options: "i" } },
-        { skills: { $regex: q, $options: "i" } },
-        { headline: { $regex: q, $options: "i" } },
+        { name: { $regex: safeQ, $options: "i" } },
+        { skills: { $regex: safeQ, $options: "i" } },
+        { headline: { $regex: safeQ, $options: "i" } },
       ];
     }
 
