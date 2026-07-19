@@ -31,23 +31,23 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
   ),
   title: {
-    default: "SkillSync — Share skills. Hire talent.",
+    default: "SkillSync — Smart Freelancer Hiring & Review System",
     template: "%s · SkillSync",
   },
   description:
-    "SkillSync is an online marketplace to share your skills, learn from experts, and hire vetted talent by the hour.",
-  keywords: ["skills", "hiring", "freelance", "mentorship", "learning"],
+    "SkillSync is an AI-powered freelancing platform to hire vetted talent, manage projects and contracts, and pay securely.",
+  keywords: ["freelance", "hiring", "freelancer marketplace", "talent", "AI matching"],
   authors: [{ name: "SkillSync" }],
   openGraph: {
     title: "SkillSync",
-    description: "Share skills. Hire talent.",
+    description: "Hire smarter. Work smarter.",
     type: "website",
     siteName: "SkillSync",
   },
   twitter: {
     card: "summary_large_image",
     title: "SkillSync",
-    description: "Share skills. Hire talent.",
+    description: "Hire smarter. Work smarter.",
   },
 };
 

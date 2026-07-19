@@ -35,7 +35,7 @@ export function WatchDemoDialog() {
         <DialogHeader className="p-6 pb-0">
           <DialogTitle>See SkillSync in action</DialogTitle>
           <DialogDescription>
-            A 2-minute tour of finding, booking, and paying an expert.
+            A 2-minute tour of finding, hiring, and paying a freelancer.
           </DialogDescription>
         </DialogHeader>
 

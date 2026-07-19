@@ -19,7 +19,7 @@ export const testimonials: Testimonial[] = [
     company: "Northwind",
     rating: 5,
     quote:
-      "I found a senior mentor within a day and shipped my portfolio redesign in a week. SkillSync made the whole process effortless.",
+      "I found a senior React freelancer within a day and shipped my portfolio redesign in a week. SkillSync made the whole process effortless.",
     avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=128&h=128&fit=crop&crop=faces",
   },
   {
@@ -39,7 +39,7 @@ export const testimonials: Testimonial[] = [
     company: "Helix Labs",
     rating: 5,
     quote:
-      "As a provider I love how transparent bookings and payments are. My calendar fills up and I never chase invoices.",
+      "As a freelancer I love how transparent contracts and payments are. My calendar fills up and I never chase invoices.",
     avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=128&h=128&fit=crop&crop=faces",
   },
   {

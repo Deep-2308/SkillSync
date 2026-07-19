@@ -87,7 +87,7 @@ export type ContactInput = z.infer<typeof contactSchema>;
 /** Admin user moderation — at least one field must be present. */
 export const adminUserUpdateSchema = z
   .object({
-    role: z.enum(["member", "provider", "admin"]).optional(),
+    role: z.enum(["client", "freelancer", "admin"]).optional(),
     banned: z.boolean().optional(),
   })
   .refine((data) => data.role !== undefined || data.banned !== undefined, {

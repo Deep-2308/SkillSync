@@ -31,7 +31,7 @@ export const authConfig = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id as string;
-        token.role = (user.role ?? "member") as "member" | "provider" | "admin";
+        token.role = (user.role ?? "client") as "client" | "freelancer" | "admin";
       }
       return token;
     },

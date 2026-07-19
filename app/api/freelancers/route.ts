@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     const sort = searchParams.get("sort") ?? "newest";
 
     // Base match: only providers
-    const matchStage: Record<string, unknown> = { role: "provider" };
+    const matchStage: Record<string, unknown> = { role: "freelancer" };
 
     // Text search on name or skills
     if (q) {

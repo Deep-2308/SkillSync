@@ -25,17 +25,9 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { FilterSidebar } from "@/components/hire-talent/FilterSidebar";
 import { FreelancerCard, FreelancerCardSkeleton } from "@/components/hire-talent/FreelancerCard";
 import { Freelancer } from "@/components/hire-talent/FreelancerCard";
+import { categoryNames } from "@/data/categories";
 
-const CATEGORIES = [
-  "Web Development",
-  "UI/UX Design",
-  "Data Science",
-  "Mobile Apps",
-  "Digital Marketing",
-  "Writing",
-  "Translation",
-  "Video Editing",
-];
+const CATEGORIES = categoryNames;
 
 const ITEMS_PER_PAGE = 12;
 
@@ -183,8 +175,8 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Hire Top Talent</h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <h1 className="text-3xl font-bold text-foreground">Hire Top Talent</h1>
+        <p className="text-muted-foreground">
           Showing {paginatedFreelancers.length} of {filteredFreelancers.length} freelancers
         </p>
       </div>
@@ -214,12 +206,12 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
         <div className="flex-1 space-y-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
               <Input
                 placeholder="Search by name, title, or skills..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-12 text-base w-full bg-white dark:bg-zinc-950"
+                className="pl-10 h-12 text-base w-full bg-card"
               />
             </div>
             
@@ -256,7 +248,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
               </div>
 
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-[180px] h-12 bg-white dark:bg-zinc-950">
+                <SelectTrigger className="w-full sm:w-[180px] h-12 bg-card">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -279,7 +271,7 @@ export function HireTalentClient({ initialFreelancers }: HireTalentClientProps) 
           ) : filteredFreelancers.length === 0 ? (
             <div className="py-24 text-center">
               <h3 className="text-xl font-semibold mb-2">No freelancers found</h3>
-              <p className="text-zinc-500 mb-6">Try adjusting your filters or search query.</p>
+              <p className="text-muted-foreground mb-6">Try adjusting your filters or search query.</p>
               <Button onClick={clearAllFilters} variant="outline">Clear all filters</Button>
             </div>
           ) : (

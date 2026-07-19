@@ -36,7 +36,7 @@ export async function GET() {
       gmvAgg,
     ] = await Promise.all([
       User.countDocuments({}),
-      User.countDocuments({ role: "provider" }),
+      User.countDocuments({ role: "freelancer" }),
       User.countDocuments({ banned: true }),
       User.countDocuments({ createdAt: { $gte: thirtyDaysAgo } }),
       Project.countDocuments({}),

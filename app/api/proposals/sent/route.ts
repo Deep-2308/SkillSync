@@ -5,7 +5,7 @@ import { getAuthSession, parsePagination } from "@/lib/api-utils";
 import { Proposal } from "@/models/Proposal";
 
 /**
- * GET /api/proposals/sent — Expert sees their sent proposals.
+ * GET /api/proposals/sent — Freelancer sees their sent proposals.
  * Auth required, paginated.
  */
 export async function GET(request: Request) {

@@ -12,10 +12,10 @@ import { User } from "@/models/User";
 /**
  * GET /api/dashboard/stats — Role-aware dashboard overview numbers.
  *
- * member ("learner"):  { totalProjects, activeContracts, totalSpent, savedFreelancers }
- * provider ("expert"): { totalSkills, receivedProposals, activeContracts,
- *                        totalEarnings, profileViews }
- * admins get the provider shape (they can use /api/admin/stats for platform data).
+ * client:     { totalProjects, activeContracts, totalSpent, savedFreelancers }
+ * freelancer: { totalSkills, receivedProposals, activeContracts,
+ *               totalEarnings, profileViews }
+ * admins get the freelancer shape (they can use /api/admin/stats for platform data).
  *
  * Money figures aggregate completed contracts' agreedRate. Every metric is one
  * indexed count/aggregation and they all run in parallel.
@@ -26,10 +26,10 @@ export async function GET() {
     await connectToDatabase();
 
     const userId = new Types.ObjectId(session.user.id);
-    const isProvider =
-      session.user.role === "provider" || session.user.role === "admin";
+    const isFreelancer =
+      session.user.role === "freelancer" || session.user.role === "admin";
 
-    if (!isProvider) {
+    if (!isFreelancer) {
       const [totalProjects, activeContracts, spentAgg, me] = await Promise.all([
         Project.countDocuments({ postedBy: userId }),
         Contract.countDocuments({ clientId: userId, status: "active" }),
@@ -42,7 +42,7 @@ export async function GET() {
 
       return NextResponse.json({
         data: {
-          role: "member",
+          role: "client",
           totalProjects,
           activeContracts,
           totalSpent: spentAgg[0]?.total ?? 0,
@@ -75,7 +75,7 @@ export async function GET() {
 
     return NextResponse.json({
       data: {
-        role: "provider",
+        role: "freelancer",
         totalSkills,
         receivedProposals,
         activeContracts,

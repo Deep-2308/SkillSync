@@ -22,8 +22,8 @@ export const mainNavLinks: NavLink[] = [
   { label: "Hire Talent", href: "/hire-talent" },
   { label: "Post Project", href: "/post-project" },
   { label: "Contact", href: "/contact" },
-  // "Share Skill" is provider-only (the brief's "expert" == our "provider" role).
-  { label: "Share Skill", href: "/share-skill", requiredRole: "provider" },
+  // "Share Skill" is freelancer-only.
+  { label: "Share Skill", href: "/share-skill", requiredRole: "freelancer" },
 ];
 
 /** Links inside the authenticated user dropdown. */

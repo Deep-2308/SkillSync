@@ -1,7 +1,7 @@
 import { Schema, model, models, type Model, type InferSchemaType } from "mongoose";
 
 /**
- * Proposal model — a bid by an expert (provider) on a project.
+ * Proposal model — a bid by a freelancer on a project.
  */
 const proposalSchema = new Schema(
   {

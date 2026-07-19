@@ -124,7 +124,7 @@ const scoreMeta = { score: { $meta: "textScore" } } as const;
 async function searchFreelancers(q: string, limit: number, skip: number) {
   const filter = {
     ...textQuery(q),
-    role: "provider" as const,
+    role: "freelancer" as const,
     banned: { $ne: true },
   };
   const [docs, total] = await Promise.all([

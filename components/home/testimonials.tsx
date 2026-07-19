@@ -61,7 +61,7 @@ export function Testimonials() {
     <section className="mx-auto w-full max-w-5xl px-4 py-24 sm:px-6">
       <AnimatedSection animation="slideUp" className="mx-auto max-w-2xl text-center">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Loved by learners and teams
+          Loved by clients and freelancers
         </h2>
         <p className="mt-4 text-lg text-muted-foreground">
           Thousands of successful matches and counting.

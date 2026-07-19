@@ -116,7 +116,7 @@ export default function LoginPage() {
                       onCheckedChange={field.onChange}
                     />
                   </FormControl>
-                  <FormLabel className="font-normal text-sm text-zinc-600 dark:text-zinc-400">
+                  <FormLabel className="font-normal text-sm text-muted-foreground">
                     Remember me
                   </FormLabel>
                 </FormItem>
@@ -125,7 +125,7 @@ export default function LoginPage() {
 
             <Link
               href="/forgot-password"
-              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="text-sm font-medium text-brand hover:text-brand/80"
             >
               Forgot password?
             </Link>
@@ -140,11 +140,11 @@ export default function LoginPage() {
 
       <OAuthButtons text="Continue with Google" />
 
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400 mt-8">
+      <p className="text-center text-sm text-muted-foreground mt-8">
         Don&apos;t have an account?{" "}
         <Link
           href="/signup"
-          className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+          className="font-medium text-brand hover:text-brand/80 transition-colors"
         >
           Sign up
         </Link>

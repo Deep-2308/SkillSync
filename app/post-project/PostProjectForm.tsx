@@ -47,22 +47,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TagInput } from "@/components/forms/TagInput";
+import { categoryNames } from "@/data/categories";
 import { cn } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */
 /*                                  Constants                                 */
 /* -------------------------------------------------------------------------- */
 
-const CATEGORIES = [
-  "Web Development",
-  "UI/UX Design",
-  "Mobile Apps",
-  "Data Science",
-  "Digital Marketing",
-  "Content Writing",
-  "Video Editing",
-  "Translation",
-];
+const CATEGORIES = categoryNames;
 
 const TIMELINES = [
   { value: "less_than_1_week", label: "Less than 1 week" },
@@ -84,13 +76,15 @@ const MAX_FILES = 5;
 
 const BUDGET_TIPS: Record<string, string> = {
   "Web Development": "Typical web dev projects range $500–$5,000 depending on complexity.",
+  "Mobile Development": "Mobile apps usually range $2,000–$15,000 for MVP builds.",
   "UI/UX Design": "Design projects typically run $300–$3,000 for a full set of screens.",
-  "Mobile Apps": "Mobile apps usually range $2,000–$15,000 for MVP builds.",
-  "Data Science": "Data science projects typically cost $1,000–$8,000.",
-  "Digital Marketing": "Marketing campaigns range $500–$5,000/month.",
+  "Graphic Design": "Branding and visual design projects range $200–$2,500.",
   "Content Writing": "Content projects typically cost $100–$2,000.",
-  "Video Editing": "Video editing projects range $200–$3,000.",
-  "Translation": "Translation projects typically cost $100–$1,500.",
+  "Digital Marketing": "Marketing campaigns range $500–$5,000/month.",
+  "Video & Animation": "Video and animation projects range $200–$3,000.",
+  "Data & AI": "Data and AI projects typically cost $1,000–$8,000.",
+  "DevOps & Cloud": "Infrastructure projects typically run $1,000–$10,000.",
+  "Business & Consulting": "Consulting engagements range $500–$10,000.",
 };
 
 /* -------------------------------------------------------------------------- */
@@ -277,17 +271,17 @@ export function PostProjectForm() {
               onClick={() => i < currentStep && goToStep(i)}
               className={cn(
                 "flex items-center gap-2 text-sm font-medium transition-colors",
-                i < currentStep && "text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline",
-                i === currentStep && "text-zinc-900 dark:text-zinc-50",
-                i > currentStep && "text-zinc-400 dark:text-zinc-600"
+                i < currentStep && "text-brand cursor-pointer hover:underline",
+                i === currentStep && "text-foreground",
+                i > currentStep && "text-muted-foreground"
               )}
             >
               <span
                 className={cn(
                   "flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border-2 transition-all",
-                  i < currentStep && "bg-indigo-600 border-indigo-600 text-white",
-                  i === currentStep && "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400",
-                  i > currentStep && "border-zinc-300 text-zinc-400 dark:border-zinc-700"
+                  i < currentStep && "bg-brand border-brand text-white",
+                  i === currentStep && "border-brand text-brand",
+                  i > currentStep && "border-border text-muted-foreground"
                 )}
               >
                 {i < currentStep ? <Check className="w-3.5 h-3.5" /> : i + 1}
@@ -305,8 +299,8 @@ export function PostProjectForm() {
           {currentStep === 0 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div>
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">Project Basics</h2>
-                <p className="text-zinc-500 dark:text-zinc-400">Tell us about your project</p>
+                <h2 className="text-2xl font-bold text-foreground mb-1">Project Basics</h2>
+                <p className="text-muted-foreground">Tell us about your project</p>
               </div>
 
               <FormField
@@ -353,7 +347,7 @@ export function PostProjectForm() {
                   <FormItem>
                     <div className="flex items-center justify-between">
                       <FormLabel>Description</FormLabel>
-                      <span className="text-xs text-zinc-400">{field.value.length}/2000</span>
+                      <span className="text-xs text-muted-foreground">{field.value.length}/2000</span>
                     </div>
                     <FormControl>
                       <Textarea
@@ -392,8 +386,8 @@ export function PostProjectForm() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div>
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">Requirements</h2>
-                <p className="text-zinc-500 dark:text-zinc-400">Define the expertise and timeline</p>
+                <h2 className="text-2xl font-bold text-foreground mb-1">Requirements</h2>
+                <p className="text-muted-foreground">Define the expertise and timeline</p>
               </div>
 
               <FormField
@@ -419,13 +413,13 @@ export function PostProjectForm() {
                               className={cn(
                                 "flex flex-col items-center p-5 rounded-xl border-2 transition-all duration-200 cursor-pointer",
                                 isSelected
-                                  ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 dark:border-indigo-500"
-                                  : "border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+                                  ? "border-brand bg-brand/10"
+                                  : "border-border hover:border-muted-foreground/40"
                               )}
                             >
-                              <Icon className={cn("w-8 h-8 mb-3", isSelected ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-400")} />
-                              <span className={cn("font-semibold text-sm", isSelected ? "text-indigo-600 dark:text-indigo-400" : "text-zinc-900 dark:text-zinc-50")}>{level.label}</span>
-                              <span className="text-xs text-zinc-500 mt-1">{level.desc}</span>
+                              <Icon className={cn("w-8 h-8 mb-3", isSelected ? "text-brand" : "text-muted-foreground")} />
+                              <span className={cn("font-semibold text-sm", isSelected ? "text-brand" : "text-foreground")}>{level.label}</span>
+                              <span className="text-xs text-muted-foreground mt-1">{level.desc}</span>
                             </button>
                           );
                         })}
@@ -467,30 +461,30 @@ export function PostProjectForm() {
                   className={cn(
                     "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors",
                     isDragActive
-                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/30"
-                      : "border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
+                      ? "border-brand bg-brand/10"
+                      : "border-border hover:border-muted-foreground/40"
                   )}
                 >
                   <input {...getInputProps()} />
-                  <Upload className="w-10 h-10 mx-auto mb-3 text-zinc-400" />
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-1">
+                  <Upload className="w-10 h-10 mx-auto mb-3 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground mb-1">
                     {isDragActive ? "Drop files here..." : "Drag & drop files, or click to browse"}
                   </p>
-                  <p className="text-xs text-zinc-400">PDF, DOC, DOCX, PNG, JPG — max 10MB each, up to 5 files</p>
+                  <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, PNG, JPG — max 10MB each, up to 5 files</p>
                 </div>
 
                 {files.length > 0 && (
                   <div className="space-y-2 mt-4">
                     {files.map((f, index) => (
-                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg border bg-muted">
                         {f.preview ? (
                           <img src={f.preview} alt={f.file.name} className="w-10 h-10 rounded object-cover" />
                         ) : (
-                          <FileText className="w-10 h-10 text-zinc-400 p-1" />
+                          <FileText className="w-10 h-10 text-muted-foreground p-1" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate text-zinc-900 dark:text-zinc-50">{f.file.name}</p>
-                          <p className="text-xs text-zinc-500">{(f.file.size / 1024 / 1024).toFixed(2)} MB</p>
+                          <p className="text-sm font-medium truncate text-foreground">{f.file.name}</p>
+                          <p className="text-xs text-muted-foreground">{(f.file.size / 1024 / 1024).toFixed(2)} MB</p>
                         </div>
                         <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)} className="h-8 w-8">
                           <X className="w-4 h-4" />
@@ -507,8 +501,8 @@ export function PostProjectForm() {
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div>
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">Budget</h2>
-                <p className="text-zinc-500 dark:text-zinc-400">Set your project budget</p>
+                <h2 className="text-2xl font-bold text-foreground mb-1">Budget</h2>
+                <p className="text-muted-foreground">Set your project budget</p>
               </div>
 
               {/* Budget type toggle */}
@@ -518,15 +512,15 @@ export function PostProjectForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Budget Type</FormLabel>
-                    <div className="flex items-center gap-4 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 w-fit">
+                    <div className="flex items-center gap-4 p-1 rounded-lg border w-fit">
                       <button
                         type="button"
                         onClick={() => field.onChange("fixed")}
                         className={cn(
                           "px-4 py-2 rounded-md text-sm font-medium transition-all",
                           field.value === "fixed"
-                            ? "bg-indigo-600 text-white shadow"
-                            : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                            ? "bg-brand text-white shadow"
+                            : "text-muted-foreground hover:text-foreground"
                         )}
                       >
                         Fixed Price
@@ -537,8 +531,8 @@ export function PostProjectForm() {
                         className={cn(
                           "px-4 py-2 rounded-md text-sm font-medium transition-all",
                           field.value === "hourly"
-                            ? "bg-indigo-600 text-white shadow"
-                            : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
+                            ? "bg-brand text-white shadow"
+                            : "text-muted-foreground hover:text-foreground"
                         )}
                       >
                         Hourly Rate
@@ -581,7 +575,7 @@ export function PostProjectForm() {
                   </div>
 
                   <div>
-                    <Label className="text-sm text-zinc-500 mb-2 block">Budget Range</Label>
+                    <Label className="text-sm text-muted-foreground mb-2 block">Budget Range</Label>
                     <Slider
                       value={[watchFixedMin ?? 100, watchFixedMax ?? 1000]}
                       onValueChange={([min, max]) => {
@@ -626,11 +620,11 @@ export function PostProjectForm() {
               )}
 
               {/* Dynamic estimate */}
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/50">
-                <DollarSign className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-brand/10 border border-brand/20">
+                <DollarSign className="w-5 h-5 text-brand flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Estimated Budget</p>
-                  <p className="text-sm text-indigo-600 dark:text-indigo-400">{budgetEstimate}</p>
+                  <p className="text-sm font-semibold text-foreground">Estimated Budget</p>
+                  <p className="text-sm text-brand">{budgetEstimate}</p>
                 </div>
               </div>
 
@@ -639,8 +633,8 @@ export function PostProjectForm() {
                 <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50">
                   <Info className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Budget Recommendation</p>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">{BUDGET_TIPS[watchCategory]}</p>
+                    <p className="text-sm font-semibold text-foreground">Budget Recommendation</p>
+                    <p className="text-sm text-muted-foreground">{BUDGET_TIPS[watchCategory]}</p>
                   </div>
                 </div>
               )}
@@ -651,8 +645,8 @@ export function PostProjectForm() {
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
               <div>
-                <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">Review & Submit</h2>
-                <p className="text-zinc-500 dark:text-zinc-400">Double-check everything before posting</p>
+                <h2 className="text-2xl font-bold text-foreground mb-1">Review & Submit</h2>
+                <p className="text-muted-foreground">Double-check everything before posting</p>
               </div>
 
               {/* Review cards */}
@@ -685,13 +679,13 @@ export function PostProjectForm() {
                   ],
                 },
               ].map((section) => (
-                <div key={section.title} className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
-                  <div className="flex items-center justify-between px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
-                    <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-50">{section.title}</h3>
+                <div key={section.title} className="rounded-xl border overflow-hidden">
+                  <div className="flex items-center justify-between px-5 py-3 bg-muted border-b">
+                    <h3 className="font-semibold text-sm text-foreground">{section.title}</h3>
                     <button
                       type="button"
                       onClick={() => goToStep(section.step)}
-                      className="flex items-center gap-1 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                      className="flex items-center gap-1 text-xs font-medium text-brand hover:underline"
                     >
                       <Pencil className="w-3 h-3" /> Edit
                     </button>
@@ -699,8 +693,8 @@ export function PostProjectForm() {
                   <div className="p-5 space-y-3">
                     {section.items.map((item) => (
                       <div key={item.label} className="flex flex-col sm:flex-row sm:items-start gap-1">
-                        <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 sm:w-32 flex-shrink-0">{item.label}</span>
-                        <span className="text-sm text-zinc-900 dark:text-zinc-50 break-words">{item.value || "—"}</span>
+                        <span className="text-sm font-medium text-muted-foreground sm:w-32 flex-shrink-0">{item.label}</span>
+                        <span className="text-sm text-foreground break-words">{item.value || "—"}</span>
                       </div>
                     ))}
                   </div>
@@ -710,7 +704,7 @@ export function PostProjectForm() {
           )}
 
           {/* ========== Navigation Buttons ========== */}
-          <div className="flex items-center justify-between pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center justify-between pt-6 border-t">
             <Button
               type="button"
               variant="outline"

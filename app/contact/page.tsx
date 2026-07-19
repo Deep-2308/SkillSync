@@ -80,12 +80,12 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="min-h-screen bg-muted/40">
       {/* Hero */}
       <section className="pt-32 pb-16 px-6 text-center">
         <AnimatedSection>
-          <h1 className="text-4xl md:text-5xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Get in Touch</h1>
-          <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Get in Touch</h1>
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto">
             Have a question or feedback? We&apos;d love to hear from you.
           </p>
         </AnimatedSection>
@@ -97,15 +97,15 @@ export default function ContactPage() {
           {/* Form */}
           <div className="lg:col-span-3">
             <AnimatedSection animation="slideInLeft">
-              <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8">
+              <div className="rounded-2xl border bg-card p-8">
                 {isSuccess ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center space-y-6">
                     <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center animate-in zoom-in duration-300">
                       <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">Message Sent!</h3>
-                      <p className="text-zinc-600 dark:text-zinc-400">We&apos;ll get back to you within 24 hours.</p>
+                      <h3 className="text-2xl font-bold text-foreground mb-2">Message Sent!</h3>
+                      <p className="text-muted-foreground">We&apos;ll get back to you within 24 hours.</p>
                     </div>
                     <Button variant="outline" onClick={() => { setIsSuccess(false); form.reset(); }}>
                       Send Another Message
@@ -169,8 +169,8 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div className="lg:col-span-2 space-y-6">
             <AnimatedSection animation="slideInRight">
-              <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 space-y-6">
-                <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Contact Information</h3>
+              <div className="rounded-2xl border bg-card p-8 space-y-6">
+                <h3 className="text-lg font-semibold text-foreground">Contact Information</h3>
                 {[
                   { icon: Mail, label: "Email", value: "hello@skillsync.com" },
                   { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
@@ -180,12 +180,12 @@ export default function ContactPage() {
                   const Icon = item.icon;
                   return (
                     <div key={item.label} className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-5 h-5 text-brand" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{item.label}</p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400 whitespace-pre-line">{item.value}</p>
+                        <p className="text-sm font-medium text-foreground">{item.label}</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-line">{item.value}</p>
                       </div>
                     </div>
                   );
@@ -193,8 +193,8 @@ export default function ContactPage() {
               </div>
 
               {/* Map placeholder */}
-              <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-200 dark:bg-zinc-800 h-48 flex items-center justify-center">
-                <p className="text-sm text-zinc-500 dark:text-zinc-400">Map Placeholder</p>
+              <div className="rounded-2xl border bg-zinc-200 dark:bg-zinc-800 h-48 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">Map Placeholder</p>
               </div>
             </AnimatedSection>
           </div>

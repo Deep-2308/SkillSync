@@ -68,13 +68,13 @@ export default function ForgotPasswordPage() {
         subtitle="We've sent you a link to reset your password"
       >
         <div className="flex flex-col items-center justify-center space-y-6 py-6">
-          <div className="h-20 w-20 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full flex items-center justify-center">
+          <div className="h-20 w-20 bg-brand/10 text-brand rounded-full flex items-center justify-center">
             <MailCheck className="h-10 w-10" />
           </div>
           <div className="text-center space-y-2">
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground">
               We sent a password reset link to <br />
-              <span className="font-semibold text-zinc-900 dark:text-zinc-100">{form.getValues().email}</span>
+              <span className="font-semibold text-foreground">{form.getValues().email}</span>
             </p>
           </div>
           <Button
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
           </Button>
           <Link
             href="/login"
-            className="flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 mt-4"
+            className="flex items-center text-sm font-medium text-brand hover:text-brand/80 mt-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to sign in
@@ -127,7 +127,7 @@ export default function ForgotPasswordPage() {
       <div className="mt-8 text-center">
         <Link
           href="/login"
-          className="inline-flex items-center text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+          className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to sign in

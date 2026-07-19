@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, GraduationCap, Briefcase } from "lucide-react";
+import { Loader2, Briefcase, UserSearch } from "lucide-react";
 
 import {
   Form,
@@ -37,7 +37,7 @@ const signupSchema = z
       .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
       .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
-    role: z.enum(["member", "provider"]),
+    role: z.enum(["client", "freelancer"]),
     terms: z.boolean().refine((val) => val, "You must accept the terms and conditions"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -58,7 +58,7 @@ export default function SignupPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      role: "member",
+      role: "client",
       terms: false,
     },
     mode: "onBlur",
@@ -162,7 +162,7 @@ export default function SignupPage() {
             name="role"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>I want to...</FormLabel>
+                <FormLabel>Join as...</FormLabel>
                 <FormControl>
                   <RadioGroup
                     onValueChange={field.onChange}
@@ -171,31 +171,33 @@ export default function SignupPage() {
                   >
                     <FormItem>
                       <FormControl>
-                        <RadioGroupItem value="member" className="sr-only" />
+                        <RadioGroupItem value="client" className="sr-only" />
                       </FormControl>
                       <FormLabel
                         className={cn(
                           "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors",
-                          field.value === "member" && "border-indigo-600 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50"
+                          field.value === "client" && "border-brand bg-brand/5"
                         )}
                       >
-                        <GraduationCap className={cn("mb-3 h-6 w-6", field.value === "member" && "text-indigo-600 dark:text-indigo-400")} />
-                        <span className="font-semibold text-sm">Learn Skills</span>
+                        <UserSearch className={cn("mb-3 h-6 w-6", field.value === "client" && "text-brand")} />
+                        <span className="font-semibold text-sm">I&apos;m a Client</span>
+                        <span className="mt-1 text-xs text-muted-foreground text-center">I want to hire talent</span>
                       </FormLabel>
                     </FormItem>
-                    
+
                     <FormItem>
                       <FormControl>
-                        <RadioGroupItem value="provider" className="sr-only" />
+                        <RadioGroupItem value="freelancer" className="sr-only" />
                       </FormControl>
                       <FormLabel
                         className={cn(
                           "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-colors",
-                          field.value === "provider" && "border-indigo-600 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-950/50"
+                          field.value === "freelancer" && "border-brand bg-brand/5"
                         )}
                       >
-                        <Briefcase className={cn("mb-3 h-6 w-6", field.value === "provider" && "text-indigo-600 dark:text-indigo-400")} />
-                        <span className="font-semibold text-sm">Teach & Mentor</span>
+                        <Briefcase className={cn("mb-3 h-6 w-6", field.value === "freelancer" && "text-brand")} />
+                        <span className="font-semibold text-sm">I&apos;m a Freelancer</span>
+                        <span className="mt-1 text-xs text-muted-foreground text-center">I want to offer services</span>
                       </FormLabel>
                     </FormItem>
                   </RadioGroup>
@@ -217,13 +219,13 @@ export default function SignupPage() {
                   />
                 </FormControl>
                 <div className="space-y-1 leading-none">
-                  <FormLabel className="font-normal text-sm text-zinc-600 dark:text-zinc-400">
+                  <FormLabel className="font-normal text-sm text-muted-foreground">
                     I agree to the{" "}
-                    <Link href="/terms" className="text-indigo-600 hover:underline dark:text-indigo-400">
+                    <Link href="/terms" className="text-brand hover:underline">
                       Terms of Service
                     </Link>{" "}
                     and{" "}
-                    <Link href="/privacy" className="text-indigo-600 hover:underline dark:text-indigo-400">
+                    <Link href="/privacy" className="text-brand hover:underline">
                       Privacy Policy
                     </Link>
                   </FormLabel>
@@ -242,11 +244,11 @@ export default function SignupPage() {
 
       <OAuthButtons text="Sign up with Google" />
 
-      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400 mt-8">
+      <p className="text-center text-sm text-muted-foreground mt-8">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+          className="font-medium text-brand hover:text-brand/80 transition-colors"
         >
           Sign in
         </Link>

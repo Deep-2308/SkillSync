@@ -7,7 +7,7 @@
  * are safe to pass to Client Components.
  */
 
-export type UserRole = "member" | "provider" | "admin";
+export type UserRole = "client" | "freelancer" | "admin";
 
 export type SkillLevel = "beginner" | "intermediate" | "advanced" | "expert";
 

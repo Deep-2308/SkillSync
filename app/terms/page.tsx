@@ -39,10 +39,10 @@ export default function TermsPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
-      <section className="pt-32 pb-12 px-6 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
+      <section className="pt-32 pb-12 px-6 bg-muted/40 border-b border-border">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Terms of Service</h1>
-          <p className="text-zinc-500 dark:text-zinc-400">Last updated: July 1, 2026</p>
+          <h1 className="text-4xl font-bold text-foreground mb-4">Terms of Service</h1>
+          <p className="text-muted-foreground">Last updated: July 1, 2026</p>
         </div>
       </section>
 
@@ -58,7 +58,7 @@ export default function TermsPage() {
                 className={cn(
                   "block text-sm py-1.5 px-3 rounded-md transition-colors",
                   activeSection === s.id
-                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium"
+                    ? "bg-brand/10 text-brand font-medium"
                     : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
                 )}
               >
@@ -78,8 +78,8 @@ export default function TermsPage() {
 
           <section id="description">
             <h2>2. Description of Service</h2>
-            <p>SkillSync is an online marketplace that connects individuals seeking services (&quot;Clients&quot;) with skilled professionals (&quot;Experts&quot;). The Platform facilitates the discovery, hiring, and payment process but does not itself provide any professional services.</p>
-            <p>SkillSync acts as an intermediary and is not a party to any agreement between Clients and Experts. All work arrangements, deliverables, and timelines are agreed upon directly between the parties involved.</p>
+            <p>SkillSync is an online marketplace that connects individuals seeking services (&quot;Clients&quot;) with skilled professionals (&quot;Freelancers&quot;). The Platform facilitates the discovery, hiring, and payment process but does not itself provide any professional services.</p>
+            <p>SkillSync acts as an intermediary and is not a party to any agreement between Clients and Freelancers. All work arrangements, deliverables, and timelines are agreed upon directly between the parties involved.</p>
           </section>
 
           <section id="accounts">
@@ -96,12 +96,12 @@ export default function TermsPage() {
           <section id="payments">
             <h2>4. Payments & Fees</h2>
             <p>SkillSync charges a service fee on each transaction completed through the Platform. The current fee structure is displayed at the time of transaction.</p>
-            <p>Payments are processed through our secure payment partner. Funds are held in escrow until the Client confirms satisfactory completion of work. Experts receive payment within 5 business days of release from escrow.</p>
+            <p>Payments are processed through our secure payment partner. Funds are held in escrow until the Client confirms satisfactory completion of work. Freelancers receive payment within 5 business days of release from escrow.</p>
           </section>
 
           <section id="ip">
             <h2>5. Intellectual Property</h2>
-            <p>Unless otherwise agreed in writing between Client and Expert, all intellectual property created during an engagement belongs to the Client upon full payment. Experts retain the right to display completed work in their portfolio unless restricted by a non-disclosure agreement.</p>
+            <p>Unless otherwise agreed in writing between Client and Freelancer, all intellectual property created during an engagement belongs to the Client upon full payment. Freelancers retain the right to display completed work in their portfolio unless restricted by a non-disclosure agreement.</p>
           </section>
 
           <section id="prohibited">
@@ -135,7 +135,7 @@ export default function TermsPage() {
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className={cn(
-          "fixed bottom-8 right-8 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-indigo-700",
+          "fixed bottom-8 right-8 w-12 h-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-brand/90",
           showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         )}
         aria-label="Back to top"

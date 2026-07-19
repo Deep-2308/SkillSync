@@ -38,14 +38,14 @@ export function FilterSidebar({
   return (
     <div className="w-full lg:w-64 flex-shrink-0 space-y-8">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-lg text-zinc-900 dark:text-zinc-50">Filters</h3>
-        <Button variant="ghost" size="sm" onClick={onClearAll} className="h-8 px-2 text-zinc-500 text-xs">
+        <h3 className="font-semibold text-lg text-foreground">Filters</h3>
+        <Button variant="ghost" size="sm" onClick={onClearAll} className="h-8 px-2 text-muted-foreground text-xs">
           Clear all
         </Button>
       </div>
 
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Category</h4>
+        <h4 className="font-medium text-sm text-foreground">Category</h4>
         <div className="space-y-2">
           {categories.map((category) => (
             <div key={category} className="flex items-center space-x-2">
@@ -56,7 +56,7 @@ export function FilterSidebar({
               />
               <Label
                 htmlFor={`cat-${category}`}
-                className="text-sm font-normal text-zinc-600 dark:text-zinc-400"
+                className="text-sm font-normal text-muted-foreground"
               >
                 {category}
               </Label>
@@ -66,12 +66,12 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Experience Level</h4>
+        <h4 className="font-medium text-sm text-foreground">Experience Level</h4>
         <RadioGroup value={experienceLevel} onValueChange={onExperienceChange}>
           {["Any", "Junior", "Mid", "Senior"].map((level) => (
             <div key={level} className="flex items-center space-x-2">
               <RadioGroupItem value={level} id={`exp-${level}`} />
-              <Label htmlFor={`exp-${level}`} className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
+              <Label htmlFor={`exp-${level}`} className="text-sm font-normal text-muted-foreground">
                 {level}
               </Label>
             </div>
@@ -81,8 +81,8 @@ export function FilterSidebar({
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Hourly Rate</h4>
-          <span className="text-xs text-zinc-500">${hourlyRate[0]} - ${hourlyRate[1]}</span>
+          <h4 className="font-medium text-sm text-foreground">Hourly Rate</h4>
+          <span className="text-xs text-muted-foreground">${hourlyRate[0]} - ${hourlyRate[1]}</span>
         </div>
         <Slider
           defaultValue={[5, 200]}
@@ -96,7 +96,7 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Minimum Rating</h4>
+        <h4 className="font-medium text-sm text-foreground">Minimum Rating</h4>
         <RadioGroup value={minRating} onValueChange={onMinRatingChange}>
           {[
             { value: "0", label: "Any Rating" },
@@ -105,7 +105,7 @@ export function FilterSidebar({
           ].map((rating) => (
             <div key={rating.value} className="flex items-center space-x-2">
               <RadioGroupItem value={rating.value} id={`rating-${rating.value}`} />
-              <Label htmlFor={`rating-${rating.value}`} className="text-sm font-normal text-zinc-600 dark:text-zinc-400">
+              <Label htmlFor={`rating-${rating.value}`} className="text-sm font-normal text-muted-foreground">
                 {rating.label}
               </Label>
             </div>
@@ -114,7 +114,7 @@ export function FilterSidebar({
       </div>
 
       <div className="space-y-4">
-        <h4 className="font-medium text-sm text-zinc-900 dark:text-zinc-50">Availability</h4>
+        <h4 className="font-medium text-sm text-foreground">Availability</h4>
         <div className="flex items-center space-x-2">
           <Checkbox
             id="available-now"
@@ -123,7 +123,7 @@ export function FilterSidebar({
           />
           <Label
             htmlFor="available-now"
-            className="text-sm font-normal text-zinc-600 dark:text-zinc-400"
+            className="text-sm font-normal text-muted-foreground"
           >
             Available Now
           </Label>

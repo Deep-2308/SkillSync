@@ -50,7 +50,7 @@ export function welcomeEmail(name: string): string {
       <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 16px 0;">
       <p style="font-size: 16px; line-height: 1.6;">Hi ${name},</p>
       <p style="font-size: 16px; line-height: 1.6;">
-        We're thrilled to have you join our community. Whether you're here to hire top talent or offer your expert skills, SkillSync is the place to make it happen.
+        We're thrilled to have you join our community. Whether you're here to hire top talent or offer your services as a freelancer, SkillSync is the place to make it happen.
       </p>
       <p style="font-size: 16px; line-height: 1.6;">
         Get started by exploring projects or updating your profile!

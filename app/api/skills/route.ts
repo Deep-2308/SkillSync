@@ -29,15 +29,15 @@ function slugify(title: string): string {
 }
 
 /**
- * POST /api/skills — Create skill listing (provider role only).
+ * POST /api/skills — Create skill listing (freelancer role only).
  */
 export async function POST(request: Request) {
   try {
     const session = await getAuthSession();
 
-    if (session.user.role !== "provider") {
+    if (session.user.role !== "freelancer") {
       return NextResponse.json(
-        { error: "Only experts can create skill listings." },
+        { error: "Only freelancers can create skill listings." },
         { status: 403 }
       );
     }

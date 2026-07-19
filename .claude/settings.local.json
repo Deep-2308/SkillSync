@@ -4,7 +4,15 @@
       "Bash(cd \"D:\\\\Project Skillsync\" 2>/dev/null || cd \"/tmp\"; find \"D:\\\\Project Skillsync\" -type f 2>/dev/null | sort || find \"/mnt/d/Project Skillsync\" -type f 2>/dev/null | sort || echo \"trying alt path\")",
       "Bash(npx tsc *)",
       "Bash(node -e \"const p=require\\('next-auth/package.json'\\); console.log\\('version', p.version\\); console.log\\('exports', Object.keys\\(p.exports||{}\\).join\\(', '\\)\\)\")",
-      "Bash(MONGODB_URI=\"mongodb://localhost:27017/skillsync\" NEXTAUTH_SECRET=\"build-time-placeholder-secret-value\" npx next build)"
+      "Bash(MONGODB_URI=\"mongodb://localhost:27017/skillsync\" NEXTAUTH_SECRET=\"build-time-placeholder-secret-value\" npx next build)",
+      "Bash(python -)",
+      "Bash(python _check_tex.py)",
+      "Bash(sed -i 's/share your expertise with the world/offer your services as a freelancer/' app/about/page.tsx)",
+      "Bash(sed -i 's/thousands of experts across hundreds of categories/thousands of freelancers across hundreds of categories/; s/Become an Expert/Become a Freelancer/; s/{category.count} experts/{category.count} freelancers/; s/Finding the perfect expert shouldn/Finding the perfect freelancer shouldn/; s/chat with experts/chat with freelancers/; s/found their perfect expert on SkillSync/found their perfect freelancer on SkillSync/' app/services/page.tsx)",
+      "Bash(sed -i 's/\\(&quot;Experts&quot;\\)/\\(\\\\&quot;Freelancers\\\\&quot;\\)/; s/between Clients and Experts/between Clients and Freelancers/; s/between Client and Expert/between Client and Freelancer/; s/Experts receive payment/Freelancers receive payment/; s/Experts retain the right/Freelancers retain the right/' app/terms/page.tsx)",
+      "Bash(sed -i 's/role \\(Learner or Expert\\)/role \\(Client or Freelancer\\)/; s/Match Clients with relevant Experts/Match Clients with relevant Freelancers/' app/privacy/page.tsx)",
+      "Bash(git stash *)",
+      "Bash(rm -f tsconfig.tsbuildinfo)"
     ]
   }
 }

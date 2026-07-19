@@ -7,7 +7,7 @@ import { User } from "@/models/User";
 
 /**
  * GET /api/admin/users — Paginated user list (admin only).
- * ?q=search&role=member|provider|admin&banned=true|false&page=1&limit=20
+ * ?q=search&role=client|freelancer|admin&banned=true|false&page=1&limit=20
  */
 export async function GET(request: Request) {
   try {

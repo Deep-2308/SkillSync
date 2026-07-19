@@ -59,7 +59,7 @@ export default async function HireTalentPage() {
   const freelancers = generateMockFreelancers();
 
   return (
-    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pt-20">
+    <main className="min-h-screen bg-muted/40 pt-20">
       <HireTalentClient initialFreelancers={freelancers} />
     </main>
   );

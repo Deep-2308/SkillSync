@@ -37,7 +37,7 @@ export function Hero() {
           <AnimatedSection animation="fadeIn">
             <span className="inline-flex items-center gap-2 rounded-full border bg-background/60 px-4 py-1.5 text-sm text-muted-foreground backdrop-blur">
               <Sparkles className="size-4 text-brand" />
-              The skill marketplace for modern teams
+              The smart freelancer marketplace for modern teams
             </span>
           </AnimatedSection>
 
@@ -45,16 +45,16 @@ export function Hero() {
             <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
               {/* Animated gradient text: oversized bg + panning keyframes */}
               <span className="animate-gradient-x bg-[length:200%_auto] bg-gradient-to-r from-brand via-brand-green to-brand bg-clip-text text-transparent">
-                Connect. Learn. Hire.
+                Hire smarter. Work smarter.
               </span>
             </h1>
           </AnimatedSection>
 
           <AnimatedSection animation="slideUp" delay={160}>
             <p className="max-w-xl text-pretty text-lg text-muted-foreground">
-              SkillSync connects people who want to learn with experts ready to
-              teach and take on work — matched by AI, booked by the hour, and
-              backed by real reviews.
+              SkillSync connects businesses with vetted freelance professionals —
+              matched by AI, protected by secure payments, and backed by real
+              reviews.
             </p>
           </AnimatedSection>
 

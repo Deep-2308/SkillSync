@@ -1,0 +1,1323 @@
+% ============================================================================
+%  SkillSync — Prompt Diary
+%  From Vibe-Coded Prototype to a Production-Grade Smart Freelancing Platform
+%
+%  Compile with pdflatex (TeX Live / MiKTeX / Overleaf).
+% ============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,linkcolor=brandblue,urlcolor=brandblue]{hyperref}
+
+% ---------------------------------------------------------------------------
+% Brand colours
+% ---------------------------------------------------------------------------
+\definecolor{brandblue}{HTML}{1D4ED8}
+\definecolor{brandink}{HTML}{0F172A}
+\definecolor{brandmist}{HTML}{EEF2FF}
+\definecolor{brandline}{HTML}{C7D2FE}
+\definecolor{donegreen}{HTML}{047857}
+\definecolor{phasegray}{HTML}{475569}
+
+\titleformat{\section}{\Large\bfseries\color{brandink}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{phasegray}}{\thesubsection}{0.7em}{}
+
+% ---------------------------------------------------------------------------
+% Prompt box environment
+%   \begin{promptbox}{<number>}{<title>}  ... \end{promptbox}
+% ---------------------------------------------------------------------------
+\newtcolorbox{promptbox}[2]{
+  enhanced, breakable,
+  colback=brandmist, colframe=brandblue,
+  boxrule=0.8pt, arc=2mm,
+  title={\textbf{Prompt #1 --- #2}},
+  fonttitle=\bfseries\color{white},
+  colbacktitle=brandblue,
+  left=3mm, right=3mm, top=2.5mm, bottom=2.5mm
+}
+
+% "Definition of done" mini-heading
+\newcommand{\dod}{\medskip\noindent\textcolor{donegreen}{\rule{\linewidth}{0.5pt}}\\[1mm]\textbf{\textcolor{donegreen}{Definition of done}}\\[-2mm]}
+\newcommand{\objective}[1]{\noindent\textbf{Objective.} #1\medskip}
+\newcommand{\filepath}[1]{\texttt{#1}}
+
+% ============================================================================
+\begin{document}
+
+% ---------------------------------------------------------------------------
+% Title page
+% ---------------------------------------------------------------------------
+\begin{titlepage}
+  \centering
+  \vspace*{2.5cm}
+  {\Huge\bfseries\color{brandblue} SkillSync\par}
+  \vspace{0.4cm}
+  {\Large\color{brandink} Smart Freelancer Hiring \& Review System\par}
+  \vspace{1.2cm}
+  {\huge\bfseries The Prompt Diary\par}
+  \vspace{0.5cm}
+  {\large From Vibe-Coded Prototype to a Production-Grade\\Intelligent Freelancing Platform\par}
+  \vspace{2cm}
+  \begin{tcolorbox}[colback=brandmist,colframe=brandline,arc=2mm,width=0.8\textwidth]
+    \centering
+    \textbf{10 Phases \quad\textbullet\quad 27 Prompts \quad\textbullet\quad 1 Transformation}\\[2mm]
+    Execute the prompts in order. Each prompt assumes every prompt before it\\has been completed and verified.
+  \end{tcolorbox}
+  \vfill
+  {\color{phasegray} July 2026 \quad\textbullet\quad Version 1.0\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ===========================================================================
+\section{How to Use This Diary}
+% ===========================================================================
+
+This document is a \emph{development playbook}, not a code listing. Each prompt is a
+self-contained instruction you paste into your AI coding session. Rules of engagement:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Order matters.} The sequence is deliberately dependency-ordered:
+        identity $\rightarrow$ architecture $\rightarrow$ core loops $\rightarrow$
+        intelligence $\rightarrow$ hardening. Skipping ahead will force rework.
+  \item \textbf{One prompt per session.} Finish, verify against the ``Definition of
+        done'' checklist, commit, and only then move on. Keep commits small and named
+        after the prompt (e.g.\ \texttt{P07: profile \& settings}).
+  \item \textbf{Verify before you trust.} After every prompt run
+        \texttt{npm run typecheck} and click through the affected screens. The current
+        codebase's biggest disease is \emph{mock success} --- forms that pretend to
+        submit. Never accept a screen you have not exercised against the real API.
+  \item \textbf{Never regress the loop.} From Phase~3 onward there is always a working
+        end-to-end hiring loop. Every later prompt must preserve it.
+  \item \textbf{Adapt freely.} If your session discovers that a referenced file has
+        drifted, tell the agent to re-inspect and adapt --- the \emph{intent} of each
+        prompt is the contract, not the exact file list.
+\end{enumerate}
+
+% ===========================================================================
+\section{State of the Project (Condensed Audit)}
+% ===========================================================================
+
+A full audit of the repository (frontend, backend, models, docs) produced the
+following verdict. The backend is a respectable skeleton; the frontend is a
+marketing shell with an almost entirely simulated application behind it.
+
+\subsection{What already works}
+\begin{itemize}[leftmargin=1.6em]
+  \item $\sim$34 real API routes: auth (credentials + Google, password reset),
+        projects, skills, proposals (with a proper MongoDB transaction on accept),
+        contracts, Stripe PaymentIntent + verified webhook, reviews (race-safe
+        uniqueness), notifications, admin user management, search with text index.
+  \item Sound security hygiene in places: bcrypt cost 12, hashed reset tokens,
+        \texttt{select:\,false} on secrets, enumeration-safe responses,
+        denormalised rating aggregates.
+  \item A polished landing-page aesthetic: animations, dark mode, glassmorphism.
+\end{itemize}
+
+\subsection{Critical defects}
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{Identity crisis.} Skill-\emph{learning} language (``Learn Skills'',
+        ``Teach \& Mentor'', ``Learner''/``Expert'') collides with freelancing
+        mechanics (proposals, contracts). Roles are named \texttt{member}/\texttt{provider}
+        instead of client/freelancer. Two clashing colour systems (blue/emerald vs.\
+        indigo/zinc). Two contradictory category taxonomies.
+  \item \textbf{No marketing/app separation.} One global layout wraps everything;
+        login redirects to the landing page; logged-in users keep marketing navigation.
+  \item \textbf{Simulated frontend.} Post-Project, Share-Skill and Hire dialogs fake
+        success with \texttt{setTimeout}; the dashboard shows hardcoded stats and a
+        fake activity feed; \texttt{/hire-talent} renders 48 randomly generated
+        freelancers; every profile is a hardcoded ``Alex Morgan''; the Stripe checkout
+        component is imported by no page.
+  \item \textbf{Ghost routes.} \texttt{/register}, \texttt{/explore},
+        \texttt{/profile}, \texttt{/settings}, \texttt{/projects/[id]},
+        \texttt{/dashboard/contracts/[id]} are linked or documented but do not exist.
+        Freelancers cannot browse or bid on projects at all.
+  \item \textbf{Broken economics.} No Stripe Connect, no payout path, no escrow
+        despite the Terms page promising it; a freelancer can self-complete an unpaid
+        contract; cancelled contracts can still be funded.
+  \item \textbf{Enforcement gaps.} Banned users can log in and use every API; JWT
+        roles go stale after admin changes; $\sim$9 routes return 500 on malformed
+        ObjectIds; no rate limit on login or forgot-password; unescaped user-supplied
+        regex in four routes.
+  \item \textbf{Dead code.} \texttt{Booking} model, all of
+        \filepath{lib/aggregations.ts}, unused helpers in \filepath{lib/api-utils.ts},
+        seed and index scripts that write or index phantom fields.
+  \item \textbf{Zero AI.} ``AI matching'' exists only as marketing copy.
+\end{itemize}
+
+\subsection{Gap matrix vs.\ industry platforms}
+\begin{table}[h]
+\small
+\begin{tabularx}{\textwidth}{@{}lXl@{}}
+\toprule
+\textbf{Capability} & \textbf{Current state} & \textbf{Phase} \\
+\midrule
+Landing / app split          & None --- one shared shell            & 1 \\
+Role-based onboarding        & Single radio button, wrong labels    & 2 \\
+Client dashboard             & Mock data, dead tabs                 & 3 \\
+Project browse \& bidding    & Missing entirely                     & 4 \\
+Freelancer dashboard         & Mock data, dead tabs                 & 4 \\
+Contract workspace           & Missing (API exists)                 & 5 \\
+Escrow / payouts / earnings  & Missing (Terms page lies)            & 5 \\
+Messaging                    & Missing entirely                     & 6 \\
+Notifications UI             & Missing (API exists)                 & 6 \\
+Reviews UI                   & Missing (API exists)                 & 6 \\
+AI features                  & Missing entirely                     & 7 \\
+Admin panel                  & Missing (3 API routes exist)         & 8 \\
+Security hardening           & Partial                              & 9 \\
+Tests                        & 0\,\% coverage                       & 9 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ===========================================================================
+\section{Target Architecture}
+% ===========================================================================
+
+\subsection{Naming and roles}
+The platform's vocabulary is unified once, in Phase 0, and never violated again:
+
+\begin{itemize}[leftmargin=1.6em]
+  \item \texttt{member} $\rightarrow$ \textbf{client} (hires talent);
+        \texttt{provider} $\rightarrow$ \textbf{freelancer} (provides services);
+        \texttt{admin} stays.
+  \item ``Skill'' listings become \textbf{Gigs} (Fiverr-style service offerings).
+  \item All learning/teaching/mentoring language is eliminated.
+\end{itemize}
+
+\subsection{Route topology}
+\begin{itemize}[leftmargin=1.6em]
+  \item \texttt{(marketing)} --- landing, about, contact, terms, privacy. Public.
+        Marketing navigation and footer. Authenticated visitors hitting \texttt{/}
+        are redirected into the app.
+  \item \texttt{(auth)} --- login, register, onboarding, password reset. Minimal
+        chrome, no marketing navigation.
+  \item \texttt{(app)} --- everything behind login. Its own shell: role-aware
+        sidebar, topbar with notifications and messages, no marketing links.
+        Client area under \texttt{/client/\ldots}, freelancer area under
+        \texttt{/freelancer/\ldots}, shared surfaces (contracts, messages, settings)
+        role-agnostic.
+  \item \texttt{(admin)} --- \texttt{/admin/\ldots}, gated by role at middleware level.
+\end{itemize}
+
+\subsection{The Smart layer}
+All AI lives server-side behind \filepath{lib/ai/} using the Gemini API
+(\texttt{GEMINI\_API\_KEY} in env; never exposed to the client). Six pillars:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Smart Matching Engine} --- Gemini embeddings over project briefs and
+        freelancer profiles; ranked matches with human-readable reasons.
+  \item \textbf{Hiring Copilot} --- proposal ranking, summarisation and red-flag
+        detection for clients.
+  \item \textbf{AI Writing Studio} --- job-post composer, proposal assistant,
+        profile optimiser.
+  \item \textbf{Smart Pricing} --- budget estimation for clients, rate guidance for
+        freelancers.
+  \item \textbf{Review Intelligence} --- sentiment digests on profiles, anomalous
+        review flagging.
+  \item \textbf{SyncMate} --- a role-aware platform assistant widget.
+\end{enumerate}
+
+Every AI feature degrades gracefully: if the Gemini call fails or the key is absent,
+the surrounding feature still works without its smart enhancement.
+
+\newpage
+% ===========================================================================
+\section{Phase 0 --- Foundation Reset}
+% ===========================================================================
+
+\textit{Purpose: kill the identity crisis and the dead weight before building
+anything new. Everything later assumes this vocabulary and hygiene.}
+
+% ---------------------------------------------------------------------------
+\objective{Rename the roles across the entire stack, unify all product language
+around freelancing, and collapse the two category taxonomies into one.}
+
+\begin{promptbox}{01}{Product Identity \& Role Unification}
+You are working on SkillSync, a Next.js 15 App Router + Mongoose + NextAuth v5
+freelancing platform. Before adding features, unify its identity. Do the following
+across the entire codebase:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Rename the user roles: \texttt{member} $\rightarrow$ \texttt{client} and
+        \texttt{provider} $\rightarrow$ \texttt{freelancer} (keep \texttt{admin}).
+        Update the Mongoose \texttt{User} schema enum, every Zod schema, every TS type,
+        the NextAuth JWT/session callbacks in \filepath{lib/auth.config.ts} and
+        \filepath{lib/auth.ts}, every API route check, and every UI conditional.
+        Write a one-off migration script \filepath{scripts/migrate-roles.ts} that
+        updates existing documents in MongoDB.
+  \item Eliminate ALL skill-learning language. Replace ``Learn Skills / Teach \&
+        Mentor'' on the signup page with ``I'm a Client --- I want to hire talent''
+        and ``I'm a Freelancer --- I want to offer services''. Replace
+        ``Learner''/``Expert'' badges in the dashboard. Rewrite the hero headline,
+        metadata tagline (``Share skills. Hire talent.''), and any copy mentioning
+        learning, teaching, mentoring, or lessons so everything reads as a modern
+        freelancer hiring platform.
+  \item Merge the two conflicting category taxonomies (\filepath{data/categories.ts}
+        vs.\ the lists inside hire-talent and post-project) into ONE canonical list in
+        \filepath{data/categories.ts} with freelancing categories only (Web
+        Development, Mobile, UI/UX Design, Graphic Design, Content Writing, Digital
+        Marketing, Video \& Animation, Data \& AI, DevOps \& Cloud, Business \&
+        Consulting). Import it everywhere; delete the local copies.
+  \item Pick ONE design token system --- the existing brand blue/emerald oklch tokens
+        in \filepath{app/globals.css} --- and replace all hardcoded indigo/purple/zinc
+        utility classes in the dashboard, auth, hire-talent, freelancer profile, and
+        form pages with the semantic tokens.
+  \item Do not add new features in this prompt. Run \texttt{npm run typecheck} and fix
+        every error you introduced.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item \texttt{grep} for ``member''/``provider'' role strings, ``Learner'',
+        ``Expert'', ``Teach'', ``mentor'' returns no product-facing hits.
+  \item Signup shows Client vs Freelancer cards; typecheck passes; app boots.
+  \item One category list; one colour system.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Remove every piece of dead or lying code so later prompts build on
+truth, and repair the data layer scripts.}
+
+\begin{promptbox}{02}{Dead Code Purge \& Data-Layer Repair}
+Clean the SkillSync codebase of dead and inconsistent code. Do not add features.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Delete the unused \filepath{models/Booking.ts}, its \texttt{Booking} types in
+        \filepath{types/index.ts}, its Zod schema in \filepath{types/schemas.ts}, and
+        the \texttt{/bookings} entry in \filepath{middleware.ts}.
+  \item Delete \filepath{lib/aggregations.ts} entirely (all four exports are unused
+        and reference a non-existent \texttt{isVerified} field). Remove the unused
+        \texttt{withErrorHandler} and \texttt{paginatedResponse} from
+        \filepath{lib/api-utils.ts}, and the dead first \texttt{pipeline} variable in
+        \filepath{app/api/proposals/received/route.ts}.
+  \item Add the missing \texttt{hourlyRate} (number, min 0) and \texttt{title}-style
+        professional fields the profile API already accepts to the \texttt{User}
+        schema so \texttt{PUT /api/users/me} stops silently dropping them.
+  \item Fix \filepath{scripts/create-indexes.ts}: remove indexes on non-existent
+        fields (\texttt{isVerified}, \texttt{availability}, \texttt{isAvailable},
+        \texttt{rate}) and index the fields that actually exist.
+  \item Rewrite \filepath{scripts/seed.ts} so it only writes fields that exist in the
+        schemas, uses the new \texttt{client}/\texttt{freelancer} roles and the
+        canonical categories, calls the rating recalculation in
+        \filepath{lib/reviews.ts} after seeding reviews, and produces a coherent demo
+        dataset: $\sim$12 freelancers with rich profiles, $\sim$6 clients,
+        $\sim$15 projects in various states, proposals, a few contracts and reviews.
+  \item Remove the no-op Pages-Router \texttt{config} export from
+        \filepath{app/api/payments/webhook/route.ts}.
+  \item Update \filepath{docs/} files only where they now state falsehoods (roles,
+        deleted files). Run \texttt{npm run typecheck}; re-run the seed against the dev
+        database to prove it works.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item No references to Booking, aggregations.ts, or phantom fields remain.
+  \item \texttt{npm run seed} completes and seeded users show correct average ratings.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 1 --- Architecture Split \& The Landing Page}
+% ===========================================================================
+
+\textit{Purpose: create the marketing/app separation the product demands ---
+a public showcase site and, behind login, a real application shell.}
+
+% ---------------------------------------------------------------------------
+\objective{Restructure the route tree into route groups with independent layouts,
+and fix every broken link in the codebase.}
+
+\begin{promptbox}{03}{Route Groups, Layouts \& Link Integrity}
+Restructure SkillSync's App Router tree into three route groups with separate
+layouts. Do not redesign pages yet --- move and wire only.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Create \texttt{app/(marketing)/} containing the landing page \texttt{/},
+        about, services, contact, terms, privacy. Its layout renders the existing
+        marketing \texttt{Navigation} and \texttt{Footer}.
+  \item Create \texttt{app/(auth)/} containing login, register (rename signup
+        $\rightarrow$ register so the nav's ``Get Started'' link finally works; keep a
+        redirect from \texttt{/signup}), forgot-password, reset-password. Its layout
+        is the minimal split-screen \texttt{AuthLayout} with NO marketing nav or
+        footer.
+  \item Create \texttt{app/(app)/} for everything behind login: move
+        \texttt{/dashboard}, \texttt{/post-project}, \texttt{/hire-talent},
+        \texttt{/share-skill} here. Give it a placeholder application layout (a plain
+        sidebar + topbar scaffold; Prompt 05 will design it properly). No marketing
+        nav or footer inside.
+  \item Middleware: protect everything in the app group; when an authenticated user
+        visits \texttt{/}, \texttt{/login}, or \texttt{/register}, redirect them to
+        \texttt{/dashboard}. Login must redirect to \texttt{/dashboard} (honouring
+        \texttt{callbackUrl}), never to \texttt{/}. Keep \texttt{/hire-talent} inside
+        the authenticated app group for now; public talent discovery can be added as
+        a marketing surface later if desired.
+  \item Fix every broken link: navigation ``Get Started'' $\rightarrow$
+        \texttt{/register}; footer links to \texttt{/explore} and
+        \texttt{/projects/new} $\rightarrow$ real routes; user-menu
+        \texttt{/profile} and \texttt{/settings} $\rightarrow$ keep the links but
+        create minimal placeholder pages so nothing 404s; \texttt{ProtectedRoute}'s
+        \texttt{/unauthorized} $\rightarrow$ create a simple unauthorized page;
+        remove links to routes that no longer exist.
+  \item Add \filepath{app/not-found.tsx}, \filepath{app/error.tsx} and
+        \filepath{app/global-error.tsx} with branded, friendly fallbacks.
+  \item Verify by clicking every link in nav, footer, user menu, and dashboard quick
+        actions --- zero 404s. Typecheck passes.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Three route groups with independent layouts; login lands on
+        \texttt{/dashboard}; logged-in users never see marketing chrome.
+  \item Zero dead links anywhere; custom 404/error pages exist.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Rebuild the landing page as a credible, freelancing-focused product
+showcase --- the professional first impression.}
+
+\begin{promptbox}{04}{The Landing Page}
+Redesign the SkillSync landing page in \texttt{app/(marketing)/} as a
+production-quality marketing site for a SMART freelancing platform. Keep the
+existing design tokens (brand blue/emerald oklch system) and animation utilities.
+Sections, in order:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Hero}: headline positioning SkillSync as AI-powered freelancer
+        hiring (e.g.\ ``Hire smarter. Work smarter.''), subline explaining the
+        platform in one sentence, dual CTAs (``Hire a Freelancer'' / ``Become a
+        Freelancer'' --- both to \texttt{/register} with a \texttt{?role=} hint), and
+        a visual that suggests intelligent matching. Remove the fabricated
+        ``50K+ users'' stats or clearly label the section as illustrative.
+  \item \textbf{How it works}: two tracks side by side --- For Clients (post
+        $\rightarrow$ get AI-matched proposals $\rightarrow$ hire \& pay securely)
+        and For Freelancers (create profile $\rightarrow$ get matched to projects
+        $\rightarrow$ deliver \& get paid).
+  \item \textbf{Smart features grid}: showcase the six AI pillars --- Smart Matching,
+        Hiring Copilot, AI Writing Studio, Smart Pricing, Review Intelligence,
+        SyncMate assistant --- as the differentiator. Only describe what will exist.
+  \item \textbf{Category strip} using the canonical categories.
+  \item \textbf{Trust section}: secure payments, verified reviews, dispute support.
+  \item \textbf{About section} (brief, on-page) + final CTA + existing footer,
+        with all links valid.
+\end{enumerate}
+The page must be a Server Component except leaf interactive islands, fully
+responsive, dark-mode correct, and free of any learning/teaching language.
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Landing reads unmistakably as an AI-powered freelancing platform.
+  \item Lighthouse-reasonable: no layout shift, images optimised, responsive at
+        375px/768px/1280px.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Build the real application shell every logged-in user lives in.}
+
+\begin{promptbox}{05}{The Application Shell}
+Design the authenticated application shell for \texttt{app/(app)/layout.tsx},
+replacing the placeholder from Prompt 03. This is the workspace chrome for both
+roles --- model it on the information density of Upwork's app, not a marketing site.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Sidebar} (collapsible on mobile): logo; role-aware primary nav.
+        Client items: Dashboard, My Projects, Find Freelancers, Proposals Received,
+        Contracts, Messages, Payments. Freelancer items: Dashboard, Find Work, My
+        Gigs, My Proposals, Contracts, Messages, Earnings. Shared bottom items:
+        Settings, Help. Highlight the active route.
+  \item \textbf{Topbar}: global search placeholder (wired later), notifications bell
+        with unread badge fed by \texttt{GET /api/notifications} (poll every 60s),
+        theme toggle, avatar menu (Profile, Settings, Log out).
+  \item Notifications bell opens a dropdown listing recent notifications with
+        read/unread state, wired to the existing mark-read APIs, plus a ``View all''
+        link to a \texttt{/notifications} page (simple list with pagination and
+        ``mark all read'').
+  \item Routes that do not exist yet should render tidy ``coming soon'' placeholders
+        within the shell --- never 404 --- so navigation is complete from day one.
+  \item Ensure the shell renders user data from the session server-side (no flash of
+        unauthenticated content), works at mobile widths with a drawer, and respects
+        the design tokens.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Both roles see coherent, distinct navigation; bell shows real unread counts;
+        every sidebar item routes somewhere sensible.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 2 --- Auth \& Onboarding}
+% ===========================================================================
+
+\textit{Purpose: turn account creation into a proper role-driven onboarding
+journey that lands each user in the right dashboard with a usable profile.}
+
+% ---------------------------------------------------------------------------
+\objective{A multi-step onboarding that makes role selection meaningful and
+eliminates the ``register, then log in again manually'' friction.}
+
+\begin{promptbox}{06}{Registration \& Role-Based Onboarding Wizard}
+Rebuild registration as a multi-step onboarding flow in \texttt{app/(auth)/register}.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Step 1 --- Role selection}: full-screen choice between two rich cards:
+        ``I'm a Client --- I want to hire'' and ``I'm a Freelancer --- I want to
+        work''. Honour a \texttt{?role=} query param from the landing CTAs as
+        preselection.
+  \item \textbf{Step 2 --- Account}: name, email, password with live strength
+        criteria, terms. On submit call \texttt{POST /api/auth/register}, then
+        automatically sign the user in with the credentials (no manual re-login) and
+        continue to step 3.
+  \item \textbf{Step 3 --- Profile setup} (role-specific, saved via
+        \texttt{PUT /api/users/me}): freelancers provide headline, hourly rate,
+        skills (tag input), bio, and optional avatar upload; clients provide company/
+        display name, what they typically hire for (categories), and optional avatar.
+        Include a visible ``Skip for now'' escape hatch.
+  \item \textbf{Step 4 --- Done}: short success screen, then redirect to
+        \texttt{/dashboard}.
+  \item \textbf{Google OAuth}: after first-time OAuth sign-in, users have no chosen
+        role --- detect this and route them into the wizard at Step 1 (role +
+        profile only). Persist their choice via a new safe API mechanism; the role
+        must be settable exactly once by the user, then only by admins.
+  \item Show a progress indicator across steps; all state survives refresh (persist
+        step data client-side until committed).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item New credential users go card $\rightarrow$ form $\rightarrow$ profile
+        $\rightarrow$ dashboard without ever re-entering credentials.
+  \item OAuth first-timers are forced through role selection; role is immutable
+        afterwards for non-admins.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Give the profile and settings links real destinations.}
+
+\begin{promptbox}{07}{Profile Management \& Settings}
+Build the profile and settings surfaces inside the app shell.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \texttt{/settings/profile}: full profile editor wired to
+        \texttt{GET/PUT /api/users/me} --- avatar upload via the existing
+        \texttt{/api/upload} route with client-side preview, name, headline, bio,
+        location, hourly rate (freelancers), skills tag editor. Server-validated,
+        optimistic UI with toasts.
+  \item \texttt{/settings/account}: change password (add the missing API route:
+        verify current password, validate new one with the shared Zod rules),
+        connected sign-in methods display, and a danger zone placeholder for account
+        deletion (UI only, disabled, labelled ``contact support'').
+  \item \texttt{/settings/notifications}: preference toggles persisted on the User
+        document (email on proposal, contract, payment, review events). The email
+        helpers in \filepath{lib/email.ts} must respect these flags.
+  \item Public freelancer profile page \texttt{/freelancers/[id]}: REPLACE the
+        hardcoded ``Alex Morgan'' mock with real data from
+        \texttt{GET /api/users/[id]} and \texttt{GET /api/reviews/[id]} --- header
+        (avatar, name, headline, rate, location, rating), about, skills, gigs
+        (from the skills API, by provider), and reviews with rating breakdown. Handle
+        not-found IDs gracefully. Increment \texttt{profileViews} server-side on
+        view (add the missing write path, excluding self-views).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Editing a profile visibly changes the public profile page.
+  \item No mock person remains anywhere; profile views actually increment.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 3 --- The Client Experience}
+% ===========================================================================
+
+\textit{Purpose: make the client side real --- posting projects that persist,
+and a dashboard that tells the truth.}
+
+% ---------------------------------------------------------------------------
+\objective{Wire project posting to the real API and give clients management of
+their projects.}
+
+\begin{promptbox}{08}{Real Project Posting \& Project Management}
+Make the client project workflow real.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \filepath{app/(app)/post-project/PostProjectForm.tsx} currently fakes
+        submission with \texttt{setTimeout}. Wire it to
+        \texttt{POST /api/projects} for real: map every wizard field to the API
+        schema, upload attachments through \texttt{/api/upload} first and submit the
+        returned URLs, handle validation errors field-by-field, and on success
+        redirect to the new project's detail page. Add a cross-field check that
+        \texttt{budgetMin} $\le$ \texttt{budgetMax} on both client and API.
+  \item Build \texttt{/client/projects}: the client's project list (wired to
+        \texttt{GET /api/projects} filtered to own), with status chips (open,
+        in progress, completed, cancelled), proposal counts, and actions: view, edit
+        (open projects only), close.
+  \item Build the project detail page \texttt{/projects/[id]} (shared route, both
+        roles can view): full brief, budget, skills, attachments, client card, and a
+        contextual action area --- owner sees proposals summary and manage buttons;
+        freelancers see a ``Submit Proposal'' CTA (wired in Prompt 11); visitors of
+        the wrong state see status-appropriate messaging.
+  \item Restrict \texttt{POST /api/projects} to the \texttt{client} role, and
+        constrain the owner's status edits in \texttt{PUT /api/projects/[id]} to
+        legal transitions only (open $\rightarrow$ cancelled; everything else is
+        driven by the system).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Posting a project stores a real document and appears in the client's list and
+        on its detail page after refresh.
+  \item Freelancer accounts cannot post projects.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{A client dashboard fed entirely by real data.}
+
+\begin{promptbox}{09}{Client Dashboard with Real Data}
+Replace the mock client dashboard. Delete the hardcoded stats, sparkline array and
+fake activity feed in \filepath{DashboardClient.tsx} for the client role and build a
+real \texttt{/dashboard} (client variant):
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item KPI cards wired to \texttt{GET /api/dashboard/stats}: active projects,
+        proposals awaiting review, active contracts, total spent. Extend that API if a
+        number it needs is missing --- never invent numbers client-side.
+  \item ``Needs your attention'' panel: newest pending proposals on your projects
+        (from \texttt{GET /api/proposals/received}) with quick links.
+  \item Recent activity: derive a real feed from the user's notifications.
+  \item Active contracts strip with payment status chips.
+  \item Quick actions: Post a Project, Find Freelancers, View Contracts --- all to
+        real routes.
+  \item Empty states for brand-new clients (friendly illustrations + primary CTA to
+        post the first project). Loading skeletons for every async block.
+\end{enumerate}
+The dashboard page must be a Server Component fetching initial data server-side,
+with client islands only where interactivity demands it.
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item A fresh client sees zeros and empty states; after posting a project and
+        receiving a proposal, every number changes accordingly.
+  \item No hardcoded statistics remain for the client role.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 4 --- The Freelancer Experience}
+% ===========================================================================
+
+\textit{Purpose: freelancers currently cannot even see projects. Build discovery,
+bidding, gigs, and a truthful freelancer dashboard.}
+
+% ---------------------------------------------------------------------------
+\objective{The missing core: freelancers browsing and finding work.}
+
+\begin{promptbox}{10}{Find Work --- Project Discovery}
+Build \texttt{/freelancer/find-work}, the freelancer's project discovery surface
+(the platform's most glaring absence).
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Card list of open projects from \texttt{GET /api/projects?status=open}:
+        title, truncated description, budget display (fixed range vs.\ hourly),
+        required skills, experience level, posted-ago, proposal count, client rating.
+  \item Filter sidebar: keyword (server-side search), category, budget type, budget
+        range, experience level; sort by newest / budget. Filters live in the URL
+        query string so results are shareable and refresh-safe.
+  \item Proper pagination wired to the API's existing pagination.
+  \item Each card links to the shared \texttt{/projects/[id]} detail page from
+        Prompt 08, where the ``Submit Proposal'' CTA lives.
+  \item Escape all user-supplied search input before it reaches MongoDB regex/text
+        filters (fix the unescaped \texttt{\$regex} usage in the projects, skills and
+        freelancers routes while you are here).
+  \item Also connect \texttt{/hire-talent} (rename to \texttt{/client/find-freelancers})
+        to the REAL \texttt{GET /api/freelancers} API --- delete the 48 randomly
+        generated mock freelancers --- with its filters mapped to real query params,
+        and make every card link to the real \texttt{/freelancers/[id]} profile.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Seeded projects appear with working filters; zero generated mock data
+        remains on either discovery surface.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Real bidding: submit, track, withdraw.}
+
+\begin{promptbox}{11}{Proposals --- Submit \& Manage}
+Implement the full proposal experience for freelancers.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item On \texttt{/projects/[id]}, build the proposal composer (modal or inline
+        section): cover-letter message, proposed rate (prefilled from profile
+        hourly rate for hourly projects), estimated timeline. Submit to the real
+        \texttt{POST /api/proposals}; surface duplicate-bid and own-project errors
+        cleanly; on success show the submitted state on the page.
+  \item Restrict \texttt{POST /api/proposals} to the \texttt{freelancer} role.
+  \item Build \texttt{/freelancer/proposals}: tabbed list (pending / accepted /
+        rejected / withdrawn) from \texttt{GET /api/proposals/sent}, each row linking
+        to its project, showing status changes over time.
+  \item Add the missing withdraw capability: a new authorised state transition
+        allowing the proposal's own freelancer to set \texttt{pending}
+        $\rightarrow$ \texttt{withdrawn} (extend \texttt{PUT /api/proposals/[id]}
+        with an ownership branch), with a confirm dialog in the UI.
+  \item Emit the currently-missing in-app notifications: notify the project owner on
+        new proposal (\texttt{proposal\_received}) and the freelancer on
+        accept/reject (\texttt{proposal\_update}), alongside the existing emails.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item A freelancer can bid on a seeded project, see it under Proposals, withdraw
+        it, and the client receives an in-app notification for the bid.
+  \item Clients cannot submit proposals.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Turn ``skills'' into proper Fiverr-style gigs with public pages.}
+
+\begin{promptbox}{12}{Gigs --- Service Offerings}
+Convert the ``Share Skill'' feature into a proper Gigs system.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Rename the surface: \texttt{/share-skill} $\rightarrow$
+        \texttt{/freelancer/gigs/new}; all ``skill listing'' copy becomes ``gig''.
+        Keep the \texttt{Skill} model name internally if renaming is disruptive, but
+        every user-facing string says Gig.
+  \item Wire the creation form (currently a \texttt{setTimeout} mock) to the real
+        \texttt{POST /api/skills}, including category (canonical list), delivery
+        expectations and tags.
+  \item Build \texttt{/freelancer/gigs}: the freelancer's own gig list from
+        \texttt{GET /api/skills/mine} with publish/unpublish toggle (wired to the
+        \texttt{isPublished} field via \texttt{PUT /api/skills/[id]}), edit and
+        delete (existing APIs).
+  \item Build the public gig detail page \texttt{/gigs/[slug]}: gig content, the
+        freelancer card with rating, similar gigs strip, and a ``Contact'' /
+        ``Invite to project'' CTA for clients (contact wiring arrives with
+        messaging; render it disabled with a tooltip until then).
+  \item Show a freelancer's published gigs on their public profile page.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Creating a gig persists it; it appears in My Gigs, on the public profile,
+        and at its own URL. Unpublishing hides it publicly.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{A freelancer dashboard that reports reality.}
+
+\begin{promptbox}{13}{Freelancer Dashboard with Real Data}
+Build the freelancer variant of \texttt{/dashboard} with real data, mirroring the
+quality bar of Prompt 09:
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item KPI cards from \texttt{GET /api/dashboard/stats}: active contracts, pending
+        proposals, total earned (completed contracts), average rating. Extend the
+        stats API where needed.
+  \item Proposal pipeline widget: counts by status with a link to
+        \texttt{/freelancer/proposals}.
+  \item ``Recommended for you'' placeholder panel querying newest open projects in
+        the freelancer's categories (this becomes AI-powered in Phase 7 --- structure
+        it so the data source can be swapped).
+  \item Earnings snapshot: simple monthly bar chart of completed contract values
+        (real aggregation, added to the stats API).
+  \item Recent reviews received; recent activity from notifications; empty states
+        and skeletons throughout.
+  \item Delete every remaining hardcoded stat, sparkline, and fake activity item
+        from the old dashboard for both roles; remove the dead sidebar-tab state
+        machine.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Zero mock data remains in any dashboard; numbers move when seeded data
+        changes.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 5 --- Hiring, Contracts \& Money}
+% ===========================================================================
+
+\textit{Purpose: close the loop --- proposals get reviewed, contracts get a real
+workspace, and money flows with escrow semantics the Terms page already promises.}
+
+% ---------------------------------------------------------------------------
+\objective{The client's hiring decision surface.}
+
+\begin{promptbox}{14}{Proposal Review \& Hiring}
+Build the client's proposal-review experience.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \texttt{/client/proposals}: all incoming proposals across the client's
+        projects from \texttt{GET /api/proposals/received}, grouped by project,
+        filterable by status.
+  \item On the owner's view of \texttt{/projects/[id]}: a proposals tab listing each
+        bid --- freelancer card (avatar, rating, rate, headline linking to profile),
+        cover letter, proposed rate and timeline --- with Accept and Reject actions
+        wired to the existing transactional \texttt{PUT /api/proposals/[id]}.
+  \item Accepting shows a confirmation dialog explaining the consequences (other
+        pending proposals auto-rejected, contract created, project moves to in
+        progress) and on success routes the client to the new contract page.
+  \item Rejecting asks for an optional reason (stored on the proposal; extend the
+        model with a nullable \texttt{clientNote}) and notifies the freelancer.
+  \item Handle the race where the project is no longer open gracefully.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Accept creates the contract and auto-rejects siblings (verify in DB);
+        both parties receive notifications.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{A shared contract workspace where the funded work actually lives.}
+
+\begin{promptbox}{15}{Contract Workspace}
+Build \texttt{/contracts} (list, both roles) and \texttt{/contracts/[id]} (workspace),
+finally putting the orphaned Stripe \texttt{CheckoutForm} to use.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item List page: the caller's contracts from \texttt{GET /api/contracts} with
+        role-aware framing (client sees freelancer, freelancer sees client), status
+        and payment chips.
+  \item Workspace page from \texttt{GET /api/contracts/[id]}: header (project title,
+        parties, agreed rate, timeline, started date), a status timeline
+        (created $\rightarrow$ funded $\rightarrow$ delivered $\rightarrow$ completed),
+        and a role-aware action panel.
+  \item \textbf{Funding}: when payment is pending, the client sees ``Fund this
+        contract'' opening the existing \texttt{CheckoutForm} wired to
+        \texttt{POST /api/payments/create-intent}; handle success/failure states and
+        reflect webhook-driven \texttt{paid} status (poll or refresh affordance).
+  \item \textbf{Delivery flow}: add a \texttt{delivered} step --- the freelancer marks
+        work delivered (new state on the contract); only then can the CLIENT mark the
+        contract \texttt{completed}. Remove the current flaw where either party
+        (including the freelancer) can unilaterally complete. Completion requires
+        \texttt{paymentStatus === "paid"} --- enforce in
+        \texttt{PUT /api/contracts/[id]}.
+  \item \textbf{Guards}: \texttt{create-intent} must refuse non-active contracts;
+        add an idempotency key; validate ObjectIds.
+  \item Either party may raise a dispute (status \texttt{disputed}) with a required
+        reason stored on the contract; disputes freeze other transitions until admin
+        resolution (Phase 8).
+  \item Full notification + email coverage for fund, deliver, complete, dispute.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item End-to-end with Stripe test cards: accept $\rightarrow$ fund $\rightarrow$
+        deliver $\rightarrow$ complete works; freelancer cannot self-complete;
+        unpaid contracts cannot complete.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Honest money semantics: an earnings ledger and escrow-style release.}
+
+\begin{promptbox}{16}{Earnings, Escrow Semantics \& Payment Hardening}
+Give SkillSync truthful money mechanics on top of the single-payment flow.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Create a \texttt{Transaction} model: contractId, clientId, freelancerId,
+        amount, type (\texttt{funding}, \texttt{release}, \texttt{refund}), status,
+        stripePaymentIntentId, timestamps. Record a \texttt{funding} transaction from
+        the webhook, and a \texttt{release} transaction when the client marks the
+        contract completed (this is the escrow ``release'' moment --- funds held on
+        the platform account are now owed to the freelancer).
+  \item Build \texttt{/freelancer/earnings}: available (released) balance, pending
+        (funded, unreleased) balance, lifetime earned, transaction history table, and
+        a monthly earnings chart. Data comes from real Transaction aggregation
+        endpoints you add under \texttt{/api/earnings}.
+  \item Build \texttt{/client/payments}: payment history per contract with receipts
+        (amount, date, card brand/last4 from the PaymentIntent), plus total spent.
+  \item Handle \texttt{charge.refunded} in the Stripe webhook: set contract
+        \texttt{paymentStatus} to \texttt{refunded} and record a refund transaction.
+  \item Add a clearly-labelled ``Withdraw'' UI on earnings that explains payouts are
+        processed manually in this release (no Stripe Connect yet) and records a
+        withdrawal request document for admin action. Update the Terms page so it
+        describes exactly what the system now truly does.
+  \item Pass the customer email to Stripe for receipts.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Every payment produces a transaction row; earnings balances derive from
+        transactions only; refund webhook verified with Stripe CLI.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 6 --- Communication \& Trust}
+% ===========================================================================
+
+\textit{Purpose: the human layer --- talking, being notified, and public
+reputation.}
+
+% ---------------------------------------------------------------------------
+\objective{First-class messaging, the most-advertised missing feature.}
+
+\begin{promptbox}{17}{Messaging System}
+Implement real messaging between clients and freelancers.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Models: \texttt{Conversation} (participants[2], optional contractId/
+        projectId context, lastMessageAt, per-participant unread counts) and
+        \texttt{Message} (conversationId, senderId, body, optional attachment URL,
+        readAt). Indexed for inbox queries.
+  \item APIs under \texttt{/api/messages}: list conversations, get/create a
+        conversation with a specific user (idempotent), list messages (paginated,
+        newest last), send message, mark conversation read. Participants only;
+        validate everything with Zod; rate-limit sending.
+  \item UI \texttt{/messages}: two-pane inbox (conversation list with unread badges
+        and last-message preview; thread view with day separators, composer with
+        Enter-to-send). Single-pane flow on mobile. Poll the open thread every few
+        seconds and the inbox on an interval --- choose an approach that is simple
+        and serverless-friendly; leave a clean seam to upgrade to SSE later.
+  \item Entry points: ``Message'' buttons on freelancer profiles, gig pages, proposal
+        cards, and the contract workspace all open the right conversation
+        (creating it if absent). Wire the previously-disabled contact CTAs from
+        Prompt 12.
+  \item Unread message count badge on the app-shell sidebar/topbar; a
+        \texttt{message} notification type for offline recipients (in-app +
+        optional email respecting notification preferences).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Two seeded users can hold a conversation across two browsers; unread badges
+        update; every ``Message'' button in the product works.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Complete the review loop in the UI and make reputation visible.}
+
+\begin{promptbox}{18}{Reviews \& Reputation}
+Build the review experience on top of the already-solid reviews API.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item After a contract completes, both parties see a prominent ``Leave a review''
+        card on the contract workspace (and a notification link): star rating +
+        comment, submitted to \texttt{POST /api/reviews}; show the mutual-review
+        state (you reviewed / awaiting their review) from the contract detail API.
+  \item Freelancer public profiles: full review section --- average, count, star
+        breakdown bars, sorted list (recent/helpful toggle) with helpful-vote buttons
+        wired to the existing endpoint. Client profiles get a lighter equivalent
+        (rating shown on their project posts).
+  \item Surface ratings consistently everywhere a person appears: freelancer cards,
+        proposal cards, contract headers, project detail client card.
+  \item Add a gentle reminder notification 3 days after completion if a party has
+        not reviewed (a check performed on contract-page load or a simple scheduled
+        route --- keep it serverless-friendly).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Completing a contract and reviewing updates the target's public rating
+        instantly; both directions work; helpful votes toggle.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Notification coverage without gaps, plus email polish.}
+
+\begin{promptbox}{19}{Notifications \& Email Completion}
+Audit and complete the notification system end to end.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Build the full-page inbox \texttt{/notifications} if Prompt 05's version was
+        minimal: filters (all/unread), grouped by day, every item deep-linking to its
+        subject, mark-all-read.
+  \item Ensure EVERY significant event emits an in-app notification: proposal
+        received, proposal accepted/rejected/withdrawn, contract funded, work
+        delivered, contract completed/cancelled/disputed, payment succeeded/failed/
+        refunded, new message, review received, admin role change. Grep every mutation
+        route and fill the holes.
+  \item Matching email coverage via \filepath{lib/email.ts} for the high-value subset
+        (proposal accepted, contract funded, delivered, completed, payment events,
+        review received), all respecting the user's notification preferences from
+        Prompt 07. Convert inline awaited \texttt{sendEmail} calls in hot paths to
+        fire-and-forget so slow email never delays API responses.
+  \item Add missing transactional emails: verification email at credentials signup
+        (token route + ``verify your email'' banner in-app until confirmed).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item A full hire-to-review loop generates the correct notification trail for both
+        parties; credentials users can verify email.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 7 --- The Smart Layer (Gemini)}
+% ===========================================================================
+
+\textit{Purpose: the platform's namesake. Six AI pillars, built on one shared,
+safe, server-side foundation. Never expose the API key to the browser; every
+feature must degrade gracefully when AI is unavailable.}
+
+% ---------------------------------------------------------------------------
+\objective{One well-engineered AI foundation everything else plugs into.}
+
+\begin{promptbox}{20}{AI Foundation --- Gemini Service Layer}
+Create SkillSync's AI infrastructure using the Gemini API. No user-facing features
+yet --- foundation only.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item Add \texttt{GEMINI\_API\_KEY} to the env schema and
+        \filepath{.env.local.example}. Server-side only.
+  \item Create \filepath{lib/ai/}: a singleton Gemini client; a
+        \texttt{generateText} helper (system prompt + user content, JSON-mode option
+        with Zod-validated output and one retry on parse failure); a
+        \texttt{generateEmbedding} helper using Gemini's embedding model; a
+        streaming helper for chat responses; central error handling that maps
+        quota/network failures to a typed \texttt{AIUnavailableError}.
+  \item Add an AI-specific rate limiter (per-user, e.g.\ 20 AI calls/hour) reusing
+        \filepath{lib/rate-limit.ts} patterns, and response caching via
+        \filepath{lib/cache.ts} keyed on input hashes for deterministic tasks.
+  \item Create \texttt{POST /api/ai/health}: admin-only route that runs a trivial
+        generation to confirm the integration.
+  \item Add an \texttt{aiEnabled} helper: when the key is missing, every consumer
+        must skip AI gracefully. Document the module in
+        \filepath{docs/AI.md}: architecture, models used, cost controls, and the
+        rule that AI never blocks a core flow.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Health route returns a generation; removing the key degrades cleanly with no
+        crashes; typecheck passes.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Pillar 1: matching --- the platform's core intelligence.}
+
+\begin{promptbox}{21}{Smart Matching Engine}
+Build AI-powered matching between projects and freelancers.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item On project create/update, generate and store an embedding of
+        title+description+skills on the Project document; on freelancer profile/gig
+        update, store an embedding of headline+bio+skills+gig content on the User
+        document. Backfill via a script for seeded data. (MongoDB Atlas Vector Search
+        if available; otherwise store vectors and compute cosine similarity
+        server-side over candidate sets prefiltered by category --- design the data
+        access so the strategy can be swapped.)
+  \item \texttt{GET /api/ai/matches/freelancers?projectId=} (project owner only):
+        top freelancer matches --- similarity prefilter, then a Gemini rerank of the
+        top $\sim$15 that returns for each a match percentage and TWO concrete
+        reasons grounded in the actual profiles (JSON mode). Cache per
+        project-version.
+  \item \texttt{GET /api/ai/matches/projects} (freelancer): the inverse ---
+        recommended open projects for the caller with reasons.
+  \item UI: on the client's project detail page, a ``Smart Matches'' panel showing
+        matched freelancer cards with the match percentage ring and reasons, plus
+        Invite (opens messaging) and View Profile actions. On the freelancer
+        dashboard, replace Prompt 13's placeholder ``Recommended for you'' with real
+        AI matches carrying a ``Why this match?'' expander.
+  \item If AI is unavailable, both panels fall back to category+skills overlap
+        matching, visually identical minus the AI badge.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item A seeded React project surfaces the seeded React freelancers with plausible
+        percentages and specific reasons; fallback path verified with the key
+        removed.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Pillars 3 \& 4: writing assistance and pricing intelligence.}
+
+\begin{promptbox}{22}{AI Writing Studio \& Smart Pricing}
+Embed generative assistance into the platform's three highest-friction writing
+moments, plus pricing guidance.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Job-post composer} (client, in post-project): a ``Write with AI''
+        panel where the client types a rough one-paragraph brief; Gemini returns a
+        structured draft (title, description, suggested skills, suggested experience
+        level) that PREFILLS the form for editing --- never auto-submits.
+        Endpoint: \texttt{POST /api/ai/compose/project}.
+  \item \textbf{Proposal assistant} (freelancer, in the proposal composer): given
+        the project brief and the freelancer's profile, generate a tailored draft
+        cover letter plus two talking-point suggestions; insert-into-editor UX.
+        Endpoint: \texttt{POST /api/ai/compose/proposal}. Guard against prompt
+        injection: treat project text strictly as data in your system prompt.
+  \item \textbf{Profile optimiser} (freelancer, in settings/profile): reviews
+        headline+bio and returns concrete rewrite suggestions and missing-skill
+        prompts, shown side-by-side with one-click apply per suggestion.
+        Endpoint: \texttt{POST /api/ai/compose/profile}.
+  \item \textbf{Smart Pricing}: in post-project, after category+skills are chosen,
+        show an AI budget estimate range with one-line rationale; in the proposal
+        composer, show a suggested rate band derived from the project budget and the
+        freelancer's rate. Endpoint: \texttt{POST /api/ai/pricing}.
+  \item All endpoints: auth + role checks, the Phase-20 rate limiter, JSON-mode with
+        Zod validation, and disabled-with-tooltip UI when AI is unavailable.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item All four assistants produce structured, editable output in their real forms;
+        none can submit anything autonomously; rate limiting verified.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Pillars 2 \& 5: decision support for hiring and trustworthy reviews.}
+
+\begin{promptbox}{23}{Hiring Copilot \& Review Intelligence}
+Build the client's AI decision support and review analysis.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Hiring Copilot}: on a project's proposals tab (3+ proposals), an
+        ``Analyze proposals'' action calls \texttt{POST /api/ai/analyze/proposals}
+        (owner-only) which returns, per proposal: a two-sentence summary, strengths,
+        concerns (e.g.\ rate far outside budget, generic copy-paste letter), and an
+        overall fit score --- rendered as a comparison view. Include an explicit
+        on-screen disclaimer that this is assistance, not a decision; the ranking
+        must never auto-reject anyone.
+  \item \textbf{Review digest}: on freelancer profiles with 3+ reviews, a ``What
+        clients say'' card --- Gemini summarises recurring themes (strengths +
+        improvement areas) from review texts. Cached aggressively; regenerated only
+        when new reviews arrive. Endpoint: \texttt{POST /api/ai/analyze/reviews}.
+  \item \textbf{Anomaly flagging}: when a review is submitted, an async AI check
+        scores it for spam/abuse/suspicious praise patterns; scores above threshold
+        set a \texttt{flaggedForReview} field for the admin queue (Phase 8). Never
+        block or delete automatically.
+  \item Prompt-injection hardening for all three: user-generated text is data, never
+        instructions; outputs are Zod-validated JSON.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Copilot renders a useful comparison on seeded proposals; profile digest
+        appears and caches; a gibberish review gets flagged in the DB.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{Pillar 6: the assistant that ties the smart experience together.}
+
+\begin{promptbox}{24}{SyncMate --- The Platform Assistant}
+Build SyncMate, a role-aware AI assistant available throughout the app shell.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item A floating assistant button in the app shell opening a chat panel; streaming
+        responses via the Phase-20 streaming helper through
+        \texttt{POST /api/ai/assistant} (auth required).
+  \item System prompt gives SyncMate: the platform's actual feature set and routes,
+        the user's role and first name, and strict boundaries (no legal/financial
+        advice, no acting on the user's behalf, redirect abuse reports to support).
+  \item Lightweight tool access, server-side: SyncMate can fetch the caller's own
+        live context --- counts of their pending proposals, active contracts, unread
+        messages --- to answer questions like ``what needs my attention?''. Read-only,
+        strictly caller-scoped; the model must never receive other users' private
+        data.
+  \item Quick-start chips per role (client: ``How do I hire?'', ``Analyze my latest
+        proposals''; freelancer: ``Find projects for me'', ``Improve my profile'') that
+        deep-link to the relevant AI features where appropriate.
+  \item Conversation history persists for the session (client-side is fine);
+        rate-limited; hidden entirely when AI is unavailable.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item SyncMate answers platform questions with streaming text, reports the user's
+        real pending counts, and refuses out-of-scope requests.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 8 --- Admin Panel}
+% ===========================================================================
+
+\objective{An operations cockpit: oversight, moderation, and dispute resolution.}
+
+\begin{promptbox}{25}{Admin Panel}
+Build the admin area at \texttt{app/(admin)/admin/\ldots}, middleware-gated to the
+\texttt{admin} role, with its own dense two-pane shell.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Overview}: platform KPIs from \texttt{GET /api/admin/stats} extended
+        with time series (signups, projects, GMV by month) rendered as charts.
+  \item \textbf{Users}: the existing list/role/ban APIs get a real UI --- search,
+        filters, detail drawer, role change and ban/unban with confirmations. THEN fix
+        enforcement so banning matters: banned users are refused at login
+        (credentials \texttt{authorize} and Google \texttt{signIn} callback), receive
+        403s from authenticated APIs via a shared session guard, and are excluded
+        from freelancer listings and public profiles --- not just search.
+  \item \textbf{Content moderation}: admin endpoints + UI to view and unpublish/
+        remove projects, gigs, and reviews; a queue for reviews auto-flagged by
+        Prompt 23, with approve/remove actions.
+  \item \textbf{Disputes}: queue of disputed contracts showing both parties, the
+        dispute reason, payment state, and linked messages; admin resolution actions
+        --- resolve to completed (release) or cancelled (mark for refund) --- with an
+        audit note stored on the contract and notifications to both parties.
+  \item \textbf{Operations}: contact-form inbox (list \texttt{Contact} documents,
+        mark \texttt{readAt}); withdrawal-request queue from Prompt 16 with
+        mark-as-paid.
+  \item Fix the stale-JWT problem: on role change or ban, force re-validation ---
+        re-check the user document inside the NextAuth JWT callback on an interval
+        (e.g.\ refresh role/ban claims from the DB when the token is older than
+        15 minutes).
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Non-admins cannot reach \texttt{/admin} or its APIs; banning a user locks
+        them out within one token refresh; a dispute can be resolved end to end.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Phase 9 --- Hardening \& Launch Quality}
+% ===========================================================================
+
+\objective{Close the security gaps found in the audit, systematically.}
+
+\begin{promptbox}{26}{Security Hardening Pass}
+Execute a focused security pass over the entire API surface.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{Rate limiting}: add sensible limits to forgot-password,
+        reset-password, credentials login attempts (with temporary lockout after
+        repeated failures per email+IP), proposals, reviews, messages, uploads, and
+        all AI routes. Centralise limits in one config.
+  \item \textbf{Input integrity}: a shared \texttt{isValidObjectId} guard returning
+        400 on every \texttt{[id]} route (users, projects, skills, proposals,
+        payments currently 500); escape user input in every remaining
+        \texttt{\$regex} construction; cap the number of files per upload request and
+        add per-user daily upload quotas.
+  \item \textbf{AuthZ sweep}: re-verify every mutation route enforces role and
+        ownership after all phases; write the result as a route-by-route
+        authorization table in \filepath{docs/SECURITY.md}.
+  \item \textbf{Secrets \& env}: add build-time env validation (typed env module)
+        covering every variable including \texttt{GEMINI\_API\_KEY}; confirm nothing
+        secret is exposed with \texttt{NEXT\_PUBLIC\_}.
+  \item \textbf{Webhook \& payments}: verify webhook idempotency (duplicate event
+        delivery must be safe); confirm refund/dispute events are handled.
+  \item Clean up remaining validation-schema drift by making \filepath{types/schemas.ts}
+        the single source of truth imported by routes.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item Malformed IDs return 400 everywhere; brute-force login is throttled;
+        \filepath{docs/SECURITY.md} authz table is complete and accurate.
+\end{itemize}
+\end{promptbox}
+
+% ---------------------------------------------------------------------------
+\objective{The final polish and a regression safety net.}
+
+\begin{promptbox}{27}{Quality Pass, SEO \& Test Foundation}
+Final production-readiness pass.
+
+\begin{enumerate}[leftmargin=1.6em]
+  \item \textbf{UX audit}: every async view has loading skeletons, empty states
+        with a helpful CTA, and error states with retry. Audit at 375px, 768px and
+        1440px; fix responsive breaks. Verify dark mode on every page.
+  \item \textbf{SEO}: per-page \texttt{metadata} (title/description) across
+        marketing, gig and freelancer-profile pages; Open Graph tags; sitemap and
+        robots for public routes only; \texttt{noindex} on the app shell.
+  \item \textbf{Accessibility}: keyboard navigation through the main flows,
+        focus-visible states, aria labels on icon buttons, form error associations,
+        colour-contrast check on both themes.
+  \item \textbf{Performance}: eliminate client components that can be server
+        components; verify no oversized bundles (dynamic-import heavy widgets like
+        charts and the AI panels).
+  \item \textbf{Tests}: install Vitest; unit-test the critical money/state logic
+        (contract transition rules, proposal accept transaction, transaction ledger
+        math, rate-limit behaviour, AI JSON-parsing fallbacks). Install Playwright;
+        one smoke E2E covering register $\rightarrow$ onboard $\rightarrow$ post
+        project $\rightarrow$ bid $\rightarrow$ accept $\rightarrow$ fund (Stripe
+        test mode) $\rightarrow$ deliver $\rightarrow$ complete $\rightarrow$ review.
+        Add \texttt{npm test} and a CI-ready script.
+  \item Update the README and \filepath{docs/} to describe the platform as it now
+        actually is, including an env-vars table and the AI feature overview.
+\end{enumerate}
+
+\dod
+\begin{itemize}[leftmargin=1.6em]
+  \item The E2E smoke passes clean; unit tests cover the money paths; docs match
+        reality.
+\end{itemize}
+\end{promptbox}
+
+% ===========================================================================
+\section{Appendix A --- Environment Variables After All Phases}
+% ===========================================================================
+
+\begin{table}[h]
+\small
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Variable} & \textbf{Purpose} \\
+\midrule
+\texttt{MONGODB\_URI}                        & MongoDB Atlas connection string \\
+\texttt{NEXTAUTH\_SECRET} / \texttt{NEXTAUTH\_URL} & Auth.js signing secret and canonical URL \\
+\texttt{GOOGLE\_CLIENT\_ID} / \texttt{\_SECRET} & Google OAuth \\
+\texttt{STRIPE\_SECRET\_KEY}                 & Stripe server key \\
+\texttt{STRIPE\_WEBHOOK\_SECRET}             & Webhook signature verification \\
+\texttt{NEXT\_PUBLIC\_STRIPE\_PUBLISHABLE\_KEY} & Stripe.js in the browser \\
+\texttt{CLOUDINARY\_*}                       & File and avatar storage \\
+\texttt{RESEND\_API\_KEY} / \texttt{RESEND\_FROM} & Transactional email \\
+\texttt{GEMINI\_API\_KEY}                    & All Smart-layer features (server-only) \\
+\texttt{NEXT\_PUBLIC\_APP\_URL}              & Absolute URL building \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ===========================================================================
+\section{Appendix B --- Vibe-Coding Discipline}
+% ===========================================================================
+
+\begin{itemize}[leftmargin=1.6em]
+  \item \textbf{Paste the prompt verbatim first}, then answer the agent's clarifying
+        questions from this document rather than improvising new scope.
+  \item \textbf{Demand proof.} After each prompt ask the agent to demonstrate the
+        Definition-of-done items concretely (show the DB document, show the network
+        call, show the redirect) --- this codebase previously ``passed'' on
+        \texttt{setTimeout} theatre.
+  \item \textbf{Commit per prompt} with the prompt number in the message; branch per
+        phase if you want extra safety.
+  \item \textbf{When a prompt is too big for one session}, split it at the numbered
+        item boundaries --- the internal ordering within each prompt is also
+        dependency-ordered.
+  \item \textbf{Keep the seed script current.} Whenever a model changes, the same
+        session must update \filepath{scripts/seed.ts}; a stale seed silently breaks
+        every later verification.
+\end{itemize}
+
+\vspace{1cm}
+\begin{center}
+  \color{phasegray}\itshape
+  End of the Prompt Diary. Execute in order --- and make ``Smart'' mean something.
+\end{center}
+
+\end{document}

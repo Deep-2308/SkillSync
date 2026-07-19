@@ -17,6 +17,7 @@ import { Contract } from "@/models/Contract";
 import { Review } from "@/models/Review";
 import { Notification } from "@/models/Notification";
 import { slugify } from "@/lib/utils";
+import { categoryNames } from "@/data/categories";
 
 // Random utility functions
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -26,16 +27,8 @@ const randomElements = <T>(arr: T[], count: number): T[] => {
   return shuffled.slice(0, count);
 };
 
-const CATEGORIES = [
-  "web-development",
-  "mobile-development",
-  "design",
-  "writing",
-  "marketing",
-  "video-animation",
-  "data-science",
-  "customer-support",
-];
+// Canonical category display names — the same values the forms submit.
+const CATEGORIES = categoryNames;
 
 const LOCATIONS = ["US", "UK", "India", "Canada", "Germany", "Australia", "Remote"];
 
@@ -70,54 +63,54 @@ async function main() {
     isVerified: true,
   });
 
-  // 10 Experts
-  const experts = [];
+  // 10 Freelancers
+  const freelancers = [];
   for (let i = 1; i <= 10; i++) {
-    const expert = await User.create({
-      name: `Expert User ${i}`,
-      email: `expert${i}@skillsync.dev`,
+    const freelancer = await User.create({
+      name: `Freelancer User ${i}`,
+      email: `freelancer${i}@skillsync.dev`,
       passwordHash: userPasswordHash,
-      role: "provider",
+      role: "freelancer",
       headline: randomElement(["Senior Full-Stack Engineer", "UI/UX Designer", "Technical Writer", "Data Scientist", "Digital Marketer"]),
-      bio: `I am an experienced professional looking for exciting projects. This is expert number ${i}.`,
+      bio: `I am an experienced professional looking for exciting projects. This is freelancer number ${i}.`,
       location: randomElement(LOCATIONS),
       hourlyRate: randomInt(15, 150),
       isVerified: true,
       image: `https://images.unsplash.com/photo-${1500000000000 + i}?auto=format&fit=crop&q=80&w=256&h=256`, // Fake unsplash ids
       skills: ["React", "Node.js", "TypeScript", "Figma", "Python"].slice(0, randomInt(1, 5)),
     });
-    experts.push(expert);
+    freelancers.push(freelancer);
   }
 
-  // 5 Learners (Clients)
-  const learners = [];
+  // 5 Clients
+  const clients = [];
   for (let i = 1; i <= 5; i++) {
-    const learner = await User.create({
-      name: `Learner User ${i}`,
-      email: `learner${i}@skillsync.dev`,
+    const clientUser = await User.create({
+      name: `Client User ${i}`,
+      email: `client${i}@skillsync.dev`,
       passwordHash: userPasswordHash,
-      role: "member",
+      role: "client",
       headline: "Startup Founder",
-      bio: `Looking for top talent to build my next big idea. I am learner number ${i}.`,
+      bio: `Looking for top talent to build my next big idea. I am client number ${i}.`,
       location: randomElement(LOCATIONS),
       isVerified: true,
     });
-    learners.push(learner);
+    clients.push(clientUser);
   }
 
   console.log("Seeding Skills...");
   const skills = [];
   for (let i = 1; i <= 30; i++) {
-    const expert = randomElement(experts);
+    const freelancer = randomElement(freelancers);
     const category = randomElement(CATEGORIES);
-    const title = `Professional ${category.replace("-", " ")} Services ${i}`;
+    const title = `Professional ${category} Services ${i}`;
     const skill = await Skill.create({
-      providerId: expert._id,
+      providerId: freelancer._id,
       title,
       slug: slugify(title) + `-${i}`,
       category,
       description: `I will provide high-quality ${category} services tailored to your needs. With years of experience, I can deliver outstanding results.`,
-      hourlyRate: expert.hourlyRate || randomInt(20, 100),
+      hourlyRate: freelancer.hourlyRate || randomInt(20, 100),
       level: randomElement(["beginner", "intermediate", "advanced", "expert"]),
       tags: [category, "professional", "reliable"],
     });
@@ -127,11 +120,11 @@ async function main() {
   console.log("Seeding Projects...");
   const projects = [];
   for (let i = 1; i <= 20; i++) {
-    const client = randomElement(learners);
+    const client = randomElement(clients);
     const budgetType = randomElement(["fixed", "hourly"]);
     const project = await Project.create({
       postedBy: client._id,
-      title: `Need a ${randomElement(CATEGORIES).replace("-", " ")} expert for project ${i}`,
+      title: `Need a ${randomElement(CATEGORIES)} freelancer for project ${i}`,
       description: "We are looking for a skilled professional to help us with an exciting new project. Please apply if you meet the requirements.",
       category: randomElement(CATEGORIES),
       skillsRequired: ["React", "Node.js", "Design"],
@@ -152,16 +145,16 @@ async function main() {
   // 15 proposals spread across projects
   for (let i = 1; i <= 15; i++) {
     const project = randomElement(projects);
-    const expert = randomElement(experts);
+    const freelancer = randomElement(freelancers);
     
-    // Prevent duplicate proposals if they randomly hit the same project/expert
-    const exists = await Proposal.findOne({ projectId: project._id, freelancerId: expert._id });
+    // Prevent duplicate proposals if they randomly hit the same project/freelancer
+    const exists = await Proposal.findOne({ projectId: project._id, freelancerId: freelancer._id });
     if (exists) continue;
 
     const status = randomElement(["pending", "accepted", "rejected"]);
     const proposal = await Proposal.create({
       projectId: project._id,
-      freelancerId: expert._id,
+      freelancerId: freelancer._id,
       message: `I am highly interested in your project and have the right skills to deliver exactly what you need.`,
       proposedRate: randomInt(500, 2000),
       timeline: "< 1 month",
@@ -215,20 +208,20 @@ async function main() {
     reviews.push(clientReview);
 
     // Freelancer reviews client
-    const expertReview = await Review.create({
+    const freelancerReview = await Review.create({
       reviewerId: contract.freelancerId,
       targetId: contract.clientId,
       contractId: contract._id,
       rating: randomInt(4, 5),
       comment: "Great client to work with. Clear requirements and prompt payment.",
     });
-    reviews.push(expertReview);
+    reviews.push(freelancerReview);
   }
 
   console.log("Seeding Notifications...");
   const notifications = [];
   for (let i = 1; i <= 50; i++) {
-    const user = randomElement([...experts, ...learners]);
+    const user = randomElement([...freelancers, ...clients]);
     const notif = await Notification.create({
       userId: user._id,
       type: randomElement(["system", "contract_update", "proposal_received"]),
@@ -241,7 +234,7 @@ async function main() {
   }
 
   console.log(`\n--- Seed Summary ---`);
-  console.log(`Users: ${experts.length + learners.length + 1} (1 Admin, ${experts.length} Experts, ${learners.length} Learners)`);
+  console.log(`Users: ${freelancers.length + clients.length + 1} (1 Admin, ${freelancers.length} Freelancers, ${clients.length} Clients)`);
   console.log(`Skills: ${skills.length}`);
   console.log(`Projects: ${projects.length}`);
   console.log(`Proposals: ${proposals.length}`);

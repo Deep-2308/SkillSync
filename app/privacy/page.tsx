@@ -35,10 +35,10 @@ export default function PrivacyPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
-      <section className="pt-32 pb-12 px-6 bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800">
+      <section className="pt-32 pb-12 px-6 bg-muted/40 border-b border-border">
         <div className="container mx-auto max-w-4xl">
-          <h1 className="text-4xl font-bold text-zinc-900 dark:text-zinc-50 mb-4">Privacy Policy</h1>
-          <p className="text-zinc-500 dark:text-zinc-400">Last updated: July 1, 2026</p>
+          <h1 className="text-4xl font-bold text-foreground mb-4">Privacy Policy</h1>
+          <p className="text-muted-foreground">Last updated: July 1, 2026</p>
         </div>
       </section>
 
@@ -53,7 +53,7 @@ export default function PrivacyPage() {
                 className={cn(
                   "block text-sm py-1.5 px-3 rounded-md transition-colors",
                   activeSection === s.id
-                    ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium"
+                    ? "bg-brand/10 text-brand font-medium"
                     : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200"
                 )}
               >
@@ -68,7 +68,7 @@ export default function PrivacyPage() {
             <h2>1. Data We Collect</h2>
             <p>We collect information you provide directly when creating an account, posting a project, or communicating through the Platform:</p>
             <ul>
-              <li><strong>Account Information:</strong> Name, email address, password, profile photo, and role (Learner or Expert).</li>
+              <li><strong>Account Information:</strong> Name, email address, password, profile photo, and role (Client or Freelancer).</li>
               <li><strong>Profile Data:</strong> Skills, bio, portfolio links, hourly rate, and availability status.</li>
               <li><strong>Usage Data:</strong> Pages visited, features used, search queries, device information, and IP address.</li>
               <li><strong>Payment Data:</strong> Billing address and payment method details (processed by our secure payment partner — we never store full card numbers).</li>
@@ -80,7 +80,7 @@ export default function PrivacyPage() {
             <p>We use the collected data to:</p>
             <ul>
               <li>Provide, maintain, and improve the Platform.</li>
-              <li>Match Clients with relevant Experts using our AI algorithm.</li>
+              <li>Match Clients with relevant Freelancers using our AI algorithm.</li>
               <li>Process payments and prevent fraud.</li>
               <li>Send transactional emails (confirmations, notifications) and — with your consent — marketing communications.</li>
               <li>Generate anonymized, aggregated analytics to improve user experience.</li>
@@ -148,7 +148,7 @@ export default function PrivacyPage() {
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
         className={cn(
-          "fixed bottom-8 right-8 w-12 h-12 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-indigo-700",
+          "fixed bottom-8 right-8 w-12 h-12 rounded-full bg-brand text-white shadow-lg flex items-center justify-center transition-all duration-300 hover:bg-brand/90",
           showBackToTop ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
         )}
         aria-label="Back to top"

@@ -14,7 +14,7 @@ const steps: Step[] = [
     icon: Search,
     title: "Post or Browse",
     description:
-      "Describe what you need or explore thousands of vetted skills across every category.",
+      "Describe what you need or explore thousands of vetted freelancers across every category.",
   },
   {
     icon: Handshake,

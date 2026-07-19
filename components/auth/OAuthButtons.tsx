@@ -23,10 +23,10 @@ export function OAuthButtons({ text = "Continue with Google" }: { text?: string 
     <div className="flex flex-col gap-4">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-zinc-200 dark:border-zinc-800" />
+          <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white dark:bg-zinc-950 px-2 text-zinc-500">
+          <span className="bg-background px-2 text-muted-foreground">
             Or continue with
           </span>
         </div>
@@ -40,7 +40,7 @@ export function OAuthButtons({ text = "Continue with Google" }: { text?: string 
         className="w-full"
       >
         {isLoading ? (
-          <div className="w-5 h-5 mr-2 border-2 border-zinc-400 border-t-zinc-900 dark:border-t-white rounded-full animate-spin" />
+          <div className="w-5 h-5 mr-2 border-2 border-muted-foreground/40 border-t-foreground rounded-full animate-spin" />
         ) : (
           <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
             <path

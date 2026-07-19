@@ -11,7 +11,7 @@ export async function getFreelancerListing(filters: Record<string, any>, page: n
   const skip = (page - 1) * limit;
 
   // Base match for experts
-  const matchStage: any = { role: "provider", isVerified: true, ...filters };
+  const matchStage: any = { role: "freelancer", isVerified: true, ...filters };
 
   const pipeline = [
     { $match: matchStage },
@@ -130,10 +130,10 @@ export async function getProjectWithProposals(projectId: string) {
  * 3. getDashboardStats
  * Single aggregation per role returning dashboard KPIs.
  */
-export async function getDashboardStats(userId: string, role: "member" | "provider" | "admin") {
+export async function getDashboardStats(userId: string, role: "client" | "freelancer" | "admin") {
   const userObjectId = new mongoose.Types.ObjectId(userId);
 
-  if (role === "provider") {
+  if (role === "freelancer") {
     const pipeline = [
       { $match: { freelancerId: userObjectId } },
       {
@@ -159,7 +159,7 @@ export async function getDashboardStats(userId: string, role: "member" | "provid
     ];
     const results = await Contract.aggregate(pipeline);
     return results[0] || { totalEarnings: 0, activeContracts: 0, completedContracts: 0 };
-  } else if (role === "member") {
+  } else if (role === "client") {
     const pipeline = [
       { $match: { clientId: userObjectId } },
       {
@@ -194,7 +194,7 @@ export async function getSearchResults(query: string, type: "freelancers" | "pro
 
   if (type === "freelancers") {
     return await User.aggregate([
-      { $match: { $text: { $search: query }, role: "provider" } },
+      { $match: { $text: { $search: query }, role: "freelancer" } },
       { $sort: { score: { $meta: "textScore" } } },
       { $skip: skip },
       { $limit: limit },

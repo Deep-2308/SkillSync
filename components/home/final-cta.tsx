@@ -27,7 +27,7 @@ export function FinalCta() {
               Ready to sync your skills?
             </h2>
             <p className="text-lg text-white/90">
-              Join 50,000+ people learning, teaching, and hiring on SkillSync.
+              Join 50,000+ clients and freelancers hiring and working on SkillSync.
               It’s free to get started.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3">

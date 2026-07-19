@@ -98,10 +98,10 @@ export default function ResetPasswordPage() {
             <KeyRound className="h-10 w-10" />
           </div>
           <div className="text-center space-y-2">
-            <h3 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <h3 className="text-xl font-semibold text-foreground">
               All set!
             </h3>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground">
               You can now sign in with your new password.
             </p>
           </div>

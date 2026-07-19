@@ -98,7 +98,7 @@ export const {
               name: user.name,
               email: user.email,
               image: user.image ?? null,
-              role: "member", // Default role for new Google sign-ups.
+              role: "client", // Default role for new Google sign-ups.
               emailVerified: new Date(),
             });
 

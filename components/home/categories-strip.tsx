@@ -1,13 +1,15 @@
 import Link from "next/link";
 import {
-  Briefcase,
   BrainCircuit,
+  Briefcase,
+  Clapperboard,
+  Cloud,
   Code,
-  Languages,
+  Figma,
   Megaphone,
-  Music,
   Palette,
   PenLine,
+  Smartphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -21,13 +23,15 @@ import { AnimatedSection } from "@/components/animated-section";
  */
 const iconMap: Record<string, LucideIcon> = {
   Code,
+  Smartphone,
+  Figma,
   Palette,
-  BrainCircuit,
-  Megaphone,
   PenLine,
+  Megaphone,
+  Clapperboard,
+  BrainCircuit,
+  Cloud,
   Briefcase,
-  Music,
-  Languages,
 };
 
 /**

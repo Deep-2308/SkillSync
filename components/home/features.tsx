@@ -32,9 +32,9 @@ const features: Feature[] = [
   },
   {
     icon: BadgeCheck,
-    title: "Expert Verification",
+    title: "Freelancer Verification",
     description:
-      "Every provider is identity-checked and portfolio-reviewed before they can take work.",
+      "Every freelancer is identity-checked and portfolio-reviewed before they can take work.",
   },
   {
     icon: MessagesSquare,
@@ -46,13 +46,13 @@ const features: Feature[] = [
     icon: Sparkles,
     title: "Portfolio Showcase",
     description:
-      "Beautiful profiles that put work front and center and convert browsers into bookings.",
+      "Beautiful profiles that put work front and center and convert visitors into contracts.",
   },
   {
     icon: Zap,
     title: "Instant Hire",
     description:
-      "Skip the back-and-forth. Book a vetted expert for the next available slot in one click.",
+      "Skip the back-and-forth. Hire a vetted freelancer and kick off your project in one click.",
   },
 ];
 

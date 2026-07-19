@@ -26,8 +26,8 @@ const userSchema = new Schema(
     image: { type: String, default: null },
     role: {
       type: String,
-      enum: ["member", "provider", "admin"],
-      default: "member",
+      enum: ["client", "freelancer", "admin"],
+      default: "client",
     },
     headline: { type: String, maxlength: 120, default: "" },
     bio: { type: String, maxlength: 2000, default: "" },

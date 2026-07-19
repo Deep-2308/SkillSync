@@ -26,10 +26,10 @@ const registerSchema = z.object({
     .regex(/[a-z]/, "Include at least one lowercase letter.")
     .regex(/[0-9]/, "Include at least one number."),
   role: z
-    .enum(["member", "provider"], {
-      errorMap: () => ({ message: "Role must be 'member' or 'provider'." }),
+    .enum(["client", "freelancer"], {
+      errorMap: () => ({ message: "Role must be 'client' or 'freelancer'." }),
     })
-    .default("member"),
+    .default("client"),
 });
 
 /**

@@ -29,32 +29,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TagInput } from "@/components/forms/TagInput";
+import { categoryNames } from "@/data/categories";
 import { cn } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */
 /*                                  Constants                                 */
 /* -------------------------------------------------------------------------- */
 
-const CATEGORIES = [
-  "Web Development",
-  "UI/UX Design",
-  "Mobile Apps",
-  "Data Science",
-  "Digital Marketing",
-  "Content Writing",
-  "Video Editing",
-  "Translation",
-];
+const CATEGORIES = categoryNames;
 
 const SUB_CATEGORIES: Record<string, string[]> = {
   "Web Development": ["Frontend", "Backend", "Full Stack", "CMS", "E-commerce"],
+  "Mobile Development": ["iOS", "Android", "Cross-platform", "React Native", "Flutter"],
   "UI/UX Design": ["Web Design", "App Design", "Brand Design", "Prototyping"],
-  "Mobile Apps": ["iOS", "Android", "Cross-platform", "React Native", "Flutter"],
-  "Data Science": ["Machine Learning", "Data Analysis", "Visualization", "NLP"],
-  "Digital Marketing": ["SEO", "PPC", "Social Media", "Email Marketing"],
+  "Graphic Design": ["Logos", "Branding", "Illustration", "Print Design"],
   "Content Writing": ["Blog Posts", "Copywriting", "Technical Writing", "Ghostwriting"],
-  "Video Editing": ["YouTube", "Social Media", "Corporate", "Animation"],
-  "Translation": ["Documents", "Localization", "Subtitles", "Transcription"],
+  "Digital Marketing": ["SEO", "PPC", "Social Media", "Email Marketing"],
+  "Video & Animation": ["Editing", "Motion Graphics", "Explainers", "Social Media"],
+  "Data & AI": ["Machine Learning", "Data Analysis", "Visualization", "NLP"],
+  "DevOps & Cloud": ["CI/CD", "AWS", "Kubernetes", "Infrastructure as Code"],
+  "Business & Consulting": ["Strategy", "Finance", "Operations", "Market Research"],
 };
 
 const EXPERIENCE_LEVELS = [
@@ -147,8 +141,8 @@ export function ShareSkillForm() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Share Your Skill</h1>
-        <p className="text-zinc-500 dark:text-zinc-400 mt-2">
+        <h1 className="text-3xl font-bold text-foreground">Share Your Skill</h1>
+        <p className="text-muted-foreground mt-2">
           Let the community know what you can offer. Fill out the details below and start getting hired.
         </p>
       </div>
@@ -392,10 +386,10 @@ export function ShareSkillForm() {
             control={form.control}
             name="isAvailable"
             render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-xl border border-zinc-200 dark:border-zinc-800 p-4">
+              <FormItem className="flex flex-row items-center justify-between rounded-xl border p-4">
                 <div className="space-y-0.5">
                   <FormLabel className="text-base">Availability</FormLabel>
-                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <p className="text-sm text-muted-foreground">
                     {field.value ? "You are currently accepting new clients" : "You are not accepting new clients"}
                   </p>
                 </div>
@@ -427,7 +421,7 @@ export function ShareSkillForm() {
           />
 
           {/* Submit */}
-          <div className="flex justify-end pt-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="flex justify-end pt-6 border-t border-border">
             <Button type="submit" disabled={isSubmitting} size="lg">
               {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Share Skill

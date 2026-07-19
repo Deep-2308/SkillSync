@@ -48,8 +48,8 @@ export function Footer() {
             <Logo />
             <p className="text-sm font-medium">Share skills. Hire talent.</p>
             <p className="text-muted-foreground max-w-xs text-sm">
-              SkillSync connects people who want to learn with experts ready to
-              teach and take on work — booked by the hour, backed by real reviews.
+              SkillSync connects businesses with vetted freelance professionals
+              — hire with confidence, backed by secure payments and real reviews.
             </p>
           </div>
 

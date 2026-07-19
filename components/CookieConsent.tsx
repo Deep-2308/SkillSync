@@ -40,12 +40,12 @@ export function CookieConsent() {
       )}
     >
       <div className="container mx-auto max-w-4xl">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-5 rounded-2xl border bg-card shadow-xl">
           <Cookie className="w-8 h-8 text-amber-500 flex-shrink-0 hidden sm:block" />
           <div className="flex-1">
-            <p className="text-sm text-zinc-700 dark:text-zinc-300">
+            <p className="text-sm text-foreground/80">
               We use cookies to enhance your experience. By continuing to browse, you agree to our{" "}
-              <Link href="/privacy#cookies" className="text-indigo-600 dark:text-indigo-400 underline underline-offset-2 hover:no-underline">
+              <Link href="/privacy#cookies" className="text-brand underline underline-offset-2 hover:no-underline">
                 Cookie Policy
               </Link>.
             </p>

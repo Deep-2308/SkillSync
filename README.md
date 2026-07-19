@@ -62,7 +62,7 @@ SkillSync utilizes a **Serverless Monolith** architecture powered by the Next.js
 
 ## Key Features
 
-- **Robust Authentication:** Credential and Google OAuth flows with strict role-based access control (Provider vs. Member).
+- **Robust Authentication:** Credential and Google OAuth flows with strict role-based access control (Client vs. Freelancer).
 - **Advanced Search:** MongoDB `$text` search powers the Explore page, aggregating results across Skills and Projects with relevance scoring.
 - **Contract Lifecycle:** End-to-end workflow covering Proposals → Active Contracts → Secure Funding (Stripe) → Completion → Dual Reviews.
 - **Real-time Notifications:** In-app notification bell and transactional emails (Resend) alert users to crucial contract updates.

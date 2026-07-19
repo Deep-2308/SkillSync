@@ -99,19 +99,19 @@ export function HireDialog({ freelancer, open, onOpenChange }: HireDialogProps) 
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-4 py-4 mb-4 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="flex items-center gap-4 py-4 mb-4 border-b">
           <Avatar className="w-12 h-12">
             <AvatarImage src={freelancer.avatarUrl} alt={freelancer.name} />
-            <AvatarFallback className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+            <AvatarFallback className="bg-brand/10 text-brand">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div>
-            <h4 className="font-semibold text-zinc-900 dark:text-zinc-50">{freelancer.name}</h4>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{freelancer.title}</p>
+            <h4 className="font-semibold text-foreground">{freelancer.name}</h4>
+            <p className="text-sm text-muted-foreground">{freelancer.title}</p>
           </div>
           <div className="ml-auto text-right">
-            <p className="font-semibold text-zinc-900 dark:text-zinc-50">${freelancer.rate}/hr</p>
+            <p className="font-semibold text-foreground">${freelancer.rate}/hr</p>
           </div>
         </div>
 

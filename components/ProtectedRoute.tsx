@@ -20,9 +20,9 @@ import { Skeleton } from "@/components/ui/skeleton";
  * gives a graceful loading state. Never rely on client checks alone for
  * security — always enforce on the server too.
  *
- * Role note: the brief's "learner/expert" map to our canonical
- * "member/provider" roles (see types/index.ts). `requiredRole` is typed against
- * the real UserRole union so it can't drift from the auth layer.
+ * Role note: `requiredRole` is typed against the canonical UserRole union
+ * ("client" | "freelancer" | "admin" — see types/index.ts) so it can't drift
+ * from the auth layer.
  */
 export function ProtectedRoute({
   children,
