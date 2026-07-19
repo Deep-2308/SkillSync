@@ -4,6 +4,7 @@ import { z } from "zod";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { Skill } from "@/models/Skill";
+import { updateUserEmbedding } from "@/lib/ai/matching";
 
 const updateSkillSchema = z.object({
   title: z.string().min(4).max(120).optional(),

@@ -37,6 +37,7 @@ const projectSchema = new Schema(
       index: true,
     },
     attachments: { type: [String], default: [] },
+    embedding: { type: [Number], default: [] },
   },
   {
     timestamps: true,

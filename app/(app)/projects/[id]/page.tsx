@@ -12,7 +12,8 @@ import {
   Calendar,
   CheckCircle2,
   XOctagon,
-  ChevronLeft
+  ChevronLeft,
+  Sparkles
 } from "lucide-react";
 
 import { connectToDatabase } from "@/lib/mongodb";
@@ -26,6 +27,7 @@ import { User } from "@/models/User";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProposalActionCard } from "./ProposalActionCard";
 import { RatingDisplay } from "@/components/shared/RatingDisplay";
+import { SmartMatchesPanel } from "./SmartMatchesPanel";
 
 export async function generateMetadata({
   params,
@@ -155,6 +157,13 @@ export default async function ProjectDetailPage({
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2"
                 >
                   Proposals ({proposalCount})
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="matches" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2 flex items-center gap-1"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-brand" />
+                  Smart Matches
                 </TabsTrigger>
               </TabsList>
               
@@ -290,6 +299,10 @@ export default async function ProjectDetailPage({
                     ))}
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="matches" className="space-y-6 mt-0">
+                <SmartMatchesPanel projectId={id} />
               </TabsContent>
             </Tabs>
           ) : (

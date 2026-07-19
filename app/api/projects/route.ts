@@ -4,6 +4,7 @@ import { z } from "zod";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession, parsePagination } from "@/lib/api-utils";
 import { Project } from "@/models/Project";
+import { updateProjectEmbedding } from "@/lib/ai/matching";
 
 const escapeRegExp = (string: string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -65,6 +66,9 @@ export async function POST(request: Request) {
       postedBy: session.user.id,
       status: "open",
     });
+
+    // Fire and forget embedding generation
+    void updateProjectEmbedding(project._id.toString());
 
     return NextResponse.json({ data: project.toJSON() }, { status: 201 });
   } catch (error) {

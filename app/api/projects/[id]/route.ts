@@ -4,6 +4,7 @@ import { z } from "zod";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { Project } from "@/models/Project";
+import { updateProjectEmbedding } from "@/lib/ai/matching";
 import { Proposal } from "@/models/Proposal";
 
 const updateProjectSchema = z.object({

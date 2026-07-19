@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { EarningsChart } from "./EarningsChart";
+import { SmartProjectMatchesPanel } from "./SmartProjectMatchesPanel";
 
 type FreelancerDashboardProps = {
   user: { name?: string | null };
@@ -138,56 +139,7 @@ export function FreelancerDashboard({
             </div>
 
             {/* Recommended for you */}
-            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                  <h3 className="font-semibold text-foreground">Recommended for you</h3>
-                </div>
-                <Link href="/freelancer/find-work" className="text-sm text-brand font-medium hover:underline">
-                  Browse All
-                </Link>
-              </div>
-              
-              {recommendedProjects.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
-                  No recommended projects right now.
-                </div>
-              ) : (
-                <div className="divide-y divide-border">
-                  {recommendedProjects.map((project) => (
-                    <div key={project.id} className="p-6 flex flex-col sm:flex-row gap-4 justify-between hover:bg-accent/50 transition-colors">
-                      <div className="flex-1 min-w-0">
-                        <Link href={`/projects/${project.id}`} className="font-semibold text-lg text-brand hover:underline line-clamp-1 mb-1">
-                          {project.title}
-                        </Link>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                          {project.description}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {project.skills.slice(0, 3).map((s: string) => (
-                            <span key={s} className="px-2 py-1 bg-muted rounded-md text-xs font-medium text-muted-foreground">
-                              {s}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 sm:gap-2">
-                        <div className="text-right">
-                          <p className="font-bold text-foreground">
-                            {project.budgetType === "fixed" ? `$${project.budgetMin} - $${project.budgetMax}` : `$${project.hourlyRate}/hr`}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{project.budgetType === "fixed" ? "Fixed Price" : "Hourly"}</p>
-                        </div>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link href={`/projects/${project.id}`}>View</Link>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            <SmartProjectMatchesPanel />
 
             {/* Recent Reviews */}
             <div className="rounded-xl border bg-card shadow-sm overflow-hidden">

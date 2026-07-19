@@ -61,11 +61,11 @@ const userSchema = new Schema(
     /* --- Moderation & engagement --- */
     banned: { type: Boolean, default: false, index: true },
     profileViews: { type: Number, default: 0, min: 0 },
-    /** Freelancers this user has bookmarked. */
     savedFreelancers: {
       type: [{ type: Schema.Types.ObjectId, ref: "User" }],
       default: [],
     },
+    embedding: { type: [Number], default: [] },
   },
   {
     timestamps: true, // adds createdAt / updatedAt

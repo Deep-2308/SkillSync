@@ -4,6 +4,7 @@ import { z } from "zod";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession, parsePagination } from "@/lib/api-utils";
 import { Skill } from "@/models/Skill";
+import { updateUserEmbedding } from "@/lib/ai/matching";
 
 const createSkillSchema = z.object({
   title: z.string().min(4, "Title must be at least 4 characters.").max(120),
@@ -69,6 +70,9 @@ export async function POST(request: Request) {
       slug,
       providerId: session.user.id,
     });
+
+    // Fire and forget embedding generation for the freelancer
+    void updateUserEmbedding(session.user.id);
 
     return NextResponse.json({ data: skill.toJSON() }, { status: 201 });
   } catch (error) {

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { User } from "@/models/User";
+import { updateUserEmbedding } from "@/lib/ai/matching";
 
 const updateProfileSchema = z.object({
   name: z.string().min(2).max(80).optional(),
@@ -73,6 +74,9 @@ export async function PUT(request: Request) {
     if (!user) {
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
+
+    // Fire and forget embedding generation for freelancers
+    void updateUserEmbedding(user._id.toString());
 
     return NextResponse.json({ data: user.toJSON() });
   } catch (error) {
