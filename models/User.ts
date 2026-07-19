@@ -27,8 +27,8 @@ const userSchema = new Schema(
     role: {
       type: String,
       enum: ["client", "freelancer", "admin"],
-      default: "client",
     },
+    categories: { type: [String], default: [] },
     headline: { type: String, maxlength: 120, default: "" },
     bio: { type: String, maxlength: 2000, default: "" },
     location: { type: String, maxlength: 120, default: "" },

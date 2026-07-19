@@ -58,7 +58,7 @@ export const {
           name: user.name,
           email: user.email,
           image: user.image ?? null,
-          role: user.role,
+          role: (user.role ?? undefined) as "client" | "freelancer" | "admin" | undefined,
         };
       },
     }),
@@ -83,7 +83,7 @@ export const {
             // Existing user — populate the user object with DB fields so the
             // jwt callback can persist id/role onto the token.
             user.id = existingUser._id.toString();
-            user.role = existingUser.role;
+            user.role = (existingUser.role ?? undefined) as "client" | "freelancer" | "admin" | undefined;
             user.name = existingUser.name;
             user.image = existingUser.image ?? user.image ?? null;
 
@@ -98,12 +98,11 @@ export const {
               name: user.name,
               email: user.email,
               image: user.image ?? null,
-              role: "client", // Default role for new Google sign-ups.
               emailVerified: new Date(),
             });
 
             user.id = newUser._id.toString();
-            user.role = newUser.role;
+            user.role = (newUser.role ?? undefined) as "client" | "freelancer" | "admin" | undefined;
           }
         } catch (error) {
           console.error("[auth] Google signIn callback error:", error);

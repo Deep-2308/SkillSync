@@ -19,7 +19,7 @@ export interface AuthUser {
   name: string;
   email: string;
   image: string | null;
-  role: "client" | "freelancer" | "admin";
+  role?: "client" | "freelancer" | "admin";
 }
 
 export interface AuthContextValue {

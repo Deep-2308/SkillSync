@@ -39,13 +39,26 @@ export default auth((req) => {
     nextUrl.pathname.startsWith("/register") ||
     nextUrl.pathname === "/"; // Also redirect authenticated users from home
 
+  const hasRole = Boolean(req.auth?.user?.role);
+
+  // If the user is logged in but has no role, force them to the registration wizard
+  // (unless they are already on it) to complete onboarding.
+  if (isLoggedIn && !hasRole) {
+    if (!nextUrl.pathname.startsWith("/register")) {
+      return NextResponse.redirect(new URL("/register", nextUrl.origin));
+    }
+    // Let them access /register so they can set their role
+    return NextResponse.next();
+  }
+
   if (isProtected && !isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl.origin);
     loginUrl.searchParams.set("callbackUrl", nextUrl.pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isAuthRoute && isLoggedIn) {
+  // Only redirect from auth routes to dashboard if they HAVE a role.
+  if (isAuthRoute && isLoggedIn && hasRole) {
     return NextResponse.redirect(new URL("/dashboard", nextUrl.origin));
   }
 
