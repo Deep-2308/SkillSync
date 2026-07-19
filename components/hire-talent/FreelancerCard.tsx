@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { HireDialog } from "./HireDialog";
 import { cn } from "@/lib/utils";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 export interface Freelancer {
   id: string;
@@ -60,11 +61,7 @@ export function FreelancerCard({ freelancer }: FreelancerCardProps) {
             </div>
             <div className="flex flex-col items-end">
               <span className="text-lg font-bold text-foreground">${freelancer.rate}/hr</span>
-              <div className="flex items-center text-sm text-muted-foreground mt-1">
-                <Star className="w-4 h-4 text-yellow-500 mr-1 fill-yellow-500" />
-                <span className="font-medium text-foreground mr-1">{freelancer.rating}</span>
-                <span>({freelancer.reviewCount})</span>
-              </div>
+              <RatingDisplay rating={freelancer.rating} count={freelancer.reviewCount} className="mt-1" />
             </div>
           </div>
 

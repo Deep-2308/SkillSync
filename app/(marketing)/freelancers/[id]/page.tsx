@@ -14,13 +14,16 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { Review } from "@/models/Review";
 import { auth } from "@/lib/auth";
 import { MessageButton } from "@/components/messages/MessageButton";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
+import { HelpfulButton } from "@/components/reviews/HelpfulButton";
 
-async function getFreelancer(id: string, viewerId?: string) {
+async function getFreelancer(id: string, viewerId?: string, sort: string = "recent") {
   try {
     await connectToDatabase();
     const user = await User.findById(id);
@@ -35,9 +38,10 @@ async function getFreelancer(id: string, viewerId?: string) {
     }
 
     // Fetch reviews
+    const sortObj = sort === "helpful" ? { helpfulCount: -1, createdAt: -1 } : { createdAt: -1 };
     const reviews = await Review.find({ targetId: id })
       .populate("reviewerId", "name image")
-      .sort({ createdAt: -1 })
+      .sort(sortObj as any)
       .limit(10); // get last 10 reviews for now
 
     // Fetch published gigs
@@ -79,20 +83,24 @@ export async function generateMetadata({
 
 export default async function FreelancerProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const session = await auth();
   const viewerId = session?.user?.id;
 
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
+  const sort = typeof resolvedSearchParams.sort === 'string' ? resolvedSearchParams.sort : 'recent';
   
   // Wait, if it's an invalid ObjectId, mongoose throws CastError
   if (!resolvedParams.id || resolvedParams.id.length !== 24) {
     notFound();
   }
 
-  const data = await getFreelancer(resolvedParams.id, viewerId);
+  const data = await getFreelancer(resolvedParams.id, viewerId, sort);
 
   if (!data) {
     notFound();
@@ -161,11 +169,7 @@ export default async function FreelancerProfilePage({
                         {user.location}
                       </span>
                     )}
-                    <span className="flex items-center gap-1.5">
-                      <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                      <span className="font-medium text-foreground">{rating.toFixed(1)}</span>
-                      ({reviewCount} reviews)
-                    </span>
+                    <RatingDisplay rating={rating} count={reviewCount} />
                   </div>
                 </div>
               </div>
@@ -185,13 +189,50 @@ export default async function FreelancerProfilePage({
 
             {/* Reviews Section */}
             <div className="bg-card rounded-2xl border p-6 sm:p-8 space-y-6">
-              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                Reviews 
-                <span className="text-muted-foreground text-sm font-normal">({reviewCount})</span>
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-6">
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                  Reviews 
+                  <span className="text-muted-foreground text-sm font-normal">({reviewCount})</span>
+                </h2>
+                {reviewCount > 0 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Sort by:</span>
+                    <Link href={`?sort=recent`} className={cn("hover:text-foreground transition-colors", sort === "recent" ? "font-bold text-foreground" : "text-muted-foreground")}>Recent</Link>
+                    <span className="text-muted-foreground">•</span>
+                    <Link href={`?sort=helpful`} className={cn("hover:text-foreground transition-colors", sort === "helpful" ? "font-bold text-foreground" : "text-muted-foreground")}>Helpful</Link>
+                  </div>
+                )}
+              </div>
+
+              {reviewCount > 0 && (
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 border-b pb-8 mb-8">
+                  <div className="text-center sm:text-left">
+                    <div className="text-5xl font-bold text-foreground mb-2">{rating.toFixed(1)}</div>
+                    <RatingDisplay rating={rating} showCount={false} className="justify-center sm:justify-start mb-1" />
+                    <p className="text-sm text-muted-foreground">{reviewCount} reviews</p>
+                  </div>
+                  <div className="flex-1 w-full max-w-sm space-y-2">
+                    {[5, 4, 3, 2, 1].map((stars) => {
+                      const breakdown = user.ratingBreakdown || {};
+                      const count = breakdown[stars.toString()] || 0;
+                      const percentage = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
+                      return (
+                        <div key={stars} className="flex items-center gap-3 text-sm">
+                          <span className="w-3 font-medium">{stars}</span>
+                          <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
+                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500 rounded-full" style={{ width: `${percentage}%` }} />
+                          </div>
+                          <span className="w-8 text-right text-muted-foreground text-xs">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               
               {reviews.length === 0 ? (
-                <div className="text-center py-8 border rounded-xl bg-muted/30">
+                <div className="text-center py-8 bg-muted/30 rounded-xl">
                   <Star className="w-8 h-8 text-muted-foreground mx-auto mb-3 opacity-20" />
                   <p className="text-muted-foreground">No reviews yet.</p>
                 </div>
@@ -213,14 +254,12 @@ export default async function FreelancerProfilePage({
                             <p className="text-xs text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-1 rounded-md text-sm font-medium">
-                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                          {review.rating}
-                        </div>
+                        <RatingDisplay rating={review.rating} showCount={false} />
                       </div>
-                      <p className="text-muted-foreground text-sm leading-relaxed mt-3">
+                      <p className="text-foreground text-sm leading-relaxed mt-3 mb-4">
                         {review.comment}
                       </p>
+                      <HelpfulButton reviewId={review._id.toString()} initialHelpfulCount={review.helpfulCount || 0} initialHelpfulState={session?.user?.id ? (review.helpfulBy || []).includes(session.user.id) : false} />
                     </div>
                   ))}
                 </div>

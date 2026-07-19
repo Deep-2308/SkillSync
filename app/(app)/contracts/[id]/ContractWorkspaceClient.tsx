@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import { CheckCircle2, ShieldAlert, Package, Check, RefreshCw } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Package, Check, RefreshCw, Star } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,13 +19,16 @@ import { CheckoutForm } from "@/components/payments/CheckoutForm";
 import { StripeProvider } from "@/components/payments/StripeProvider";
 import { cn } from "@/lib/utils";
 import { MessageButton } from "@/components/messages/MessageButton";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 type ContractWorkspaceProps = {
   contract: any;
   currentUserId: string;
+  myReview?: any;
+  theirReview?: any;
 };
 
-export function ContractWorkspaceClient({ contract, currentUserId }: ContractWorkspaceProps) {
+export function ContractWorkspaceClient({ contract, currentUserId, myReview, theirReview }: ContractWorkspaceProps) {
   const router = useRouter();
   
   const isClient = contract.clientId._id === currentUserId || contract.clientId.id === currentUserId || contract.clientId === currentUserId;
@@ -34,6 +37,40 @@ export function ContractWorkspaceClient({ contract, currentUserId }: ContractWor
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
   const [isDisputeOpen, setIsDisputeOpen] = useState(false);
+
+  // Review state
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  const submitReview = async () => {
+    if (rating < 1 || comment.length < 10) return;
+    setIsSubmittingReview(true);
+    try {
+      const res = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contractId: contract.id || contract._id,
+          targetId: isClient ? (contract.freelancerId._id || contract.freelancerId.id || contract.freelancerId) : (contract.clientId._id || contract.clientId.id || contract.clientId),
+          rating,
+          comment
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.error || "Failed to submit review");
+      } else {
+        toast.success("Review submitted!");
+        router.refresh();
+      }
+    } catch (e) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   const updateStatus = async (status: string, reason?: string) => {
     setIsSubmitting(true);
@@ -279,11 +316,89 @@ export function ContractWorkspaceClient({ contract, currentUserId }: ContractWor
         )}
 
         {contract.status === "completed" && (
-          <div className="p-6 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
-            <h3 className="font-bold text-emerald-800 text-xl mb-2">Contract Completed!</h3>
-            <p className="text-emerald-700 max-w-md mx-auto">
-              This contract was successfully completed. Funds have been released to the freelancer.
-            </p>
+          <div className="space-y-6">
+            <div className="p-6 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+              <h3 className="font-bold text-emerald-800 text-xl mb-2">Contract Completed!</h3>
+              <p className="text-emerald-700 max-w-md mx-auto">
+                This contract was successfully completed. Funds have been released to the freelancer.
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-lg font-bold text-foreground mb-4">Reviews</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                {/* My Review */}
+                <div className="bg-muted/30 rounded-xl border p-5">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">Your Review</h4>
+                  {myReview ? (
+                    <div>
+                      <RatingDisplay rating={myReview.rating} showCount={false} className="mb-3" />
+                      <p className="text-sm text-foreground">{myReview.comment}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setRating(star)}
+                              onMouseEnter={() => setHoverRating(star)}
+                              onMouseLeave={() => setHoverRating(0)}
+                              className="focus:outline-none transition-transform hover:scale-110"
+                            >
+                              <Star
+                                className={cn(
+                                  "w-6 h-6 transition-colors",
+                                  (hoverRating || rating) >= star
+                                    ? "text-amber-500 fill-amber-500"
+                                    : "text-muted-foreground/30"
+                                )}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                        <Textarea 
+                          placeholder={`Leave a review for ${isClient ? 'the freelancer' : 'the client'}...`}
+                          value={comment}
+                          onChange={(e) => setComment(e.target.value)}
+                          className="text-sm resize-none mt-3"
+                          rows={3}
+                        />
+                      </div>
+                      <Button 
+                        onClick={submitReview} 
+                        disabled={isSubmittingReview || rating === 0 || comment.length < 10}
+                        className="w-full"
+                      >
+                        {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Their Review */}
+                <div className="bg-muted/30 rounded-xl border p-5">
+                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-4">
+                    {isClient ? "Freelancer's Review" : "Client's Review"}
+                  </h4>
+                  {theirReview ? (
+                    <div>
+                      <RatingDisplay rating={theirReview.rating} showCount={false} className="mb-3" />
+                      <p className="text-sm text-foreground">{theirReview.comment}</p>
+                    </div>
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-6 text-muted-foreground">
+                      <Star className="w-8 h-8 mb-3 opacity-20" />
+                      <p className="text-sm">Awaiting their review.</p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            </div>
           </div>
         )}
 

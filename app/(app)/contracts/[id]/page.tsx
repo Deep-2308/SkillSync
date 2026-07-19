@@ -6,6 +6,7 @@ import { Clock, DollarSign, Calendar, ShieldAlert } from "lucide-react";
 import { connectToDatabase } from "@/lib/mongodb";
 import { getAuthSession } from "@/lib/api-utils";
 import { Contract } from "@/models/Contract";
+import { Review } from "@/models/Review";
 import { ContractWorkspaceClient } from "./ContractWorkspaceClient";
 
 export const metadata: Metadata = {
@@ -65,6 +66,10 @@ export default async function ContractPage({
       _id: rawContract.freelancerId?._id?.toString(),
     }
   };
+
+  const reviews = await Review.find({ contractId: rawContract._id });
+  const myReview = reviews.find(r => r.reviewerId.toString() === session.user.id);
+  const theirReview = reviews.find(r => r.reviewerId.toString() !== session.user.id);
 
   const getStatusBadge = (s: string) => {
     switch (s) {
@@ -174,7 +179,12 @@ export default async function ContractPage({
         </div>
       </div>
 
-      <ContractWorkspaceClient contract={contract} currentUserId={session.user.id} />
+      <ContractWorkspaceClient 
+        contract={contract} 
+        currentUserId={session.user.id} 
+        myReview={myReview ? myReview.toJSON() : null}
+        theirReview={theirReview ? theirReview.toJSON() : null}
+      />
 
     </div>
   );

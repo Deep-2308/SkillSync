@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MessageButton } from "@/components/messages/MessageButton";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 export async function generateMetadata({
   params,
@@ -110,9 +111,7 @@ export default async function GigDetailPage({
                 </span>
                 
                 <span className="flex items-center gap-1.5">
-                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                  <span className="font-medium text-foreground">{gig.rating.toFixed(1)}</span>
-                  ({gig.reviewCount} reviews)
+                  <RatingDisplay rating={gig.rating} count={gig.reviewCount} />
                 </span>
               </div>
 
@@ -241,8 +240,7 @@ export default async function GigDetailPage({
                   </h3>
                   <div className="mt-auto flex items-center justify-between">
                     <span className="flex items-center gap-1 text-sm font-medium">
-                      <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                      {g.rating.toFixed(1)} <span className="text-muted-foreground font-normal">({g.reviewCount})</span>
+                      <RatingDisplay rating={g.rating} count={g.reviewCount} />
                     </span>
                     <span className="font-bold text-foreground">
                       <span className="text-xs text-muted-foreground font-normal mr-1">From</span>

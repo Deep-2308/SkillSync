@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { MessageButton } from "@/components/messages/MessageButton";
+import { RatingDisplay } from "@/components/shared/RatingDisplay";
 
 type ProposalActionCardProps = {
   proposal: any;
@@ -134,10 +135,7 @@ export function ProposalActionCard({ proposal, projectStatus }: ProposalActionCa
           
           <div className="flex flex-wrap items-center justify-center gap-2 text-xs font-medium">
             {freelancer?.averageRating !== undefined && (
-              <span className="flex items-center gap-1 bg-amber-500/10 text-amber-600 px-2 py-1 rounded-md">
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                {freelancer.averageRating.toFixed(1)}
-              </span>
+              <RatingDisplay rating={freelancer.averageRating} count={freelancer.reviewCount || 0} />
             )}
             <span className="px-2 py-1 bg-muted rounded-md text-muted-foreground">
               {freelancer?.location || "Remote"}
