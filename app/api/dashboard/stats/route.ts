@@ -63,36 +63,66 @@ export async function GET() {
       });
     }
 
-    const [totalSkills, receivedProposals, activeContracts, earningsAgg, me] =
-      await Promise.all([
-        Skill.countDocuments({ providerId: userId }),
-        // Proposals received = proposals on projects this user posted.
-        Project.find({ postedBy: userId })
-          .select("_id")
-          .lean()
-          .then((projects) =>
-            projects.length
-              ? Proposal.countDocuments({
-                  projectId: { $in: projects.map((p) => p._id) },
-                })
-              : 0
-          ),
-        Contract.countDocuments({ freelancerId: userId, status: "active" }),
-        Contract.aggregate<{ total: number }>([
-          { $match: { freelancerId: userId, status: "completed" } },
-          { $group: { _id: null, total: { $sum: "$agreedRate" } } },
-        ]),
-        User.findById(userId).select("profileViews").lean(),
-      ]);
+    const [
+      activeContracts,
+      earningsAgg,
+      earningsByMonth,
+      proposalsPipelineAgg,
+      me,
+    ] = await Promise.all([
+      Contract.countDocuments({ freelancerId: userId, status: "active" }),
+      Contract.aggregate<{ total: number }>([
+        { $match: { freelancerId: userId, status: "completed" } },
+        { $group: { _id: null, total: { $sum: "$agreedRate" } } },
+      ]),
+      Contract.aggregate<{ month: number; year: number; total: number }>([
+        { $match: { freelancerId: userId, status: "completed" } },
+        {
+          $group: {
+            _id: {
+              month: { $month: "$updatedAt" },
+              year: { $year: "$updatedAt" },
+            },
+            total: { $sum: "$agreedRate" },
+          },
+        },
+        { $sort: { "_id.year": 1, "_id.month": 1 } },
+        {
+          $project: {
+            _id: 0,
+            month: "$_id.month",
+            year: "$_id.year",
+            total: 1,
+          },
+        },
+      ]),
+      Proposal.aggregate<{ _id: string; count: number }>([
+        { $match: { freelancerId: userId } },
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ]),
+      User.findById(userId).select("profileViews averageRating").lean(),
+    ]);
+
+    const pipelineCounts = proposalsPipelineAgg.reduce((acc, curr) => {
+      acc[curr._id] = curr.count;
+      return acc;
+    }, {} as Record<string, number>);
 
     return NextResponse.json({
       data: {
         role: "freelancer",
-        totalSkills,
-        receivedProposals,
         activeContracts,
+        pendingProposals: pipelineCounts["pending"] || 0,
         totalEarnings: earningsAgg[0]?.total ?? 0,
+        averageRating: me?.averageRating ?? 0,
         profileViews: me?.profileViews ?? 0,
+        earningsSnapshot: earningsByMonth,
+        proposalPipeline: {
+          pending: pipelineCounts["pending"] || 0,
+          accepted: pipelineCounts["accepted"] || 0,
+          rejected: pipelineCounts["rejected"] || 0,
+          withdrawn: pipelineCounts["withdrawn"] || 0,
+        },
       },
     });
   } catch (error) {
