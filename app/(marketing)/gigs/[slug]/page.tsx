@@ -37,7 +37,7 @@ export async function generateMetadata({
     const gig = await Skill.findOne({ slug, isPublished: true }).select("title description providerId").populate("providerId", "name");
     if (!gig) return { title: "Gig Not Found | SkillSync" };
     
-    const providerName = gig.providerId?.name || "Freelancer";
+    const providerName = (gig.providerId as any)?.name || "Freelancer";
     return { 
       title: `${gig.title} by ${providerName} | SkillSync`,
       description: gig.description ? gig.description.substring(0, 160) : `Book ${gig.title} on SkillSync.`,
