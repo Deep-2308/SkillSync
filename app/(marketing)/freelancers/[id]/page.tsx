@@ -89,25 +89,6 @@ async function getFreelancer(id: string, viewerId?: string, sort: string = "rece
   }
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}): Promise<Metadata> {
-  const resolvedParams = await params;
-  try {
-    await connectToDatabase();
-    const user = await User.findById(resolvedParams.id).select("name headline location");
-    if (!user) return { title: "Freelancer Not Found | SkillSync" };
-
-    return {
-      title: `${user.name} ${user.headline ? `- ${user.headline}` : ""} | SkillSync`,
-      description: `Hire ${user.name} on SkillSync.`,
-    };
-  } catch (err) {
-    return { title: "Freelancer Not Found | SkillSync" };
-  }
-}
 
 export default async function FreelancerProfilePage({
   params,
